@@ -1,0 +1,28 @@
+{
+  "id": "./gemini-code-1791884034859.html",
+  "name": "GharSeva — भरोसेमंद घरेलू सेवाएँ",
+  "short_name": "GharSeva",
+  "description": "राजस्थान में भरोसेमंद स्थानीय घरेलू सेवाएँ खोजें और बुक करें।",
+  "lang": "hi",
+  "start_url": "./gemini-code-1791884034859.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f7f8fc",
+  "theme_color": "#176b52",
+  "categories": ["lifestyle", "shopping"],
+  "icons": [
+    {
+      "src": "./icons/ghar-seva-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/ghar-seva-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
