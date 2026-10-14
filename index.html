@@ -8,29 +8,6 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="GharSeva">
   <title>GharSeva — भरोसेमंद घरेलू सेवाएँ</title>
-  <!-- Firebase Core SDK (ज़रूरी) -->
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-
-<!-- Firebase Firestore Database SDK (डेटाबेस के लिए) -->
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-
-<!-- Firebase Connection Script -->
-<script>
-  // 1. यहाँ अपनी Firebase Console से मिली Config डालें
-const firebaseConfig = {
-    apiKey: "AIzaSyDIxwHt557G595L05OwTNpeZQ6dVrZovCM",
-    authDomain: "ghar-seva-1cb1a.firebaseapp.com",
-    projectId: "ghar-seva-1cb1a",
-    storageBucket: "ghar-seva-1cb1a.firebasestorage.app",
-    messagingSenderId: "732729369046",
-    appId: "1:732729369046:web:54f9bbf7993e1111dbc477",
-    measurementId: "G-S44T374LKB"
-  };
-
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-</script>
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./icons/ghar-seva-192.png" type="image/png">
   <link rel="apple-touch-icon" href="./icons/ghar-seva-192.png">
@@ -757,10 +734,10 @@ const firebaseConfig = {
       <button class="google-btn" id="googleSignIn" type="button"><span class="google-mark">G</span> Google से जारी रखें</button>
       <button class="install-app-btn auth-install-btn" id="authInstallAppButton" type="button">📲 GharSeva ऐप इंस्टॉल करें</button>
       <button class="demo-btn" id="demoContinue" type="button">अभी डेमो में आगे बढ़ें</button>
-      <div class="auth-setup" id="firebaseSetupNote">असली Google / ईमेल login के लिए अपनी Firebase Web App config जोड़ें। अभी demo mode उपलब्ध है।</div>
+      <div class="auth-setup" id="firebaseSetupNote">Firebase Auth तैयार नहीं है। Console में Authentication सेटअप करें; preview के लिए demo mode उपलब्ध है।</div>
       <details class="auth-note" style="text-align:left">
         <summary style="cursor:pointer;font-weight:700">Firebase login कैसे चालू करें?</summary>
-        <span style="display:block;margin-top:7px">Firebase Console में Web App बनाएँ। Project settings → Your apps से apiKey, authDomain, projectId और appId को इस file में FIREBASE_CONFIG के YOUR_ placeholders से बदलें। Authentication → Sign-in method में Google और Email/Password चालू करें और Authentication → Settings → Authorized domains में अपनी website का domain जोड़ें। Website को localhost या HTTPS पर खोलें; file:// से Google popup काम नहीं करता। Firebase Web config browser में दिखती है—Service Account key कभी यहाँ न डालें।</span>
+        <span style="display:block;margin-top:7px">Firebase Console में सही project खोलकर Build → Authentication → Get started चुनें। फिर Sign-in method में Email/Password और Google चालू करें और Settings → Authorized domains में अपनी website का domain जोड़ें। Website को localhost या HTTPS पर खोलें; file:// से Google popup काम नहीं करता। Firebase Web config browser में दिखती है—Service Account key कभी यहाँ न डालें।</span>
       </details>
       <p class="auth-note">डेमो मोड में असली account verification नहीं होती। पासवर्ड browser में सेव नहीं किया जाता।</p>
     </div>
@@ -768,14 +745,19 @@ const firebaseConfig = {
 
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics-compat.js"></script>
   <script>
     const FIREBASE_CONFIG = {
-      apiKey: "YOUR_FIREBASE_API_KEY",
-      authDomain: "YOUR_FIREBASE_PROJECT.firebaseapp.com",
-      projectId: "YOUR_FIREBASE_PROJECT_ID",
-      appId: "YOUR_FIREBASE_APP_ID"
+      apiKey: "AIzaSyDIxwHt557G595L05OwTNpeZQ6dVrZovCM",
+      authDomain: "ghar-seva-1cb1a.firebaseapp.com",
+      projectId: "ghar-seva-1cb1a",
+      storageBucket: "ghar-seva-1cb1a.firebasestorage.app",
+      messagingSenderId: "732729369046",
+      appId: "1:732729369046:web:54f9bbf7993e1111dbc477",
+      measurementId: "G-S44T374LKB"
     };
     let firebaseAuth = null;
+    let firebaseAuthUnavailableMessage = "Firebase Auth अभी तैयार नहीं हुआ। पेज reload करके फिर कोशिश करें।";
     let authMode = "login";
     let isFirebaseConfigured = false;
     const cities = [
@@ -1059,11 +1041,13 @@ const firebaseConfig = {
     function initializeFirebaseAuth() {
       const configReady = Object.values(FIREBASE_CONFIG).every((value) => value && !value.startsWith("YOUR_"));
       if (!configReady) {
+        firebaseAuthUnavailableMessage = "Firebase Web App config उपलब्ध नहीं है। नवीनतम index.html deploy करें और पेज reload करें।";
         document.getElementById("firebaseSetupNote").hidden = false;
         return;
       }
       if (!window.firebase || !window.firebase.auth) {
-        setAuthMessage("Firebase Auth SDK लोड नहीं हुआ। इंटरनेट कनेक्शन जाँचें और पेज फिर खोलें।", true);
+        firebaseAuthUnavailableMessage = "Firebase Auth SDK लोड नहीं हुआ। इंटरनेट कनेक्शन और gstatic.com तक पहुँच जाँचें, फिर पेज reload करें।";
+        setAuthMessage(firebaseAuthUnavailableMessage, true);
         return;
       }
       try {
@@ -1071,6 +1055,19 @@ const firebaseConfig = {
         firebaseAuth = app.auth();
         isFirebaseConfigured = true;
         document.getElementById("firebaseSetupNote").hidden = true;
+        if (!window.firebase.analytics || typeof window.firebase.analytics.isSupported !== "function") {
+          console.error("Firebase Analytics SDK did not load.");
+        } else {
+          window.firebase.analytics.isSupported()
+            .then((supported) => {
+              if (supported) {
+                window.firebase.analytics(app);
+              } else {
+                console.info("Firebase Analytics is not supported in this browser.");
+              }
+            })
+            .catch((error) => console.error("Firebase Analytics initialization failed.", error));
+        }
         firebaseAuth.onAuthStateChanged((user) => {
           if (user) openAuthenticatedApp(user, accountRole);
         }, (error) => {
@@ -1079,7 +1076,8 @@ const firebaseConfig = {
         });
       } catch (error) {
         console.error("Firebase Auth initialization failed.", error);
-        setAuthMessage("Firebase config सही नहीं है। Firebase Web App की config जाँचें।", true);
+        firebaseAuthUnavailableMessage = `Firebase Auth initialize नहीं हुआ (${error.code || "config error"})। सही Firebase project की Web App config जाँचें और पेज reload करें।`;
+        setAuthMessage(firebaseAuthUnavailableMessage, true);
       }
     }
     function firebaseErrorMessage(error) {
@@ -1092,6 +1090,7 @@ const firebaseConfig = {
         "auth/invalid-credential": "ईमेल या पासवर्ड सही नहीं है।",
         "auth/popup-closed-by-user": "Google login पूरा होने से पहले popup बंद हो गया।",
         "auth/popup-blocked": "ब्राउज़र ने Google login popup रोका। इस साइट के popups की अनुमति दें।",
+        "auth/configuration-not-found": "इस Firebase project में Authentication सेटअप नहीं है। Firebase Console → Build → Authentication → Get started खोलें, फिर Email/Password और Google sign-in method चालू करके Save करें।",
         "auth/unauthorized-domain": "इस वेबसाइट का domain Firebase Console → Authentication → Settings → Authorized domains में जोड़ें।",
         "auth/operation-not-allowed": "Firebase Console में यह sign-in तरीका चालू करें।",
         "auth/network-request-failed": "नेटवर्क नहीं जुड़ा। इंटरनेट जाँचकर फिर कोशिश करें।"
@@ -2295,7 +2294,7 @@ const firebaseConfig = {
     document.getElementById("authForm").addEventListener("submit", async (event) => {
       event.preventDefault();
       if (!isFirebaseConfigured || !firebaseAuth) {
-        setAuthMessage("ईमेल/पासवर्ड login अभी चालू नहीं है। Firebase config भरें, या preview के लिए डेमो में आगे बढ़ें।", true);
+        setAuthMessage(firebaseAuthUnavailableMessage, true);
         return;
       }
       const form = new FormData(event.currentTarget);
@@ -2324,7 +2323,7 @@ const firebaseConfig = {
     });
     document.getElementById("googleSignIn").addEventListener("click", async () => {
       if (!isFirebaseConfigured || !firebaseAuth) {
-        setAuthMessage("Google sign-in के लिए Firebase Web App config भरकर Google provider चालू करें। अभी डेमो में आगे बढ़ सकते हैं।", true);
+        setAuthMessage(firebaseAuthUnavailableMessage, true);
         return;
       }
       const button = document.getElementById("googleSignIn");
