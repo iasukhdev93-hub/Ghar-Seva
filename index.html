@@ -38,6 +38,7 @@
     .brand-mark { width: 36px; height: 36px; background: var(--green); color: white; border-radius: 12px; display: grid; place-items: center; font-size: 19px; }
     .nav-links { display: flex; gap: 25px; align-items: center; margin-left: auto; }
     .nav-links button { background: none; border: 0; color: #59635f; font-size: 14px; font-weight: 600; padding: 10px 0; }
+    .nav-links button[hidden] { display: none; }
     .nav-links button:hover, .nav-links button.active { color: var(--green); }
     .nav-profile { border: 1px solid var(--line); border-radius: 30px; background: white; display: flex; align-items: center; gap: 9px; padding: 5px 12px 5px 5px; color: var(--ink); font-weight: 700; font-size: 13px; }
     .install-app-btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; border: 0; border-radius: 11px; background: var(--green); color: white; padding: 10px 13px; white-space: nowrap; font-size: 12px; font-weight: 800; }
@@ -436,7 +437,7 @@
         <button data-view="bookingsView" onclick="showView('bookingsView')">मेरी बुकिंग</button>
         <button data-view="profileView" onclick="openProviderRegistration()">सेवा दें</button>
         <button data-view="providerView" onclick="showView('providerView')">Partner Panel</button>
-        <button data-view="adminView" onclick="showView('adminView')">Admin</button>
+        <button data-view="adminView" id="adminNavButton" onclick="showView('adminView')" hidden>Admin</button>
       </div>
       <button class="install-app-btn" id="installAppButton" type="button" aria-label="GharSeva ऐप इंस्टॉल करें"><span aria-hidden="true">📲</span><span class="install-label">ऐप इंस्टॉल करें</span></button>
       <button class="nav-profile" onclick="showView('profileView')" aria-label="मेरी प्रोफ़ाइल">
@@ -733,13 +734,12 @@
       <div class="auth-divider">या</div>
       <button class="google-btn" id="googleSignIn" type="button"><span class="google-mark">G</span> Google से जारी रखें</button>
       <button class="install-app-btn auth-install-btn" id="authInstallAppButton" type="button">📲 GharSeva ऐप इंस्टॉल करें</button>
-      <button class="demo-btn" id="demoContinue" type="button">अभी डेमो में आगे बढ़ें</button>
-      <div class="auth-setup" id="firebaseSetupNote">Firebase Auth तैयार नहीं है। Console में Authentication सेटअप करें; preview के लिए demo mode उपलब्ध है।</div>
+      <div class="auth-setup" id="firebaseSetupNote">Firebase Auth तैयार नहीं है। Console में Authentication सेटअप करें।</div>
       <details class="auth-note" style="text-align:left">
         <summary style="cursor:pointer;font-weight:700">Firebase login कैसे चालू करें?</summary>
         <span style="display:block;margin-top:7px">Firebase Console में सही project खोलकर Build → Authentication → Get started चुनें। फिर Sign-in method में Email/Password और Google चालू करें और Settings → Authorized domains में अपनी website का domain जोड़ें। Website को localhost या HTTPS पर खोलें; file:// से Google popup काम नहीं करता। Firebase Web config browser में दिखती है—Service Account key कभी यहाँ न डालें।</span>
       </details>
-      <p class="auth-note">डेमो मोड में असली account verification नहीं होती। पासवर्ड browser में सेव नहीं किया जाता।</p>
+      <p class="auth-note">पासवर्ड browser में सेव नहीं किया जाता।</p>
     </div>
   </section>
 
@@ -758,6 +758,8 @@
     };
     let firebaseAuth = null;
     let firebaseAuthUnavailableMessage = "Firebase Auth अभी तैयार नहीं हुआ। पेज reload करके फिर कोशिश करें।";
+    const ADMIN_EMAIL = "ia.sukhdev.93@gmail.com";
+    let hasAdminAccess = false;
     let authMode = "login";
     let isFirebaseConfigured = false;
     const cities = [
@@ -1007,7 +1009,21 @@
       document.getElementById("authGate").classList.add("hidden");
       document.body.classList.remove("auth-locked");
     }
+    function isAdminUser(user) {
+      return Boolean(
+        firebaseAuth &&
+        user &&
+        user.uid &&
+        firebaseAuth.currentUser &&
+        firebaseAuth.currentUser.uid === user.uid &&
+        user.emailVerified &&
+        user.email &&
+        user.email.trim().toLowerCase() === ADMIN_EMAIL
+      );
+    }
     function openAuthenticatedApp(user, role) {
+      hasAdminAccess = isAdminUser(user);
+      document.getElementById("adminNavButton").hidden = !hasAdminAccess;
       accountRole = role === "provider" ? "provider" : "customer";
       saveStored("gharSevaRole", accountRole);
       customer = {
@@ -1173,6 +1189,10 @@
       toast(button.textContent === "♥" ? "पसंदीदा में सेव किया गया।" : "पसंदीदा से हटाया गया।");
     }
     function showView(id) {
+      if (id === "adminView" && !hasAdminAccess) {
+        toast("Admin dashboard केवल अधिकृत Firebase खाते के लिए उपलब्ध है।");
+        id = "homeView";
+      }
       document.querySelectorAll(".content-view").forEach((view) => view.classList.toggle("active", view.id === id));
       document.querySelectorAll(".nav-links button").forEach((button) => button.classList.toggle("active", button.dataset.view === id));
       if (id === "bookingsView") renderBookings();
@@ -2340,17 +2360,6 @@
       } finally {
         button.disabled = false;
       }
-    });
-    document.getElementById("demoContinue").addEventListener("click", () => {
-      const role = authMode === "signup" ? document.getElementById("authRole").value : accountRole;
-      const email = document.getElementById("authEmail").value.trim();
-      const name = authMode === "signup" ? document.getElementById("authName").value.trim() : "";
-      finishAuthWithUser({
-        email: email || "",
-        displayName: name || (email ? email.split("@")[0] : customer.name),
-        phoneNumber: "",
-        photoURL: customer.photo
-      }, role);
     });
     document.querySelectorAll("[data-close]").forEach((button) => button.addEventListener("click", () => {
       button.closest(".modal-backdrop").classList.remove("open");
