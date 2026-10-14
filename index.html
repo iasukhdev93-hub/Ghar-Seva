@@ -138,6 +138,7 @@
     .profile-card h3 { margin: 12px 0 5px; }
     .profile-card p { margin: 0; color: var(--muted); font-size: 13px; }
     .profile-form { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    #providerProfileSaveStatus[hidden] { display: none; }
     .field { display: grid; gap: 6px; }
     .field.full { grid-column: 1/-1; }
     .field label { font-size: 12px; color: #56615d; font-weight: 700; }
@@ -434,6 +435,60 @@
       .filters { grid-template-columns: 1fr; }
       .stat-card { padding: 10px; }
     }
+    body { font-size: 16px; }
+    .nav-links button { font-size: 15px; }
+    .nav-profile { font-size: 14px; }
+    .install-app-btn { font-size: 14px; }
+    .eyebrow { font-size: 13px; }
+    .location-button { font-size: 13px; }
+    .location-status { font-size: 12px; }
+    .trust-item strong { font-size: 14px; }
+    .trust-item span:last-child { font-size: 12px; }
+    .section-head p, .page-subtitle { font-size: 15px; }
+    .text-button { font-size: 15px; }
+    .category strong { font-size: 14px; }
+    .category small { font-size: 12px; }
+    .filter-select { font-size: 14px; }
+    .provider-name-row h3 { font-size: 16px; }
+    .provider-trade, .provider-meta { font-size: 13px; }
+    .provider-meta span { font-size: 13px; }
+    .rating { font-size: 13px; }
+    .price { font-size: 17px; }
+    .book-btn, .primary-btn, .google-btn, .auth-tab { font-size: 15px; }
+    .content-view > .page-title { font-size: clamp(27px, 3.5vw, 38px); }
+    .booking-person strong { font-size: 16px; }
+    .booking-person span { font-size: 14px; }
+    .booking-details { font-size: 15px; }
+    .booking-details small { font-size: 13px; }
+    .status { font-size: 12px; }
+    .small-action, .admin-control { font-size: 13px; }
+    .field label { font-size: 14px; }
+    .field input, .field select, .field textarea, .coupon-row input, .chat-form input { font-size: 16px; }
+    th { font-size: 12px; }
+    td { font-size: 14px; }
+    .stat-card span { font-size: 13px; }
+    .stat-card em { font-size: 12px; }
+    .chat-message { font-size: 14px; }
+    .chat-message strong { font-size: 12px; }
+    .chat-message time { font-size: 11px; }
+    .chat-tool-status, .chat-demo-note, .demo-disclaimer, .auth-note { font-size: 12px; }
+    .profile-card p, .install-modal-copy, .invoice-payment { font-size: 14px; }
+    .rate-card-note, .rate-card-line { font-size: 13px; }
+    .help-faq summary { font-size: 15px; }
+    .help-faq details p { font-size: 14px; }
+    .booking-notification { font-size: 14px; }
+    .booking-notification span, .booking-timeline { font-size: 13px; }
+    .footer-inner { font-size: 13px; }
+    @media (max-width: 560px) {
+      .nav-links button { font-size: 14px; }
+      .trust-item strong { font-size: 13px; }
+      .trust-item span:last-child { font-size: 12px; }
+      .category strong { font-size: 13px; }
+      .filter-select { font-size: 13px; }
+      .payment-option { font-size: 14px; }
+      .chat-thread-head strong { font-size: 14px; }
+      .chat-thread-head .status { font-size: 11px; }
+    }
   </style>
 </head>
 <body>
@@ -583,6 +638,7 @@
             <div class="field"><label for="providerDuration">आमतौर पर काम में लगने वाला समय</label><input id="providerDuration" name="providerDuration" maxlength="80" placeholder="जैसे 1–2 घंटे"></div>
             <div class="field full"><label for="providerBio">अपने काम के बारे में</label><textarea id="providerBio" name="providerBio" rows="3" maxlength="300" placeholder="अपना अनुभव, काम और खासियत बताएं"></textarea></div>
             <div class="field full"><label for="providerPhotoInput">Service provider प्रोफ़ाइल फोटो · upload या बदलें</label><input id="providerPhotoInput" type="file" accept="image/*"><img id="providerPhotoPreview" class="provider-photo-preview" src="" alt="Provider फोटो preview" style="display:none"></div>
+            <p class="field full" id="providerProfileSaveStatus" role="status" aria-live="polite" hidden></p>
             <p class="field full" style="color:var(--muted);font-size:11px;margin:0">Demo profile अभी केवल इसी ब्राउज़र में सेव होगी। असली ग्राहक bookings लेने से पहले अपनी जानकारी सही भरें।</p>
           </div>
           <input type="file" id="photoInput" accept="image/*" hidden>
@@ -2459,10 +2515,16 @@
         toast("Provider मैनेज करने के लिए Admin login जरूरी है।");
         return;
       }
-      if (!firestoreDb || !firebaseAuth?.currentUser) {
-        toast("Shared provider बदलाव के लिए Firebase Firestore से जुड़ना जरूरी है।");
+      const currentUser = firebaseAuth?.currentUser;
+      if (!currentUser || !isAdminUser(currentUser)) {
+        toast("Provider सेव करने के लिए verified Admin Firebase account में दोबारा login करें।");
         return;
       }
+      if (!window.firebase?.firestore) {
+        toast("Firestore SDK लोड नहीं हुआ। Internet जाँचकर page reload करें।");
+        return;
+      }
+      firestoreDb = firestoreDb || window.firebase.firestore();
       const providerId = document.getElementById("adminProviderId").value;
       const existing = getAllProviders().find((item) => item.id === providerId);
       const category = categories.find((item) => item.id === document.getElementById("adminProviderCategory").value);
@@ -2473,14 +2535,18 @@
         toast("सेवा, शहर और ₹1 से ₹1,00,000 तक की सही कीमत चुनें।");
         return;
       }
-      if (imageValue && new URL(imageValue).protocol !== "https:") {
-        toast("Provider फोटो का URL HTTPS होना चाहिए।");
-        return;
+      if (imageValue) {
+        try {
+          if (new URL(imageValue).protocol !== "https:") throw new Error("non-https");
+        } catch {
+          toast("Provider फोटो का सही HTTPS URL भरें।");
+          return;
+        }
       }
       const provider = {
         ...(existing || {}),
         id: existing?.isUserProfile
-          ? `account-${existing.ownerId || firebaseAuth.currentUser.uid}`
+          ? `account-${existing.ownerId || currentUser.uid}`
           : providerId || `admin-${Date.now()}`,
         name: document.getElementById("adminProviderName").value.trim(),
         trade: category.label,
@@ -2492,11 +2558,11 @@
         phone: document.getElementById("adminProviderPhone").value.trim(),
         image: imageValue || existing?.image || providerTemplates.find((item) => item.category === category.id)?.image || "",
         bio: document.getElementById("adminProviderBio").value.trim(),
-        ownerId: existing?.ownerId || firebaseAuth.currentUser.uid,
+        ownerId: existing?.ownerId || currentUser.uid,
         rating: existing?.rating || 0,
         reviews: existing?.reviews || 0
       };
-      if (!existing) provider.isAdminManaged = true;
+      if (!provider.isUserProfile) provider.isAdminManaged = true;
       const saveButton = document.getElementById("adminProviderSave");
       saveButton.disabled = true;
       try {
@@ -2506,7 +2572,17 @@
         });
       } catch (error) {
         console.error("Provider details could not be saved to Firestore.", error);
-        toast("Provider बदलाव Firebase में सेव नहीं हुए। Firestore rules और इंटरनेट जाँचें।");
+        const code = error && error.code ? String(error.code).replace(/^firestore\//, "") : "";
+        const message = code === "permission-denied"
+          ? "Firebase ने provider save रोक दी। Firebase Console में firestore.rules publish करें और Admin email verification जाँचें।"
+          : code === "unavailable" || code === "network-request-failed"
+            ? "Firebase से connection नहीं हो रहा। Internet जाँचकर फिर सेव करें।"
+            : code === "failed-precondition" || code === "not-found"
+              ? "Firestore database उपलब्ध नहीं है। Firebase Console में Firestore Database बनाएँ।"
+              : code === "resource-exhausted"
+                ? "Firebase quota सीमा पूरी है। Firebase Console में usage जाँचें।"
+                : `Provider Firebase में सेव नहीं हुआ${code ? ` (${code})` : ""}। Browser console में Firebase error देखें।`;
+        toast(message);
         return;
       } finally {
         saveButton.disabled = false;
@@ -2514,7 +2590,7 @@
       const cloudIndex = cloudProviders.findIndex((item) => item.id === provider.id);
       if (cloudIndex === -1) cloudProviders.push(provider);
       else cloudProviders[cloudIndex] = provider;
-      if (provider.isUserProfile && provider.ownerId === firebaseAuth.currentUser.uid) {
+      if (provider.isUserProfile && provider.ownerId === currentUser.uid) {
         providerProfile = provider;
         providerPhotoData = provider.image;
         saveStored("gharSevaProvider", providerProfile);
@@ -2522,12 +2598,21 @@
         const existingIndex = providers.findIndex((item) => item.id === providerId || item.id === provider.id);
         if (existingIndex === -1 && !providerId) providers.push(provider);
         else if (existingIndex !== -1) providers[existingIndex] = provider;
-        if (!provider.isAdminManaged || !providerId) saveStored("gharSevaAdminProviders", providers);
+        saveStored("gharSevaAdminProviders", providers);
       }
       resetAdminProviderForm();
+      document.getElementById("citySelect").value = provider.city;
+      if (selectedCategory && selectedCategory !== provider.category) {
+        selectedCategory = "";
+        renderCategories();
+      }
+      const search = document.getElementById("searchInput");
+      if (search.value && !`${provider.name} ${provider.trade} ${provider.category} ${provider.area}`.toLocaleLowerCase("hi").includes(search.value.trim().toLocaleLowerCase("hi"))) {
+        search.value = "";
+      }
       renderProviders();
       renderAdmin();
-      toast(providerId ? "Provider की जानकारी अपडेट हो गई।" : "नया provider जोड़ दिया गया।");
+      toast(providerId ? `Provider update होकर ${provider.city} की listing में दिख रहा है।` : `नया provider ${provider.city} की listing में जोड़ दिया गया।`);
     });
     document.getElementById("adminProviderCancel").addEventListener("click", resetAdminProviderForm);
     document.getElementById("categoryForm").addEventListener("submit", (event) => {
@@ -2800,27 +2885,49 @@
     document.getElementById("profileForm").addEventListener("submit", async (event) => {
       event.preventDefault();
       const form = new FormData(event.currentTarget);
-      customer = { ...customer, name: String(form.get("name")).trim(), phone: String(form.get("phone")).trim(), city: String(form.get("city")), area: String(form.get("area")).trim() };
-      saveStored("gharSevaCustomer", customer);
-      accountRole = String(form.get("role"));
-      saveStored("gharSevaRole", accountRole);
-      if (accountRole === "provider") {
+      const nextCustomer = {
+        ...customer,
+        name: String(form.get("name")).trim(),
+        phone: String(form.get("phone")).trim(),
+        city: String(form.get("city")),
+        area: String(form.get("area")).trim()
+      };
+      const nextRole = String(form.get("role"));
+      const saveStatus = document.getElementById("providerProfileSaveStatus");
+      const saveButton = event.currentTarget.querySelector('button[type="submit"]');
+      saveStatus.hidden = true;
+      if (nextRole === "provider") {
         const user = getSignedInUser();
-        if (!user || (!demoSession && !firestoreDb)) {
-          toast("Provider profile सभी users को दिखाने के लिए Firebase/Firestore login जरूरी है।");
+        if (!user || demoSession || !firebaseAuth?.currentUser || firebaseAuth.currentUser.uid !== user.uid) {
+          saveStatus.textContent = "Provider profile साझा करने के लिए अपने Firebase account में login करें।";
+          saveStatus.hidden = false;
+          toast(saveStatus.textContent);
           return;
         }
+        if (!window.firebase?.firestore) {
+          saveStatus.textContent = "Firestore SDK लोड नहीं हुआ। Internet जाँचें, फिर page reload करें।";
+          saveStatus.hidden = false;
+          toast(saveStatus.textContent);
+          return;
+        }
+        firestoreDb = firestoreDb || window.firebase.firestore();
         const category = String(form.get("providerCategory"));
         const template = providerTemplates.find((item) => item.category === category);
         const experience = Number(form.get("providerExperience"));
-        providerProfile = {
+        if (!template) {
+          saveStatus.textContent = "चुनी गई service category उपलब्ध नहीं है। Category दोबारा चुनें।";
+          saveStatus.hidden = false;
+          toast(saveStatus.textContent);
+          return;
+        }
+        const nextProviderProfile = {
           id: `account-${user.uid}`,
           ownerId: user.uid,
-          name: customer.name,
-          phone: customer.phone,
+          name: nextCustomer.name,
+          phone: nextCustomer.phone,
           trade: `${template.trade} · ${experience} साल का अनुभव`,
           category,
-          city: customer.city,
+          city: nextCustomer.city,
           area: String(form.get("providerArea")).trim(),
           rating: 0,
           reviews: 0,
@@ -2831,25 +2938,59 @@
           experience,
           isUserProfile: true
         };
-        saveStored("gharSevaProvider", providerProfile);
-        if (demoSession) {
-          toast("डेमो provider profile इसी browser में सेव हो गई।");
-          syncCustomerDisplay();
-          renderProfile();
-          document.getElementById("citySelect").value = customer.city;
-          renderProviders();
+        nextProviderProfile.rating = Number(providerProfile?.rating) || 0;
+        nextProviderProfile.reviews = Number(providerProfile?.reviews) || 0;
+        if (nextProviderProfile.image.length > 900000) {
+          saveStatus.textContent = "Provider फोटो Firestore के लिए बहुत बड़ी है। छोटी photo चुनकर फिर कोशिश करें।";
+          saveStatus.hidden = false;
+          toast(saveStatus.textContent);
           return;
         }
+        saveButton.disabled = true;
+        saveStatus.textContent = "Provider profile Firebase में सेव हो रही है…";
+        saveStatus.style.color = "var(--muted)";
+        saveStatus.hidden = false;
         try {
-          await firestoreDb.collection("serviceProviders").doc(providerProfile.id).set({
-            ...providerProfile,
+          firestoreDb = firestoreDb || window.firebase.firestore();
+          await firestoreDb.collection("serviceProviders").doc(nextProviderProfile.id).set({
+            ...nextProviderProfile,
             updatedAt: new Date().toISOString()
           });
         } catch (error) {
           console.error("Provider profile could not be shared through Firestore.", error);
-          toast("Provider profile Firebase में साझा नहीं हुई। Firestore rules और internet जाँचें।");
+          const code = error && error.code ? String(error.code).replace(/^firestore\//, "") : "";
+          const message = code === "permission-denied"
+            ? "Firebase ने write रोक दी। Firebase Console में सही project खोलें और firestore.rules publish करें; provider profile के ownerId और isUserProfile की अनुमति जाँचें।"
+            : code === "unavailable" || code === "network-request-failed"
+              ? "Firebase तक network नहीं पहुँच रहा। Internet जाँचकर दोबारा सेव करें।"
+              : code === "failed-precondition" || code === "not-found"
+                ? "Firestore database उपलब्ध नहीं है। Firebase Console में Firestore Database बनाएँ और फिर कोशिश करें।"
+                : code === "resource-exhausted"
+                  ? "Firebase storage/quota सीमा पूरी है। Quota और provider photo size जाँचें।"
+                  : `Provider profile Firebase में सेव नहीं हुई${code ? ` (${code})` : ""}। Browser console में Firebase error देखें।`;
+          saveStatus.textContent = message;
+          saveStatus.style.color = "#a33a30";
+          toast(message);
+          saveButton.disabled = false;
           return;
+        } finally {
+          saveButton.disabled = false;
         }
+        customer = nextCustomer;
+        accountRole = nextRole;
+        providerProfile = nextProviderProfile;
+        providerPhotoData = nextProviderProfile.image;
+        saveStored("gharSevaCustomer", customer);
+        saveStored("gharSevaRole", accountRole);
+        saveStored("gharSevaProvider", providerProfile);
+        saveStatus.textContent = "Provider profile Firebase में सेव हो गई।";
+        saveStatus.style.color = "var(--green)";
+        saveStatus.hidden = false;
+      } else {
+        customer = nextCustomer;
+        accountRole = nextRole;
+        saveStored("gharSevaCustomer", customer);
+        saveStored("gharSevaRole", accountRole);
       }
       syncCustomerDisplay();
       renderProfile();
