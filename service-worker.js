@@ -1,5 +1,5 @@
-const CACHE_NAME = "gharseva-shell-v1";
-const APP_URL = new URL("./gemini-code-1791884034859.html", self.registration.scope).href;
+const CACHE_NAME = "gharseva-shell-v2";
+const APP_URL = new URL("./index.html", self.registration.scope).href;
 const APP_SHELL = [
   APP_URL,
   new URL("./manifest.webmanifest", self.registration.scope).href,
