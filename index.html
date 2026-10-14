@@ -17,20 +17,19 @@
 <!-- Firebase Connection Script -->
 <script>
   // 1. यहाँ अपनी Firebase Console से मिली Config डालें
-  const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
-  };
+ const firebaseConfig = {
+  apiKey: "AIzaSyDIxwHt557G595L05OwTNpeZQ6dVrZovCM",
+  authDomain: "ghar-seva-1cb1a.firebaseapp.com",
+  projectId: "ghar-seva-1cb1a",
+  storageBucket: "ghar-seva-1cb1a.firebasestorage.app",
+  messagingSenderId: "732729369046",
+  appId: "1:732729369046:web:54f9bbf7993e1111dbc477",
+  measurementId: "G-S44T374LKB"
+};
 
-  // 2. Firebase को शुरू करें
-  firebase.initializeApp(firebaseConfig);
-
-  // 3. Firestore Database का कनेक्शन वेरिएबल बनाएं
-  const db = firebase.firestore();
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
 </script>
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./icons/ghar-seva-192.png" type="image/png">
