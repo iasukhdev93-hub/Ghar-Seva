@@ -86,24 +86,24 @@
     .filters { display: flex; align-items: center; gap: 8px; }
     .filter-select { border: 1px solid var(--line); border-radius: 10px; background: white; color: #56615d; padding: 9px 11px; font-size: 12px; outline-color: #9ccab5; }
     .price-filter { width: 82px; min-width: 72px; }
-    .provider-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 17px; }
-    .provider-card { background: white; border: 1px solid var(--line); border-radius: 18px; overflow: hidden; transition: .2s ease; }
-    .provider-card:hover { box-shadow: var(--shadow); transform: translateY(-3px); }
-    .provider-photo-wrap { height: 185px; position: relative; background: #e5ebe8; }
-    .provider-photo { width: 100%; height: 100%; object-fit: cover; }
-    .verified { position: absolute; left: 12px; top: 12px; background: rgba(255,255,255,.95); border-radius: 20px; padding: 6px 9px; color: var(--green); font-size: 10px; font-weight: 800; }
-    .heart { position: absolute; right: 12px; top: 12px; border: 0; background: rgba(255,255,255,.95); color: #47514d; border-radius: 50%; width: 32px; height: 32px; font-size: 17px; }
-    .provider-info { padding: 15px; }
-    .provider-name-row { display: flex; justify-content: space-between; align-items: start; gap: 10px; }
-    .provider-info h3 { font-size: 16px; margin: 0 0 4px; }
-    .provider-trade { color: var(--muted); font-size: 12px; }
-    .rating { white-space: nowrap; color: #3e4844; font-size: 12px; font-weight: 700; }
+    .provider-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+    .provider-card { min-width: 0; background: white; border: 1px solid #e5ece8; border-radius: 15px; overflow: hidden; box-shadow: 0 4px 14px rgba(30,48,42,.045); transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease; }
+    .provider-card:hover { border-color: #b9d8c8; box-shadow: 0 10px 24px rgba(30,78,58,.11); transform: translateY(-2px); }
+    .provider-photo-wrap { height: 92px; position: relative; display: grid; place-items: center; background: linear-gradient(145deg, #f0f7f3, #e5f1ea); }
+    .provider-photo { width: 68px; height: 68px; border: 3px solid white; border-radius: 50%; object-fit: cover; box-shadow: 0 3px 12px rgba(30,48,42,.16); }
+    .verified { position: absolute; left: 7px; top: 7px; max-width: calc(100% - 48px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; background: rgba(255,255,255,.94); border: 1px solid rgba(23,107,82,.08); border-radius: 20px; padding: 4px 7px; color: var(--green); font-size: 8px; font-weight: 800; }
+    .heart { position: absolute; right: 7px; top: 7px; border: 1px solid rgba(24,33,31,.05); background: rgba(255,255,255,.94); color: #47514d; border-radius: 50%; width: 28px; height: 28px; font-size: 15px; }
+    .provider-info { padding: 9px 10px 10px; }
+    .provider-name-row { display: flex; justify-content: space-between; align-items: start; gap: 6px; }
+    .provider-info h3 { font-size: 13px; margin: 0 0 3px; overflow-wrap: anywhere; }
+    .provider-trade { color: var(--muted); font-size: 10px; }
+    .rating { white-space: nowrap; color: #3e4844; font-size: 10px; font-weight: 700; }
     .rating span { color: #e99b39; }
-    .provider-meta { display: flex; gap: 14px; color: var(--muted); font-size: 11px; margin: 14px 0 13px; }
-    .price-row { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f0f1f1; padding-top: 12px; }
-    .price { font-weight: 800; font-size: 17px; }
+    .provider-meta { display: grid; gap: 4px; color: var(--muted); font-size: 9px; margin: 8px 0; }
+    .price-row { display: flex; justify-content: space-between; align-items: center; gap: 5px; border-top: 1px solid #f0f1f1; padding-top: 8px; }
+    .price { font-weight: 800; font-size: 15px; }
     .price small { color: var(--muted); font-size: 10px; font-weight: 500; }
-    .book-btn, .primary-btn { border: 0; color: white; background: var(--green); border-radius: 10px; font-size: 12px; font-weight: 800; padding: 10px 14px; }
+    .book-btn, .primary-btn { border: 0; color: white; background: var(--green); border-radius: 9px; font-size: 10px; font-weight: 800; padding: 8px 9px; }
     .book-btn:hover, .primary-btn:hover { background: var(--green-dark); }
     .empty-state { grid-column: 1/-1; background: white; border: 1px dashed #d5dfda; color: var(--muted); border-radius: 16px; text-align: center; padding: 34px; }
     .content-view { display: none; padding: 32px 0 60px; min-height: 60vh; }
@@ -122,9 +122,19 @@
     .booking-details { text-align: right; font-size: 13px; font-weight: 700; }
     .booking-details small { display: block; color: var(--muted); font-weight: 500; margin-top: 5px; }
     .status { color: var(--green); background: var(--mint); border-radius: 20px; padding: 5px 9px; font-size: 10px; font-weight: 800; display: inline-block; margin-top: 5px; }
+    .booking-notifications { margin-bottom: 14px; border-color: #dbeade; background: #f5faf6; }
+    .booking-notifications h2 { margin: 0; font-size: 16px; }
+    .booking-notification-list { display: grid; gap: 8px; margin-top: 12px; }
+    .booking-notification { padding: 9px 11px; border-radius: 9px; background: white; font-size: 12px; }
+    .booking-notification span { display: block; margin-top: 3px; color: var(--muted); font-size: 10px; }
+    .booking-timeline { width: 100%; margin-top: 10px; color: var(--muted); font-size: 11px; }
+    .booking-timeline summary { color: var(--green); cursor: pointer; font-weight: 700; }
+    .booking-timeline ol { display: grid; gap: 7px; margin: 8px 0 0; padding-left: 19px; }
+    .booking-timeline li { padding-left: 2px; }
     .profile-layout { display: grid; grid-template-columns: 280px 1fr; gap: 18px; }
     .profile-card { text-align: center; }
     .profile-photo { width: 96px; height: 96px; border-radius: 50%; object-fit: cover; border: 4px solid #edf6f1; }
+    .provider-photo-preview { width: 76px; height: 76px; border-radius: 50%; object-fit: cover; border: 3px solid #edf6f1; }
     .profile-card h3 { margin: 12px 0 5px; }
     .profile-card p { margin: 0; color: var(--muted); font-size: 13px; }
     .profile-form { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
@@ -296,7 +306,6 @@
     .auth-divider::before, .auth-divider::after { content: ""; height: 1px; background: var(--line); flex: 1; }
     .google-btn { width: 100%; display: flex; justify-content: center; align-items: center; gap: 10px; border: 1px solid #dfe5e2; border-radius: 10px; background: white; padding: 11px; color: #313936; font-size: 13px; font-weight: 700; }
     .google-mark { font: 800 17px Arial, sans-serif; color: #4285f4; }
-    .demo-btn { width: 100%; margin-top: 10px; padding: 11px; border: 0; border-radius: 10px; background: #eef5f1; color: var(--green-dark); font-size: 12px; font-weight: 800; }
     .auth-note { color: var(--muted); font-size: 10px; line-height: 1.55; text-align: center; margin: 13px 0 0; }
     .auth-setup { border-radius: 9px; background: #fff8e9; color: #70521f; padding: 9px 10px; font-size: 10px; line-height: 1.5; margin-top: 11px; }
     @media (max-width: 800px) {
@@ -309,7 +318,7 @@
       .nav-links button { font-size: 12px; }
       .wrap { width: min(100% - 30px, 1180px); }
       .categories { grid-template-columns: repeat(3, 1fr); }
-      .provider-grid { grid-template-columns: repeat(2, 1fr); }
+      .provider-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
       .admin-stats { grid-template-columns: repeat(2, 1fr); }
       .profile-layout { grid-template-columns: 1fr; }
       .chat-layout { grid-template-columns: minmax(0, 1fr); }
@@ -354,8 +363,7 @@
       .category-icon { width: 42px; height: 42px; font-size: 21px; }
       .category strong, .category small { overflow-wrap: anywhere; }
       .category strong { font-size: 11px; line-height: 1.4; }
-      .provider-grid { grid-template-columns: 1fr; }
-      .provider-photo-wrap { height: 205px; }
+      .provider-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
       .service-head { align-items: start; flex-direction: column; }
       .filters { display: grid; width: 100%; min-width: 0; grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .filter-select, .price-filter { width: 100%; min-width: 0; min-height: 42px; padding: 8px 7px; font-size: 11px; }
@@ -404,7 +412,7 @@
       .auth-card { width: 100%; max-width: 440px; max-height: 100%; overflow-y: auto; padding: 21px 17px; border-radius: 18px; }
       .auth-heading { margin: 17px 0; }
       .auth-heading h1 { font-size: 22px; overflow-wrap: anywhere; }
-      .auth-tab, .google-btn, .demo-btn { min-height: 44px; }
+      .auth-tab, .google-btn { min-height: 44px; }
     }
     @media (max-width: 380px) {
       .nav-links { gap: 14px; }
@@ -493,13 +501,14 @@
 
     <section id="bookingsView" class="content-view">
       <h1 class="page-title">मेरी बुकिंग</h1><p class="page-subtitle">अपनी सेवाएँ, booking status और reviews एक ही जगह देखें। <button type="button" class="text-button" onclick="openChat()">GharSeva Support से चैट करें</button></p>
+      <div class="panel booking-notifications" id="bookingNotifications" hidden></div>
       <div class="panel"><div class="booking-list" id="bookingList"></div></div>
       <section class="panel support-grid" aria-label="ग्राहक सहायता">
         <div><h2 style="font-size:18px;margin:0">Customer Help & Complaint</h2><p class="page-subtitle">समस्या होने पर booking में Report / Complain दबाएँ। सामान्य सवालों के जवाब और support संपर्क यहाँ उपलब्ध हैं।</p>
           <div class="support-links"><button type="button" class="small-action" onclick="openChat()">💬 Support chat</button><a class="small-action support-phone-link" hidden>📞 Customer care को कॉल</a><a class="small-action support-whatsapp-link" target="_blank" rel="noopener" hidden>WhatsApp support</a><span id="supportContactUnavailable" class="demo-disclaimer">Call / WhatsApp नंबर Admin settings में configure करें।</span></div>
         </div>
         <div class="help-faq">
-          <details><summary>बुकिंग cancel कैसे करें?</summary><p>मेरी बुकिंग में booking ID चुनकर Job Chat से provider या support को तुरंत संपर्क करें। इस demo में self-service cancellation/refund उपलब्ध नहीं है; support team से cancel request दर्ज करें।</p></details>
+          <details><summary>बुकिंग cancel या reschedule कैसे करें?</summary><p>Pending या Accepted booking को “Cancel booking” या “समय बदलें” बटन से manage करें। In Progress booking के लिए Job Chat से support से संपर्क करें। Cancellation से payment refund अपने-आप नहीं होता।</p></details>
           <details><summary>Payment कट गया पर booking नहीं हुई तो क्या करें?</summary><p>यह demo किसी असली online payment को process नहीं करता। असली app में payment reference ID संभालकर support chat में booking ID सहित शिकायत भेजें—इस demo में सीधे Report / Complain इस्तेमाल करें।</p></details>
           <details><summary>सर्विसमैन देर से आए तो क्या करें?</summary><p>Booking के Job Chat से provider को संपर्क करें या Report / Complain में “Provider समय पर नहीं आया” चुनें। शिकायत Admin dashboard में alert होगी।</p></details>
           <details><summary>काम खराब हो या ज्यादा पैसे माँगे जाएँ?</summary><p>Job Chat और invoice सुरक्षित रखें, अतिरिक्त payment न करें जिस पर सहमति न हो, और booking पर Report / Complain भेजें। Admin work-stream की समीक्षा कर सकता है।</p></details>
@@ -563,7 +572,7 @@
         <form class="panel profile-form" id="profileForm">
           <div class="field full"><label for="accountRole">मैं GharSeva पर</label><select id="accountRole" name="role"><option value="customer">ग्राहक हूँ — मुझे सेवा चाहिए</option><option value="provider">Service provider हूँ — मैं सेवा देना चाहता/चाहती हूँ</option></select></div>
           <div class="field"><label for="customerName">पूरा नाम</label><input id="customerName" name="name" value="Priya Sharma" required></div>
-          <div class="field"><label for="customerPhone">मोबाइल नंबर</label><input id="customerPhone" name="phone" value="+91 7737356531" inputmode="tel" required></div>
+          <div class="field"><label for="customerPhone">मोबाइल नंबर</label><input id="customerPhone" name="phone" value="+91 98765 43210" inputmode="tel" required></div>
           <div class="field"><label for="customerCity">राजस्थान का शहर</label><select id="customerCity" name="city"></select></div>
           <div class="field"><label for="customerArea">इलाका / पिनकोड</label><input id="customerArea" name="area" value="जयपुर"></div>
           <div id="providerProfileFields" class="profile-form field full" style="display:none;padding:0;border:0;background:none">
@@ -573,7 +582,7 @@
             <div class="field"><label for="providerArea">सेवा का इलाका</label><input id="providerArea" name="providerArea" placeholder="जैसे मानसरोवर, जयपुर"></div>
             <div class="field"><label for="providerDuration">आमतौर पर काम में लगने वाला समय</label><input id="providerDuration" name="providerDuration" maxlength="80" placeholder="जैसे 1–2 घंटे"></div>
             <div class="field full"><label for="providerBio">अपने काम के बारे में</label><textarea id="providerBio" name="providerBio" rows="3" maxlength="300" placeholder="अपना अनुभव, काम और खासियत बताएं"></textarea></div>
-            <div class="field full"><label for="providerPhotoInput">Service provider प्रोफ़ाइल फोटो</label><input id="providerPhotoInput" type="file" accept="image/*"><img id="providerPhotoPreview" src="" alt="Provider फोटो preview" style="display:none;width:64px;height:64px;border-radius:50%;object-fit:cover"></div>
+            <div class="field full"><label for="providerPhotoInput">Service provider प्रोफ़ाइल फोटो · upload या बदलें</label><input id="providerPhotoInput" type="file" accept="image/*"><img id="providerPhotoPreview" class="provider-photo-preview" src="" alt="Provider फोटो preview" style="display:none"></div>
             <p class="field full" style="color:var(--muted);font-size:11px;margin:0">Demo profile अभी केवल इसी ब्राउज़र में सेव होगी। असली ग्राहक bookings लेने से पहले अपनी जानकारी सही भरें।</p>
           </div>
           <input type="file" id="photoInput" accept="image/*" hidden>
@@ -628,7 +637,7 @@
       <div class="table-wrap"><table><thead><tr><th>सेवा</th><th>शुरुआती कीमत</th><th>एक्शन</th></tr></thead><tbody id="adminCategoriesTable"></tbody></table></div>
       <div class="section-head"><div><h2 style="font-size:19px">Customer support संपर्क</h2><p>कॉल और WhatsApp के लिए अपना verified business number सेट करें।</p></div></div>
       <form class="panel profile-form" id="supportContactForm">
-        <div class="field"><label for="supportPhoneInput">Customer care फोन (country code सहित)</label><input id="supportPhoneInput" type="tel" inputmode="tel" placeholder="+91 7737356531"></div>
+        <div class="field"><label for="supportPhoneInput">Customer care फोन (country code सहित)</label><input id="supportPhoneInput" type="tel" inputmode="tel" placeholder="+91 98765 43210"></div>
         <div class="field"><label for="supportWhatsappInput">WhatsApp फोन (country code सहित)</label><input id="supportWhatsappInput" type="tel" inputmode="tel" placeholder="+91 98765 43210"></div>
         <div class="form-actions"><button class="primary-btn" type="submit">Support नंबर सेव करें</button></div>
         <p class="demo-disclaimer">ये संपर्क केवल इसी browser में सेव होंगे; production में admin access और verified business contacts सुरक्षित server पर रखें।</p>
@@ -721,14 +730,24 @@
           <button class="primary-btn modal-submit" type="submit">शिकायत Admin को भेजें</button>
         </form>
       </div>
-      <div class="modal-backdrop" id="installHelpModal" role="dialog" aria-modal="true" aria-labelledby="installHelpTitle">
-        <div class="modal">
-          <div class="modal-head"><div><h2 id="installHelpTitle">GharSeva ऐप इंस्टॉल करें</h2><span style="font-size:12px;color:var(--muted)">अपने फोन की होम स्क्रीन से जल्दी खोलें।</span></div><button class="close-btn" type="button" data-close aria-label="बंद करें">×</button></div>
-          <div class="install-modal-copy" id="installHelpContent"></div>
-          <p class="demo-disclaimer">Install prompt आपके browser और device पर निर्भर है। Install करने के बाद भी account/data इस demo में इसी browser पर रहता है।</p>
-        </div>
-      </div>
+  </div>
+  <div class="modal-backdrop" id="rescheduleModal" role="dialog" aria-modal="true" aria-labelledby="rescheduleTitle">
+    <div class="modal">
+      <div class="modal-head"><div><h2 id="rescheduleTitle">बुकिंग का समय बदलें</h2><span id="rescheduleBookingLabel" style="font-size:12px;color:var(--muted)"></span></div><button class="close-btn" type="button" data-close aria-label="बंद करें">×</button></div>
+      <form id="rescheduleForm" class="profile-form">
+        <div class="field"><label for="rescheduleDate">नई तारीख</label><input id="rescheduleDate" type="date" required></div>
+        <div class="field"><label for="rescheduleTime">नया समय</label><select id="rescheduleTime" required><option>सुबह 9–12</option><option>दोपहर 12–3</option><option>शाम 3–6</option><option>शाम 6–8</option></select></div>
+        <div class="form-actions"><button class="primary-btn" type="submit">समय अपडेट करें</button></div>
+      </form>
     </div>
+  </div>
+  <div class="modal-backdrop" id="installHelpModal" role="dialog" aria-modal="true" aria-labelledby="installHelpTitle">
+    <div class="modal">
+      <div class="modal-head"><div><h2 id="installHelpTitle">GharSeva ऐप इंस्टॉल करें</h2><span style="font-size:12px;color:var(--muted)">अपने फोन की होम स्क्रीन से जल्दी खोलें।</span></div><button class="close-btn" type="button" data-close aria-label="बंद करें">×</button></div>
+      <div class="install-modal-copy" id="installHelpContent"></div>
+      <p class="demo-disclaimer">Install prompt आपके browser और device पर निर्भर है। Install करने के बाद भी account/data इस demo में इसी browser पर रहता है।</p>
+    </div>
+  </div>
   <section id="invoicePrintArea" aria-label="GharSeva invoice"></section>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <section class="auth-gate" id="authGate" aria-label="GharSeva लॉगिन">
@@ -750,7 +769,7 @@
       <div class="auth-divider">या</div>
       <button class="google-btn" id="googleSignIn" type="button"><span class="google-mark">G</span> Google से जारी रखें</button>
       <button class="install-app-btn auth-install-btn" id="authInstallAppButton" type="button">📲 GharSeva ऐप इंस्टॉल करें</button>
-      <div class="auth-setup" id="firebaseSetupNote">Firebase Auth तैयार नहीं है। Console में Authentication सेटअप करें।</div>
+      <div class="auth-setup" id="firebaseSetupNote">Firebase login सेटअप उपलब्ध नहीं है। Firebase project config और Authentication settings जाँचें।</div>
       <details class="auth-note" style="text-align:left">
         <summary style="cursor:pointer;font-weight:700">Firebase login कैसे चालू करें?</summary>
         <span style="display:block;margin-top:7px">Firebase Console में सही project खोलकर Build → Authentication → Get started चुनें। फिर Sign-in method में Email/Password और Google चालू करें और Settings → Authorized domains में अपनी website का domain जोड़ें। बुकिंग हिस्ट्री और सभी devices पर provider listings साझा करने के लिए Build → Firestore Database बनाएँ और लागू app rules लगाएँ: bookings केवल उनके मालिक पढ़ें; serviceProviders public-read हों, लेकिन बदलाव केवल profile का मालिक या verified admin account ia.sukhdev.93@gmail.com कर सके। Website को localhost या HTTPS पर खोलें; file:// से Google popup काम नहीं करता। Firebase Web config browser में दिखती है—Service Account key कभी यहाँ न डालें।</span>
@@ -776,9 +795,12 @@
     let firebaseAuth = null;
     let firestoreDb = null;
     let userBookingsUnsubscribe = null;
+    let allBookingsUnsubscribe = null;
     const syncedBookingData = new Map();
+    let demoSession = false;
     let firebaseAuthUnavailableMessage = "Firebase Auth अभी तैयार नहीं हुआ। पेज reload करके फिर कोशिश करें।";
     const ADMIN_EMAIL = "ia.sukhdev.93@gmail.com";
+    let verifiedAdminUid = null;
     let hasAdminAccess = false;
     let authMode = "login";
     let isFirebaseConfigured = false;
@@ -905,6 +927,7 @@
     let activeChatBookingId = null;
     let activeChatIsAdmin = false;
     let activeComplaintBookingId = null;
+    let activeRescheduleBookingId = null;
     let chatReturnView = "bookingsView";
     let selectedCategory = "";
     let activeProvider = null;
@@ -953,11 +976,15 @@
       }
     }
     function syncCurrentUserBookings(items) {
+      if (demoSession) return;
       const user = firebaseAuth && firebaseAuth.currentUser;
       if (!firestoreDb || !user || !user.email) return;
       const changedBookings = items.filter((booking) =>
-        booking.userId === user.uid &&
-        booking.userEmail === user.email &&
+        (
+          (booking.userId === user.uid && booking.userEmail === user.email) ||
+          (hasAdminAccess && syncedBookingData.has(booking.id))
+        ) &&
+        booking.userId !== "local-demo-user" &&
         syncedBookingData.get(booking.id) !== JSON.stringify(booking)
       );
       for (let offset = 0; offset < changedBookings.length; offset += 450) {
@@ -969,7 +996,7 @@
         batch.commit().then(() => {
           chunk.forEach((booking) => syncedBookingData.set(booking.id, JSON.stringify(booking)));
         }).catch((error) => {
-          console.error("User bookings could not be synced to Firestore.", error);
+          console.error("Booking changes could not be synced to Firestore.", error);
           toast("बुकिंग अपडेट Firebase में सेव नहीं हुआ। Firestore rules और इंटरनेट जाँचें।");
         });
       }
@@ -1062,15 +1089,27 @@
     }
     function isAdminUser(user) {
       return Boolean(
-        firebaseAuth &&
+        !demoSession &&
         user &&
         user.uid &&
+        firebaseAuth &&
         firebaseAuth.currentUser &&
         firebaseAuth.currentUser.uid === user.uid &&
-        user.emailVerified &&
-        user.email &&
-        user.email.trim().toLowerCase() === ADMIN_EMAIL
+        verifiedAdminUid === user.uid
       );
+    }
+    function getSignedInUser() {
+      if (demoSession) {
+        return {
+          uid: "local-demo-user",
+          email: "demo@gharseva.local",
+          displayName: customer.name,
+          phoneNumber: customer.phone,
+          photoURL: customer.photo,
+          emailVerified: false
+        };
+      }
+      return firebaseAuth && firebaseAuth.currentUser;
     }
     function openAuthenticatedApp(user, role) {
       hasAdminAccess = isAdminUser(user);
@@ -1136,17 +1175,41 @@
             })
             .catch((error) => console.error("Firebase Analytics initialization failed.", error));
         }
-        firebaseAuth.onAuthStateChanged((user) => {
+        firebaseAuth.onAuthStateChanged(async (user) => {
           if (user) {
-            openAuthenticatedApp(user, accountRole);
+            demoSession = false;
             listenForUserBookings(user);
+            verifiedAdminUid = null;
+            try {
+              const token = await user.getIdTokenResult(true);
+              if (
+                firebaseAuth.currentUser &&
+                firebaseAuth.currentUser.uid === user.uid &&
+                token.claims.email_verified === true &&
+                typeof token.claims.email === "string" &&
+                token.claims.email.trim().toLowerCase() === ADMIN_EMAIL
+              ) {
+                verifiedAdminUid = user.uid;
+              }
+            } catch (error) {
+              console.error("Firebase ID token claims could not be refreshed.", error);
+              if (user.email && user.email.trim().toLowerCase() === ADMIN_EMAIL) {
+                toast("Admin access verify नहीं हो सका। Internet जाँचकर फिर login करें।");
+              }
+            }
+            if (!firebaseAuth.currentUser || firebaseAuth.currentUser.uid !== user.uid) return;
+            openAuthenticatedApp(user, accountRole);
+            if (hasAdminAccess) listenForAllBookings();
             listenForProviderListings(user);
           } else {
             if (userBookingsUnsubscribe) userBookingsUnsubscribe();
+            if (allBookingsUnsubscribe) allBookingsUnsubscribe();
             if (providerListingsUnsubscribe) providerListingsUnsubscribe();
             userBookingsUnsubscribe = null;
+            allBookingsUnsubscribe = null;
             providerListingsUnsubscribe = null;
             cloudProviders = [];
+            verifiedAdminUid = null;
             hasAdminAccess = false;
             document.getElementById("adminNavButton").hidden = true;
             document.getElementById("providerPanelNavButton").hidden = true;
@@ -1203,6 +1266,34 @@
           console.error("Firebase user bookings could not be loaded.", error);
           toast("बुकिंग Firebase से लोड नहीं हुई। Firestore database और rules जाँचें।");
         });
+    }
+    function listenForAllBookings() {
+      if (!firestoreDb || !hasAdminAccess) return;
+      if (allBookingsUnsubscribe) allBookingsUnsubscribe();
+      allBookingsUnsubscribe = firestoreDb.collection("bookings").onSnapshot((snapshot) => {
+        const remoteBookings = snapshot.docs.map((document) => ({
+          ...document.data(),
+          id: document.id
+        }));
+        const mergedBookings = new Map(bookings.map((booking) => [booking.id, booking]));
+        remoteBookings.forEach((booking) => {
+          mergedBookings.set(booking.id, booking);
+          syncedBookingData.set(booking.id, JSON.stringify(booking));
+        });
+        bookings = [...mergedBookings.values()];
+        try {
+          localStorage.setItem("gharSevaBookings", JSON.stringify(bookings));
+        } catch (error) {
+          console.error("All Firebase bookings could not be cached locally.", error);
+          toast("Bookings Firebase से मिलीं, लेकिन browser में cache नहीं हुईं।");
+        }
+        renderBookings();
+        renderProviderPanel();
+        renderAdmin();
+      }, (error) => {
+        console.error("Admin booking feed could not be loaded from Firestore.", error);
+        toast("सभी bookings लोड नहीं हुईं। Firebase Console में firestore.rules publish करें।");
+      });
     }
     function listenForProviderListings(user) {
         if (!firestoreDb) {
@@ -1268,6 +1359,10 @@
           return;
         }
       }
+      demoSession = false;
+      hasAdminAccess = false;
+      document.getElementById("adminNavButton").hidden = true;
+      document.getElementById("providerPanelNavButton").hidden = true;
       document.body.classList.add("auth-locked");
       document.getElementById("authGate").classList.remove("hidden");
       updateAuthMode("login");
@@ -1400,8 +1495,8 @@
       document.getElementById("grandTotal").textContent = formatRupees(total);
     }
     function setBookingStatus(bookingId, status) {
-      if (accountRole !== "provider") {
-        toast("Job status बदलने के लिए provider account से sign in करें।");
+      if (!hasAdminAccess) {
+        toast("Job status बदलने के लिए Admin login जरूरी है।");
         return;
       }
       const booking = bookings.find((item) => item.id === bookingId);
@@ -1415,7 +1510,7 @@
         requestJobOtp(bookingId, "start");
         return;
       }
-      booking.status = status;
+      updateBookingStatus(booking, status, bookingStatusLabel(status));
       saveStored("gharSevaBookings", bookings);
       renderBookings();
       renderProviderPanel();
@@ -1429,7 +1524,7 @@
     }
     function requestJobOtp(bookingId, stage) {
       const booking = bookings.find((item) => item.id === bookingId);
-      if (accountRole !== "provider" || !booking || (stage === "start" && booking.status !== "Accepted") ||
+      if (!hasAdminAccess || !booking || (stage === "start" && booking.status !== "Accepted") ||
           (stage === "complete" && (booking.status !== "In Progress" || !booking.pendingInvoice))) return;
       const previousVerification = booking.verification;
       booking.verification = {
@@ -1450,7 +1545,7 @@
     }
     function openOtpModal(bookingId) {
       const booking = bookings.find((item) => item.id === bookingId);
-      if (accountRole !== "provider" || !booking?.verification) return;
+      if (!hasAdminAccess || !booking?.verification) return;
       activeOtpBookingId = bookingId;
       const isStart = booking.verification.stage === "start";
       document.getElementById("jobOtpTitle").textContent = isStart ? "काम शुरू करने का OTP" : "काम पूरा करने का OTP";
@@ -1468,14 +1563,16 @@
       booking.total = invoice.total;
       booking.commission = Math.round(invoice.total * commissionRate);
       booking.providerPayout = invoice.total - booking.commission;
-      booking.status = "Completed";
+      updateBookingStatus(booking, "Completed", bookingStatusLabel("Completed"));
       booking.completedAt = invoice.createdAt;
       booking.chat = booking.chat || [];
       booking.chat.push({ type: "invoice", sender: getChatCurrentName(booking), createdAt: invoice.createdAt });
       return true;
     }
     function verifyJobOtp(booking, submittedOtp) {
+      if (!hasAdminAccess) return "केवल Admin OTP सत्यापित कर सकता है।";
       const verification = booking.verification;
+      const previousTimeline = booking.timeline;
       if (!verification) return "इस job के लिए OTP सक्रिय नहीं है।";
       if (Date.now() > verification.expiresAt) return "OTP expire हो गया। नया OTP बनाएँ।";
       if (verification.attempts >= 5) return "5 गलत प्रयास हो चुके हैं। नया OTP बनाएँ।";
@@ -1485,7 +1582,7 @@
         return `OTP सही नहीं है। ${5 - verification.attempts} प्रयास बाकी हैं।`;
       }
       if (verification.stage === "start" && booking.status === "Accepted") {
-        booking.status = "In Progress";
+        updateBookingStatus(booking, "In Progress", bookingStatusLabel("In Progress"));
       } else if (verification.stage === "complete" && booking.status === "In Progress" && booking.pendingInvoice) {
         finalizeJobCompletion(booking);
       } else {
@@ -1494,6 +1591,8 @@
       delete booking.verification;
       if (!saveStored("gharSevaBookings", bookings)) {
         booking.status = verification.stage === "start" ? "Accepted" : "In Progress";
+        if (previousTimeline) booking.timeline = previousTimeline;
+        else delete booking.timeline;
         booking.verification = verification;
         if (verification.stage === "complete") {
           booking.pendingInvoice = booking.invoice || booking.pendingInvoice;
@@ -1520,7 +1619,7 @@
     }
     function openInvoiceModal(bookingId) {
       const booking = bookings.find((item) => item.id === bookingId);
-      if (!booking || booking.status !== "In Progress" || booking.invoice || booking.pendingInvoice) return;
+      if (!hasAdminAccess || !booking || booking.status !== "In Progress" || booking.invoice || booking.pendingInvoice) return;
       activeInvoiceBookingId = bookingId;
       document.getElementById("invoiceEstimate").textContent = `बुकिंग ${booking.id} · ${booking.rateItem || booking.category} · ग्राहक का शुरुआती अनुमान ${formatRupees(booking.serviceAmount)}। Final bill वास्तविक parts + labour के आधार पर बनेगा।`;
       document.getElementById("invoiceParts").value = "";
@@ -1554,6 +1653,7 @@
       showView("chatView");
     }
     function openAdminWorkstream(bookingId) {
+      if (!hasAdminAccess) return;
       const currentView = document.querySelector(".content-view.active");
       if (currentView && currentView.id !== "chatView") chatReturnView = currentView.id;
       activeChatBookingId = bookingId;
@@ -1601,6 +1701,7 @@
       return true;
     }
     function resolveComplaint(bookingId, complaintId, action) {
+      if (!hasAdminAccess) return;
       const booking = bookings.find((item) => item.id === bookingId);
       const complaint = booking?.complaints?.find((item) => item.id === complaintId);
       if (!booking || !complaint || complaint.status !== "Open") return;
@@ -1610,6 +1711,7 @@
         providerId: booking.providerId,
         image: booking.image,
         status: booking.status,
+        timeline: booking.timeline,
         verification: booking.verification,
         pendingInvoice: booking.pendingInvoice,
         refundStatus: booking.refundStatus,
@@ -1651,7 +1753,7 @@
         booking.providerPhone = replacement.phone || "";
         booking.providerId = replacement.id;
         booking.image = replacement.image;
-        booking.status = "Pending";
+        updateBookingStatus(booking, "Pending", "नए provider के लिए booking फिर से भेजी गई");
         delete booking.verification;
         delete booking.pendingInvoice;
         complaint.resolution = `नया ${replacement.id.startsWith("demo-replacement-") ? "demo " : ""}provider भेजा गया: ${replacement.name}`;
@@ -1930,9 +2032,9 @@
       document.getElementById("modalProviderName").textContent = activeProvider.name;
       document.getElementById("modalProviderTrade").textContent = `${activeProvider.trade} · ${activeProvider.rating ? `${activeProvider.rating} ★` : "नई प्रोफ़ाइल"} · ${activeProvider.area}`;
       document.getElementById("bookingRateItem").value = rateCard[0].id;
-      const currentUser = firebaseAuth && firebaseAuth.currentUser;
+      const currentUser = getSignedInUser();
       document.getElementById("bookingCustomerName").value = currentUser && currentUser.displayName || customer.name;
-      document.getElementById("bookingAccountEmail").innerHTML = currentUser && currentUser.email
+      document.getElementById("bookingAccountEmail").innerHTML = currentUser && currentUser.email && !demoSession
         ? `<label>ईमेल (लॉगिन खाते से)</label><input type="email" value="${escapeHTML(currentUser.email)}" readonly>`
         : "";
       document.getElementById("bookingCustomerPhone").value = customer.phone;
@@ -1974,12 +2076,123 @@
     }
     function closeModal() { document.getElementById("bookingModal").classList.remove("open"); }
     function getCurrentUserBookings() {
-      const user = firebaseAuth && firebaseAuth.currentUser;
+      const user = getSignedInUser();
       return user ? bookings.filter((booking) => booking.userId === user.uid) : [];
+    }
+    function bookingTimeline(booking) {
+      if (Array.isArray(booking.timeline) && booking.timeline.length) return booking.timeline;
+      return [{
+        type: "status",
+        status: booking.status || "Pending",
+        label: "Booking requested",
+        actor: booking.customer,
+        actorId: booking.userId,
+        createdAt: booking.createdAt
+      }];
+    }
+    function appendBookingTimeline(booking, type, label, details = {}) {
+      const user = getSignedInUser();
+      const timeline = Array.isArray(booking.timeline) ? booking.timeline : [];
+      timeline.push({
+        type,
+        label,
+        status: booking.status || "Pending",
+        actor: hasAdminAccess ? "GharSeva Admin" : user?.displayName || customer.name,
+        actorId: user?.uid || "local-demo-user",
+        createdAt: new Date().toISOString(),
+        ...details
+      });
+      booking.timeline = timeline.slice(-100);
+    }
+    function formatTimelineTime(value) {
+      const date = new Date(value);
+      return Number.isNaN(date.getTime()) ? "समय उपलब्ध नहीं" : date.toLocaleString("hi-IN", { dateStyle: "medium", timeStyle: "short" });
+    }
+    function renderBookingNotifications(userBookings) {
+      const container = document.getElementById("bookingNotifications");
+      const user = getSignedInUser();
+      if (!user) {
+        container.hidden = true;
+        return;
+      }
+      const readAtKey = `gharSevaNotificationsRead:${user.uid}`;
+      const readAt = Number(loadStored(readAtKey, 0)) || 0;
+      const updates = userBookings.flatMap((booking) => bookingTimeline(booking)
+        .filter((entry) => entry.type === "schedule" || (entry.type === "status" && entry.actorId !== user.uid))
+        .map((entry) => ({ booking, entry, timestamp: new Date(entry.createdAt).getTime() })))
+        .filter((item) => Number.isFinite(item.timestamp))
+        .sort((a, b) => b.timestamp - a.timestamp);
+      const unreadCount = updates.filter((item) => item.timestamp > readAt).length;
+      container.hidden = false;
+      container.innerHTML = `<div class="section-head"><div><h2>Booking alerts ${unreadCount ? `<span class="status">${unreadCount} नई</span>` : ""}</h2><p class="page-subtitle">${unreadCount ? "आपकी बुकिंग में नए बदलाव हुए हैं।" : "Status और समय के बदलाव यहाँ दिखेंगे।"}</p></div>${unreadCount ? '<button class="small-action" type="button" onclick="markBookingNotificationsRead()">सब पढ़ लिया</button>' : ""}</div><div class="booking-notification-list">${updates.length ? updates.slice(0, 5).map(({ booking, entry }) => `<div class="booking-notification"><strong>${escapeHTML(entry.label || entry.status || "Booking अपडेट")} · ${escapeHTML(booking.id)}</strong><span>${entry.type === "schedule" ? `नया समय: ${escapeHTML(entry.date || booking.date)} · ${escapeHTML(entry.time || booking.time)}` : `स्थिति: ${escapeHTML(entry.status || booking.status || "Pending")}`} · ${formatTimelineTime(entry.createdAt)}</span></div>`).join("") : '<div class="booking-notification">अभी कोई booking update नहीं है।</div>'}</div>`;
+    }
+    function markBookingNotificationsRead() {
+      const user = getSignedInUser();
+      if (!user) return;
+      if (!saveStored(`gharSevaNotificationsRead:${user.uid}`, Date.now())) return;
+      renderBookings();
+    }
+    function updateBookingStatus(booking, status, label) {
+      if (booking.status === status) return;
+      booking.status = status;
+      if (status === "Cancelled") booking.cancelledAt = new Date().toISOString();
+      appendBookingTimeline(booking, "status", label);
+    }
+    function bookingStatusLabel(status) {
+      return ({
+        Pending: "नई booking प्राप्त हुई",
+        Accepted: "Provider ने booking स्वीकार की",
+        "In Progress": "काम शुरू हो गया",
+        Completed: "काम पूरा हो गया",
+        Rejected: "Booking provider द्वारा अस्वीकार हुई",
+        Cancelled: "ग्राहक ने booking cancel की"
+      })[status] || `स्थिति बदली: ${status}`;
+    }
+    function canCustomerManageBooking(booking) {
+      return accountRole === "customer" &&
+        booking.userId === getSignedInUser()?.uid &&
+        (booking.status === "Pending" || booking.status === "Accepted");
+    }
+    function openRescheduleModal(bookingId) {
+      const booking = bookings.find((item) => item.id === bookingId);
+      if (!booking || !canCustomerManageBooking(booking)) {
+        toast("केवल Pending या Accepted booking का समय बदला जा सकता है।");
+        return;
+      }
+      activeRescheduleBookingId = bookingId;
+      document.getElementById("rescheduleBookingLabel").textContent = `बुकिंग ${booking.id} · ${booking.provider}`;
+      const dateInput = document.getElementById("rescheduleDate");
+      const now = new Date();
+      dateInput.min = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+      dateInput.value = booking.date || dateInput.min;
+      document.getElementById("rescheduleTime").value = booking.time || "";
+      document.getElementById("rescheduleModal").classList.add("open");
+    }
+    function cancelCustomerBooking(bookingId) {
+      const booking = bookings.find((item) => item.id === bookingId);
+      if (!booking || !canCustomerManageBooking(booking)) {
+        toast("केवल Pending या Accepted booking cancel की जा सकती है।");
+        return;
+      }
+      if (!window.confirm(`बुकिंग ${booking.id} रद्द करें? Cancellation से कोई payment अपने-आप refund नहीं होगा।`)) return;
+      const previousStatus = booking.status;
+      const previousTimeline = booking.timeline;
+      updateBookingStatus(booking, "Cancelled", "ग्राहक ने booking cancel की");
+      if (!saveStored("gharSevaBookings", bookings)) {
+        booking.status = previousStatus;
+        delete booking.cancelledAt;
+        if (previousTimeline) booking.timeline = previousTimeline;
+        else delete booking.timeline;
+        return;
+      }
+      renderBookings();
+      renderAdmin();
+      toast("बुकिंग cancel हो गई। Refund के लिए support से संपर्क करें।");
     }
     function renderBookings() {
       const list = document.getElementById("bookingList");
       const userBookings = getCurrentUserBookings();
+      renderBookingNotifications(userBookings);
       if (!userBookings.length) {
         list.innerHTML = '<div class="empty-state">अभी आपकी कोई बुकिंग नहीं है। होम पर जाकर अपनी पहली सेवा बुक करें।</div>';
         return;
@@ -1988,7 +2201,8 @@
         <div class="booking-row"><div class="booking-person"><img src="${booking.image}" alt="${escapeHTML(booking.provider)} की फोटो"><div><strong>${escapeHTML(booking.category)} · ${escapeHTML(booking.provider)}</strong><span>${escapeHTML(booking.city)} · ${escapeHTML(booking.date)} · ${escapeHTML(booking.time)}</span><span class="status">${escapeHTML(booking.status || "Pending")}</span>
           ${booking.verification && accountRole === "customer" ? `<span class="otp-demo-card"><strong>${booking.verification.stage === "start" ? "काम शुरू करने का OTP" : "काम पूरा करने का OTP"}</strong><span class="otp-demo-code">${escapeHTML(booking.verification.code)}</span><span class="otp-demo-warning">यह demo code provider को केवल ${booking.verification.stage === "start" ? "काम शुरू होने से पहले" : "काम पूरा होने के बाद"} दें। SMS नहीं भेजा गया है। ${Date.now() > booking.verification.expiresAt ? "यह OTP expire हो चुका है; provider से नया code बनाने को कहें।" : ""}</span></span>` : ""}
           ${booking.review ? `<span>आपकी रेटिंग: ${"★".repeat(booking.review.rating)} · ${escapeHTML(booking.review.text)}</span>` : booking.status === "Completed" ? `<span class="review-box"><select id="reviewRating-${booking.id}" aria-label="स्टार रेटिंग"><option value="5">★★★★★</option><option value="4">★★★★</option><option value="3">★★★</option><option value="2">★★</option><option value="1">★</option></select><input id="reviewText-${booking.id}" maxlength="240" placeholder="अपना रिव्यू लिखें"><button class="small-action accept" onclick="submitReview('${booking.id}')">रिव्यू भेजें</button></span>` : ""}
-          <div class="booking-actions"><button class="small-action" onclick="openChat('${booking.id}')">💬 Job Chat</button>${booking.invoice ? `<button class="small-action" onclick="printInvoice('${booking.id}')">🧾 Invoice / PDF</button>` : ""}${accountRole === "customer" && !booking.complaints?.some((item) => item.status === "Open") ? `<button class="small-action" onclick="openComplaint('${booking.id}')">⚠ Report / Complain</button>` : booking.complaints?.some((item) => item.status === "Open") ? '<span class="small-action disabled">शिकायत review में</span>' : ""}${booking.providerPhone ? `<a class="small-action" href="tel:${encodeURIComponent(booking.providerPhone)}">📞 Provider को कॉल</a>` : '<span class="small-action disabled" title="इस demo प्रोफ़ाइल में फोन नंबर उपलब्ध नहीं है।">📞 फोन नंबर उपलब्ध नहीं</span>'}<a class="small-action" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(booking.latitude && booking.longitude ? `${booking.latitude},${booking.longitude}` : booking.address)}">📍 Map</a></div>
+          <div class="booking-actions"><button class="small-action" onclick="openChat('${booking.id}')">💬 Job Chat</button>${canCustomerManageBooking(booking) ? `<button class="small-action" onclick="openRescheduleModal('${booking.id}')">🕒 समय बदलें</button><button class="small-action" onclick="cancelCustomerBooking('${booking.id}')">बुकिंग cancel करें</button>` : ""}${booking.invoice ? `<button class="small-action" onclick="printInvoice('${booking.id}')">🧾 Invoice / PDF</button>` : ""}${accountRole === "customer" && !booking.complaints?.some((item) => item.status === "Open") ? `<button class="small-action" onclick="openComplaint('${booking.id}')">⚠ Report / Complain</button>` : booking.complaints?.some((item) => item.status === "Open") ? '<span class="small-action disabled">शिकायत review में</span>' : ""}${booking.providerPhone ? `<a class="small-action" href="tel:${encodeURIComponent(booking.providerPhone)}">📞 Provider को कॉल</a>` : '<span class="small-action disabled" title="इस demo प्रोफ़ाइल में फोन नंबर उपलब्ध नहीं है।">📞 फोन नंबर उपलब्ध नहीं</span>'}<a class="small-action" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(booking.latitude && booking.longitude ? `${booking.latitude},${booking.longitude}` : booking.address)}">📍 Map</a></div>
+          <details class="booking-timeline"><summary>Booking timeline · ${bookingTimeline(booking).length} अपडेट</summary><ol>${bookingTimeline(booking).slice().reverse().map((entry) => `<li><strong>${escapeHTML(entry.label || entry.status || "Booking update")}</strong> · ${formatTimelineTime(entry.createdAt)}${entry.type === "schedule" ? `<br>नई तारीख और समय: ${escapeHTML(entry.date || booking.date)} · ${escapeHTML(entry.time || booking.time)}` : ""}</li>`).join("")}</ol></details>
         </div></div><div class="booking-details">${formatRupees(booking.invoice ? booking.invoice.total : booking.total)}<small>${booking.invoice ? "अंतिम बिल" : "शुरुआती अनुमान"}</small><small>${escapeHTML(booking.payment)} · ${booking.payment === "Cash" ? "COD / नकद" : "online payment demo"}</small><small>स्थिति: ${escapeHTML(booking.status || "Pending")}</small></div></div>`).join("");
     }
     function submitReview(bookingId) {
@@ -2008,8 +2222,7 @@
     function renderProviderPanel() {
       if (!hasAdminAccess) return;
       const jobs = [...bookings].reverse();
-      const currentProvider = providerProfile && accountRole === "provider" ? providerProfile : null;
-      const visibleJobs = currentProvider ? jobs.filter((booking) => booking.providerId === currentProvider.id) : jobs;
+      const visibleJobs = jobs;
       const now = new Date();
       const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
       const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -2375,6 +2588,47 @@
       toast("शिकायत Admin को भेज दी गई। वे booking work-stream देखकर जवाब देंगे।");
       if (document.getElementById("chatView").classList.contains("active")) renderChat();
     });
+    document.getElementById("rescheduleForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const booking = bookings.find((item) => item.id === activeRescheduleBookingId);
+      if (!booking || !canCustomerManageBooking(booking)) {
+        toast("यह booking अब reschedule नहीं की जा सकती।");
+        document.getElementById("rescheduleModal").classList.remove("open");
+        return;
+      }
+      const date = document.getElementById("rescheduleDate").value;
+      const time = document.getElementById("rescheduleTime").value;
+      if (!date || !time || date < document.getElementById("rescheduleDate").min) {
+        toast("भविष्य की सही तारीख और समय चुनें।");
+        return;
+      }
+      if (date === booking.date && time === booking.time) {
+        document.getElementById("rescheduleModal").classList.remove("open");
+        return;
+      }
+      const previousDate = booking.date;
+      const previousTime = booking.time;
+      const previousTimeline = booking.timeline;
+      booking.date = date;
+      booking.time = time;
+      appendBookingTimeline(booking, "schedule", "ग्राहक ने booking का समय बदला", {
+        previousDate,
+        previousTime,
+        date,
+        time
+      });
+      if (!saveStored("gharSevaBookings", bookings)) {
+        booking.date = previousDate;
+        booking.time = previousTime;
+        if (previousTimeline) booking.timeline = previousTimeline;
+        else delete booking.timeline;
+        return;
+      }
+      document.getElementById("rescheduleModal").classList.remove("open");
+      activeRescheduleBookingId = null;
+      renderBookings();
+      toast("Booking का नया समय सेव हो गया।");
+    });
     document.getElementById("supportContactForm").addEventListener("submit", (event) => {
       event.preventDefault();
       const phone = document.getElementById("supportPhoneInput").value.trim();
@@ -2403,8 +2657,8 @@
       event.preventDefault();
       const booking = bookings.find((item) => item.id === activeOtpBookingId);
       const submittedOtp = document.getElementById("jobOtpInput").value;
-      if (accountRole !== "provider") {
-        document.getElementById("jobOtpStatus").textContent = "केवल provider OTP सत्यापित कर सकता है।";
+      if (!hasAdminAccess) {
+        document.getElementById("jobOtpStatus").textContent = "केवल Admin OTP सत्यापित कर सकता है।";
         return;
       }
       if (!booking || !/^\d{4}$/.test(submittedOtp)) {
@@ -2433,6 +2687,10 @@
     });
     document.getElementById("invoiceForm").addEventListener("submit", (event) => {
       event.preventDefault();
+      if (!hasAdminAccess) {
+        toast("Invoice बनाने के लिए Admin login जरूरी है।");
+        return;
+      }
       const booking = bookings.find((item) => item.id === activeInvoiceBookingId);
       const partsAmount = document.getElementById("invoicePartsAmount");
       const labourAmount = document.getElementById("invoiceLabourAmount");
@@ -2472,9 +2730,9 @@
     document.getElementById("bookingForm").addEventListener("submit", (event) => {
       event.preventDefault();
       if (!activeProvider) return;
-      const user = firebaseAuth && firebaseAuth.currentUser;
+      const user = getSignedInUser();
       if (!user || !user.email) {
-        toast("बुकिंग से पहले Firebase खाते में लॉगिन करें।");
+        toast("बुकिंग से पहले लॉगिन करें या डेमो मोड खोलें।");
         return;
       }
       const form = new FormData(event.currentTarget);
@@ -2514,6 +2772,14 @@
         total,
         providerPayout: total - commission,
         status: "Pending",
+        timeline: [{
+          type: "status",
+          status: "Pending",
+          label: "नई booking प्राप्त हुई",
+          actor: customer.name,
+          actorId: user.uid,
+          createdAt: new Date().toISOString()
+        }],
         createdAt: new Date().toISOString()
       };
       bookings.push(booking);
@@ -2539,8 +2805,8 @@
       accountRole = String(form.get("role"));
       saveStored("gharSevaRole", accountRole);
       if (accountRole === "provider") {
-        const user = firebaseAuth && firebaseAuth.currentUser;
-        if (!user || !firestoreDb) {
+        const user = getSignedInUser();
+        if (!user || (!demoSession && !firestoreDb)) {
           toast("Provider profile सभी users को दिखाने के लिए Firebase/Firestore login जरूरी है।");
           return;
         }
@@ -2566,6 +2832,14 @@
           isUserProfile: true
         };
         saveStored("gharSevaProvider", providerProfile);
+        if (demoSession) {
+          toast("डेमो provider profile इसी browser में सेव हो गई।");
+          syncCustomerDisplay();
+          renderProfile();
+          document.getElementById("citySelect").value = customer.city;
+          renderProviders();
+          return;
+        }
         try {
           await firestoreDb.collection("serviceProviders").doc(providerProfile.id).set({
             ...providerProfile,
@@ -2607,16 +2881,43 @@
     document.getElementById("providerPhotoInput").addEventListener("change", (event) => {
       const file = event.target.files[0];
       if (!file) return;
-      if (!file.type.startsWith("image/")) { toast("कृपया सही image file चुनें।"); return; }
+      if (!file.type.startsWith("image/") || file.size > 10 * 1024 * 1024) {
+        toast("कृपया 10 MB से छोटी सही image file चुनें।");
+        event.target.value = "";
+        return;
+      }
       const reader = new FileReader();
       reader.addEventListener("load", () => {
-        providerPhotoData = String(reader.result);
-        const preview = document.getElementById("providerPhotoPreview");
-        preview.src = providerPhotoData;
-        preview.style.display = "block";
-        document.getElementById("providerPhotoInput").required = false;
+        const image = new Image();
+        image.addEventListener("load", () => {
+          const maxDimension = 512;
+          const scale = Math.min(1, maxDimension / Math.max(image.naturalWidth, image.naturalHeight));
+          const canvas = document.createElement("canvas");
+          canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+          canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+          const context = canvas.getContext("2d");
+          if (!context) {
+            toast("फोटो तैयार नहीं हो सकी। दूसरी image चुनें।");
+            event.target.value = "";
+            return;
+          }
+          context.drawImage(image, 0, 0, canvas.width, canvas.height);
+          providerPhotoData = canvas.toDataURL("image/jpeg", 0.82);
+          const preview = document.getElementById("providerPhotoPreview");
+          preview.src = providerPhotoData;
+          preview.style.display = "block";
+          document.getElementById("providerPhotoInput").required = false;
+        });
+        image.addEventListener("error", () => {
+          toast("यह फोटो पढ़ी नहीं जा सकी। दूसरी image चुनें।");
+          event.target.value = "";
+        });
+        image.src = String(reader.result);
       });
-      reader.addEventListener("error", () => toast("फोटो पढ़ी नहीं जा सकी। दूसरी image चुनें।"));
+      reader.addEventListener("error", () => {
+        toast("फोटो पढ़ी नहीं जा सकी। दूसरी image चुनें।");
+        event.target.value = "";
+      });
       reader.readAsDataURL(file);
     });
     document.getElementById("loginTab").addEventListener("click", () => updateAuthMode("login"));
