@@ -8,6 +8,30 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="GharSeva">
   <title>GharSeva — भरोसेमंद घरेलू सेवाएँ</title>
+  <!-- Firebase Core SDK (ज़रूरी) -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+
+<!-- Firebase Firestore Database SDK (डेटाबेस के लिए) -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+<!-- Firebase Connection Script -->
+<script>
+  // 1. यहाँ अपनी Firebase Console से मिली Config डालें
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT_ID.appspot.com",
+    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
+
+  // 2. Firebase को शुरू करें
+  firebase.initializeApp(firebaseConfig);
+
+  // 3. Firestore Database का कनेक्शन वेरिएबल बनाएं
+  const db = firebase.firestore();
+</script>
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./icons/ghar-seva-192.png" type="image/png">
   <link rel="apple-touch-icon" href="./icons/ghar-seva-192.png">
