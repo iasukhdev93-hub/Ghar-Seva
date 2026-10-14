@@ -1,0 +1,130 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return signedIn()
+        && request.auth.token.email_verified == true
+        && request.auth.token.email == 'ia.sukhdev.93@gmail.com';
+    }
+
+    function ownsBooking(data) {
+      return signedIn()
+        && data.userId == request.auth.uid
+        && data.userEmail == request.auth.token.email;
+    }
+
+    function onlyAppends(oldItems, newItems) {
+      return oldItems is list
+        && newItems is list
+        && newItems.size() == oldItems.size() + 1
+        && newItems.hasAll(oldItems);
+    }
+
+    function appendsOwnTimelineEntry(entryType) {
+      let oldTimeline = resource.data.get('timeline', []);
+      let newTimeline = request.resource.data.timeline;
+      return onlyAppends(oldTimeline, newTimeline)
+        && newTimeline[newTimeline.size() - 1].type == entryType
+        && newTimeline[newTimeline.size() - 1].actorId == request.auth.uid;
+    }
+
+    function canCancelBooking() {
+      return ownsBooking(resource.data)
+        && resource.data.status in ['Pending', 'Accepted']
+        && request.resource.data.status == 'Cancelled'
+        && request.resource.data.userId == resource.data.userId
+        && request.resource.data.userEmail == resource.data.userEmail
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['status', 'cancelledAt', 'timeline'])
+        && request.resource.data.cancelledAt is string
+        && appendsOwnTimelineEntry('status')
+        && request.resource.data.timeline[request.resource.data.timeline.size() - 1].status == 'Cancelled';
+    }
+
+    function canRescheduleBooking() {
+      return ownsBooking(resource.data)
+        && resource.data.status in ['Pending', 'Accepted']
+        && request.resource.data.status == resource.data.status
+        && request.resource.data.userId == resource.data.userId
+        && request.resource.data.userEmail == resource.data.userEmail
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['date', 'time', 'timeline'])
+        && request.resource.data.date is string
+        && request.resource.data.time is string
+        && (request.resource.data.date != resource.data.date
+          || request.resource.data.time != resource.data.time)
+        && appendsOwnTimelineEntry('schedule')
+        && request.resource.data.timeline[request.resource.data.timeline.size() - 1].date == request.resource.data.date
+        && request.resource.data.timeline[request.resource.data.timeline.size() - 1].time == request.resource.data.time;
+    }
+
+    match /bookings/{bookingId} {
+      allow read: if isAdmin() || ownsBooking(resource.data);
+      allow create: if signedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.userEmail == request.auth.token.email
+        && request.resource.data.status == 'Pending';
+      allow update: if isAdmin()
+        || canCancelBooking()
+        || canRescheduleBooking()
+        || (
+          ownsBooking(resource.data)
+          && request.resource.data.userId == resource.data.userId
+          && request.resource.data.userEmail == resource.data.userEmail
+          && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['chat', 'complaints', 'review', 'latitude', 'longitude', 'photos'])
+          && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['chat'])
+            || (
+              request.resource.data.keys().hasAny(['chat'])
+              && onlyAppends(resource.data.get('chat', []), request.resource.data.chat)
+            ))
+          && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['complaints'])
+            || (
+              request.resource.data.keys().hasAny(['complaints'])
+              && onlyAppends(resource.data.get('complaints', []), request.resource.data.complaints)
+            ))
+          && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['photos'])
+            || (
+              request.resource.data.keys().hasAny(['photos'])
+              && onlyAppends(resource.data.get('photos', []), request.resource.data.photos)
+            ))
+          && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['review'])
+            || (
+              !resource.data.keys().hasAny(['review'])
+              && request.resource.data.review is map
+              && request.resource.data.review.rating is int
+              && request.resource.data.review.rating >= 1
+              && request.resource.data.review.rating <= 5
+              && request.resource.data.review.text is string
+              && request.resource.data.review.text.size() <= 240
+              && resource.data.status == 'Completed'
+            ))
+        );
+      allow delete: if isAdmin();
+    }
+
+    match /serviceProviders/{providerId} {
+      allow read: if true;
+      allow create: if isAdmin()
+        || (
+          signedIn()
+          && request.resource.data.ownerId == request.auth.uid
+          && request.resource.data.isUserProfile == true
+        );
+      allow update: if isAdmin()
+        || (
+          signedIn()
+          && resource.data.ownerId == request.auth.uid
+          && request.resource.data.ownerId == request.auth.uid
+          && resource.data.isUserProfile == true
+          && request.resource.data.isUserProfile == true
+        );
+      allow delete: if isAdmin();
+    }
+  }
+}
