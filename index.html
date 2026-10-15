@@ -674,7 +674,7 @@
       </div>
       <div class="section-head"><div><h2 style="font-size:19px">Customer और Provider accounts</h2><p>इस demo browser में सेव profile और provider listings।</p></div></div>
       <div class="table-wrap"><table><thead><tr><th>नाम</th><th>भूमिका</th><th>शहर</th><th>ईमेल / फोन</th><th>सेवा</th><th>मैनेज</th></tr></thead><tbody id="adminUsersTable"></tbody></table></div>
-      <div class="section-head"><div><h2 style="font-size:19px">Service provider मैनेज करें</h2><p>Demo listings या नया provider जोड़ें। बदलाव Firestore में सभी devices पर साझा होंगे।</p></div></div>
+      <div class="section-head"><div><h2 style="font-size:19px">Service provider मैनेज करें</h2><p>Demo listings या नया provider जोड़ें। बदलाव Firestore में सभी devices पर साझा होंगे। Provider केवल उसके Delete action से हटेगा।</p></div></div>
       <form class="panel profile-form" id="adminProviderForm">
         <input type="hidden" id="adminProviderId">
         <div class="field"><label for="adminProviderName">Provider का नाम</label><input id="adminProviderName" maxlength="100" required></div>
@@ -941,14 +941,24 @@
     });
     let providers = loadStored("gharSevaAdminProviders", defaultProviders);
     if (!Array.isArray(providers)) providers = defaultProviders;
-    const defaultCustomer = { name: "Priya Sharma", phone: "+91 98765 43210", city: "Jaipur", area: "जयपुर", photo: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=240&q=85" };
+    const defaultCustomer = { name: "Priya Sharma", phone: "+91 98765 43210", city: "Phalodi", area: "फलोदी", photo: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=240&q=85" };
     let customer = loadStored("gharSevaCustomer", defaultCustomer);
+    if (
+      customer.name === "Priya Sharma" &&
+      customer.phone === "+91 98765 43210" &&
+      customer.city === "Jaipur" &&
+      customer.area === "जयपुर"
+    ) {
+      customer = { ...customer, city: defaultCustomer.city, area: defaultCustomer.area };
+      saveStored("gharSevaCustomer", customer);
+    }
     if (!cities.some((city) => city.value === customer.city)) {
       customer = { ...customer, city: defaultCustomer.city, area: defaultCustomer.area };
       saveStored("gharSevaCustomer", customer);
     }
     let providerProfile = loadStored("gharSevaProvider", null);
     let cloudProviders = [];
+    let deletedProviderIds = new Set();
     let providerListingsUnsubscribe = null;
     let accountRole = loadStored("gharSevaRole", "customer");
     let providerPhotoData = providerProfile ? providerProfile.image : "";
@@ -1100,14 +1110,21 @@
         showInstallHelp();
         return;
       }
-      deferredInstallPrompt.prompt();
-      const choice = await deferredInstallPrompt.userChoice;
-      deferredInstallPrompt = null;
-      if (choice.outcome === "accepted") {
-        setInstallButtonsVisible(false);
-        toast("GharSeva install हो रहा है।");
-      } else {
-        toast("Install रद्द हुआ। आप बाद में फिर कोशिश कर सकते हैं।");
+      try {
+        const installPrompt = deferredInstallPrompt;
+        await installPrompt.prompt();
+        const choice = await installPrompt.userChoice;
+        deferredInstallPrompt = null;
+        if (choice.outcome === "accepted") {
+          setInstallButtonsVisible(false);
+          toast("GharSeva install हो रहा है।");
+        } else {
+          toast("Install रद्द हुआ। आप बाद में फिर कोशिश कर सकते हैं।");
+        }
+      } catch (error) {
+        console.error("GharSeva installation prompt failed.", error);
+        deferredInstallPrompt = null;
+        showInstallHelp();
       }
     }
     function initializeAppInstall() {
@@ -1213,9 +1230,51 @@
         setAuthMessage(firebaseAuthUnavailableMessage, true);
         return;
       }
+      const observeAuthState = () => firebaseAuth.onAuthStateChanged(async (user) => {
+        if (user) {
+          demoSession = false;
+          listenForUserBookings(user);
+          verifiedAdminUid = null;
+          try {
+            const token = await user.getIdTokenResult(true);
+            if (
+              firebaseAuth.currentUser &&
+              firebaseAuth.currentUser.uid === user.uid &&
+              token.claims.email_verified === true &&
+              typeof token.claims.email === "string" &&
+              token.claims.email.trim().toLowerCase() === ADMIN_EMAIL
+            ) {
+              verifiedAdminUid = user.uid;
+            }
+          } catch (error) {
+            console.error("Firebase ID token claims could not be refreshed.", error);
+            if (user.email && user.email.trim().toLowerCase() === ADMIN_EMAIL) {
+              toast("Admin access verify नहीं हो सका। Internet जाँचकर फिर login करें।");
+            }
+          }
+          if (!firebaseAuth.currentUser || firebaseAuth.currentUser.uid !== user.uid) return;
+          openAuthenticatedApp(user, accountRole);
+          if (hasAdminAccess) listenForAllBookings();
+          listenForProviderListings();
+        } else {
+          if (userBookingsUnsubscribe) userBookingsUnsubscribe();
+          if (allBookingsUnsubscribe) allBookingsUnsubscribe();
+          userBookingsUnsubscribe = null;
+          allBookingsUnsubscribe = null;
+          verifiedAdminUid = null;
+          hasAdminAccess = false;
+          document.getElementById("adminNavButton").hidden = true;
+          document.getElementById("providerPanelNavButton").hidden = true;
+          if (document.getElementById("providerView").classList.contains("active")) showView("homeView");
+        }
+      }, (error) => {
+        console.error("Firebase authentication state could not be read.", error);
+        setAuthMessage("लॉगिन स्थिति जाँची नहीं जा सकी। कृपया पेज फिर खोलें।", true);
+      });
       try {
         const app = window.firebase.apps.length ? window.firebase.app() : window.firebase.initializeApp(FIREBASE_CONFIG);
         firebaseAuth = app.auth();
+        listenForProviderListings();
         isFirebaseConfigured = true;
         document.getElementById("firebaseSetupNote").hidden = true;
         if (!window.firebase.analytics || typeof window.firebase.analytics.isSupported !== "function") {
@@ -1231,50 +1290,13 @@
             })
             .catch((error) => console.error("Firebase Analytics initialization failed.", error));
         }
-        firebaseAuth.onAuthStateChanged(async (user) => {
-          if (user) {
-            demoSession = false;
-            listenForUserBookings(user);
-            verifiedAdminUid = null;
-            try {
-              const token = await user.getIdTokenResult(true);
-              if (
-                firebaseAuth.currentUser &&
-                firebaseAuth.currentUser.uid === user.uid &&
-                token.claims.email_verified === true &&
-                typeof token.claims.email === "string" &&
-                token.claims.email.trim().toLowerCase() === ADMIN_EMAIL
-              ) {
-                verifiedAdminUid = user.uid;
-              }
-            } catch (error) {
-              console.error("Firebase ID token claims could not be refreshed.", error);
-              if (user.email && user.email.trim().toLowerCase() === ADMIN_EMAIL) {
-                toast("Admin access verify नहीं हो सका। Internet जाँचकर फिर login करें।");
-              }
-            }
-            if (!firebaseAuth.currentUser || firebaseAuth.currentUser.uid !== user.uid) return;
-            openAuthenticatedApp(user, accountRole);
-            if (hasAdminAccess) listenForAllBookings();
-            listenForProviderListings(user);
-          } else {
-            if (userBookingsUnsubscribe) userBookingsUnsubscribe();
-            if (allBookingsUnsubscribe) allBookingsUnsubscribe();
-            if (providerListingsUnsubscribe) providerListingsUnsubscribe();
-            userBookingsUnsubscribe = null;
-            allBookingsUnsubscribe = null;
-            providerListingsUnsubscribe = null;
-            cloudProviders = [];
-            verifiedAdminUid = null;
-            hasAdminAccess = false;
-            document.getElementById("adminNavButton").hidden = true;
-            document.getElementById("providerPanelNavButton").hidden = true;
-            if (document.getElementById("providerView").classList.contains("active")) showView("homeView");
-          }
-        }, (error) => {
-          console.error("Firebase authentication state could not be read.", error);
-          setAuthMessage("लॉगिन स्थिति जाँची नहीं जा सकी। कृपया पेज फिर खोलें।", true);
-        });
+        firebaseAuth.setPersistence(window.firebase.auth.Auth.Persistence.LOCAL)
+          .then(observeAuthState)
+          .catch((error) => {
+            console.error("Firebase local login persistence could not be enabled.", error);
+            setAuthMessage("इस browser में login याद नहीं रखा जा सका। Browser storage चालू करें; अभी login स्थिति जाँची जा रही है।", true);
+            observeAuthState();
+          });
       } catch (error) {
         console.error("Firebase Auth initialization failed.", error);
         firebaseAuthUnavailableMessage = `Firebase Auth initialize नहीं हुआ (${error.code || "config error"})। सही Firebase project की Web App config जाँचें और पेज reload करें।`;
@@ -1351,7 +1373,7 @@
         toast("सभी bookings लोड नहीं हुईं। Firebase Console में firestore.rules publish करें।");
       });
     }
-    function listenForProviderListings(user) {
+    function listenForProviderListings() {
         if (!firestoreDb) {
           if (!window.firebase.firestore) {
             console.error("Firebase Firestore SDK did not load.");
@@ -1363,11 +1385,22 @@
         if (providerListingsUnsubscribe) providerListingsUnsubscribe();
         providerListingsUnsubscribe = firestoreDb.collection("serviceProviders")
           .onSnapshot((snapshot) => {
-            cloudProviders = snapshot.docs.map((document) => ({
+            const storedProviders = snapshot.docs.map((document) => ({
               ...document.data(),
               id: document.id
-            })).filter((provider) => provider.name && provider.category && provider.city && Number.isFinite(Number(provider.price)));
-            const ownProfile = cloudProviders.find((provider) => provider.ownerId === user.uid && provider.isUserProfile);
+            }));
+            deletedProviderIds = new Set(storedProviders
+              .filter((provider) => provider.isDeleted === true)
+              .map((provider) => provider.id));
+            cloudProviders = storedProviders.filter((provider) =>
+              provider.isDeleted !== true &&
+              provider.name &&
+              provider.category &&
+              provider.city &&
+              Number.isFinite(Number(provider.price))
+            );
+            const user = firebaseAuth && firebaseAuth.currentUser;
+            const ownProfile = user && cloudProviders.find((provider) => provider.ownerId === user.uid && provider.isUserProfile);
             if (ownProfile) {
               providerProfile = ownProfile;
               providerPhotoData = ownProfile.image || "";
@@ -1510,7 +1543,7 @@
       const merged = new Map();
       [...providers, ...(providerProfile ? [providerProfile] : []), ...cloudProviders]
         .forEach((provider) => merged.set(provider.id, provider));
-      return [...merged.values()];
+      return [...merged.values()].filter((provider) => !deletedProviderIds.has(provider.id));
     }
     function getProviderRating(provider) {
       const reviews = loadStored("gharSevaReviews", []).filter((review) => review.providerId === provider.id);
@@ -2406,7 +2439,7 @@
         <td>${escapeHTML(cities.find((city) => city.value === provider.city)?.label || provider.city)} · ${escapeHTML(provider.area || "")}</td>
         <td>${escapeHTML(provider.phone || "—")}</td>
         <td>${formatRupees(provider.price)}</td>
-        <td><button class="admin-control" onclick="editAdminProvider('${escapeHTML(provider.id)}')">Edit</button></td></tr>`).join("");
+        <td><button class="admin-control" onclick="editAdminProvider('${escapeHTML(provider.id)}')">Edit</button> <button class="admin-control" onclick="deleteAdminProvider('${escapeHTML(provider.id)}')">Delete</button></td></tr>`).join("");
       document.getElementById("adminCategoriesTable").innerHTML = categories.map((category) => {
         const template = providerTemplates.find((item) => item.category === category.id);
         const isCustom = customCategories.some((item) => item.category.id === category.id);
@@ -2422,33 +2455,61 @@
     }
     function removeCategory(categoryId) {
       if (!hasAdminAccess || !customCategories.some((item) => item.category.id === categoryId)) return;
+      if (getAllProviders().some((provider) => provider.category === categoryId)) {
+        toast("इस category में provider listings हैं। पहले Admin provider सूची से हर listing को अलग से Delete करें।");
+        return;
+      }
       categories = categories.filter((category) => category.id !== categoryId);
       providerTemplates = providerTemplates.filter((template) => template.category !== categoryId);
-      providers = providers.filter((provider) => provider.category !== categoryId);
-      const removedCloudProviders = cloudProviders.filter((provider) => provider.category === categoryId);
-      cloudProviders = cloudProviders.filter((provider) => provider.category !== categoryId);
-      if (firestoreDb) {
-        Promise.all(removedCloudProviders.map((provider) =>
-          firestoreDb.collection("serviceProviders").doc(provider.id).delete()
-        )).catch((error) => {
-          console.error("Removed category provider listings could not be deleted from Firestore.", error);
-          toast("कुछ provider listings Firebase से नहीं हट सकीं। Firestore rules जाँचें।");
-        });
-      }
       customCategories = customCategories.filter((item) => item.category.id !== categoryId);
-      if (providerProfile && providerProfile.category === categoryId) {
-        providerProfile = null;
-        providerPhotoData = "";
-        localStorage.removeItem("gharSevaProvider");
-      }
       if (selectedCategory === categoryId) selectedCategory = "";
       saveStored("gharSevaCustomCategories", customCategories);
-      saveStored("gharSevaAdminProviders", providers);
       populateCitySelectors();
       renderCategories();
       renderProviders();
       renderAdmin();
       toast("Custom service category हटा दी गई।");
+    }
+    async function deleteAdminProvider(providerId) {
+      if (!hasAdminAccess) return;
+      const currentUser = firebaseAuth?.currentUser;
+      if (!currentUser || !isAdminUser(currentUser)) {
+        toast("Provider हटाने के लिए verified Admin Firebase account में दोबारा login करें।");
+        return;
+      }
+      const provider = getAllProviders().find((item) => item.id === providerId);
+      if (!provider) {
+        toast("यह provider profile नहीं मिली।");
+        return;
+      }
+      if (!window.confirm(`${provider.name} (${provider.city}) को provider listings से हटाएँ?`)) return;
+      try {
+        firestoreDb = firestoreDb || window.firebase.firestore();
+        await firestoreDb.collection("serviceProviders").doc(providerId).set({
+          isDeleted: true,
+          deletedAt: new Date().toISOString(),
+          deletedBy: currentUser.uid
+        });
+      } catch (error) {
+        console.error("Provider listing could not be deleted from Firestore.", error);
+        const code = error && error.code ? String(error.code).replace(/^firestore\//, "") : "";
+        toast(code === "permission-denied"
+          ? "Firebase ने provider हटाने की अनुमति नहीं दी। firestore.rules publish करें और Admin verification जाँचें।"
+          : `Provider Firebase से नहीं हटाया जा सका${code ? ` (${code})` : ""}। Internet और Firestore rules जाँचें।`);
+        return;
+      }
+      deletedProviderIds.add(providerId);
+      cloudProviders = cloudProviders.filter((item) => item.id !== providerId);
+      providers = providers.filter((item) => item.id !== providerId);
+      if (providerProfile?.id === providerId) {
+        providerProfile = null;
+        providerPhotoData = "";
+        saveStored("gharSevaProvider", null);
+      }
+      saveStored("gharSevaAdminProviders", providers);
+      renderProviders();
+      renderAdmin();
+      toast("Provider listing Firebase से हटा दी गई।");
     }
 
     document.getElementById("searchForm").addEventListener("submit", (event) => { event.preventDefault(); selectedCategory = ""; renderCategories(); renderProviders(); document.querySelector(".service-head").scrollIntoView({ behavior: "smooth", block: "start" }); });
@@ -2568,6 +2629,7 @@
       try {
         await firestoreDb.collection("serviceProviders").doc(provider.id).set({
           ...provider,
+          createdAt: existing?.createdAt || new Date().toISOString(),
           updatedAt: new Date().toISOString()
         });
       } catch (error) {
@@ -2612,7 +2674,9 @@
       }
       renderProviders();
       renderAdmin();
-      toast(providerId ? `Provider update होकर ${provider.city} की listing में दिख रहा है।` : `नया provider ${provider.city} की listing में जोड़ दिया गया।`);
+      toast(providerId
+        ? `Provider Firebase में स्थायी रूप से अपडेट होकर ${provider.city} की listing में दिख रहा है।`
+        : `नया provider Firebase में स्थायी रूप से सेव होकर ${provider.city} की listing में जोड़ दिया गया।`);
     });
     document.getElementById("adminProviderCancel").addEventListener("click", resetAdminProviderForm);
     document.getElementById("categoryForm").addEventListener("submit", (event) => {
