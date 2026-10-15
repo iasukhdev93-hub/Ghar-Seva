@@ -177,7 +177,7 @@
     .payment-option { border: 1px solid #dfe5e2; border-radius: 10px; padding: 10px 7px; text-align: center; font-size: 11px; cursor: pointer; color: #4c5752; }
     .payment-option input { accent-color: var(--green); }
     .modal-submit { width: 100%; padding: 13px; margin-top: 16px; font-size: 13px; }
-    .demo-disclaimer { color: var(--muted); font-size: 10px; line-height: 1.5; margin: 10px 0 0; }
+    .feature-note { color: var(--muted); font-size: 10px; line-height: 1.5; margin: 10px 0 0; }
     .service-details { color: #53605a; font-size: 13px; line-height: 1.65; }
     .service-details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin: 15px 0; }
     .service-detail-chip { border-radius: 10px; background: #f4f8f5; padding: 11px; font-size: 11px; }
@@ -222,9 +222,9 @@
     .invoice-calculation { display: grid; gap: 6px; padding-top: 10px; border-top: 1px solid var(--line); }
     .invoice-calculation .summary-line { margin: 2px 0; }
     .invoice-calculation .summary-line.total { padding-top: 9px; }
-    .otp-demo-card { display: grid; gap: 5px; margin: 9px 0; padding: 10px 12px; border: 1px solid #f0dfb5; border-radius: 10px; background: #fff9ea; color: #684b16; font-size: 11px; }
-    .otp-demo-code { font-size: 20px; font-weight: 900; letter-spacing: 5px; }
-    .otp-demo-warning { line-height: 1.5; color: #7b6440; }
+    .otp-code-card { display: grid; gap: 5px; margin: 9px 0; padding: 10px 12px; border: 1px solid #f0dfb5; border-radius: 10px; background: #fff9ea; color: #684b16; font-size: 11px; }
+    .otp-code-value { font-size: 20px; font-weight: 900; letter-spacing: 5px; }
+    .otp-code-note { line-height: 1.5; color: #7b6440; }
     .otp-input { width: 100%; padding: 13px; border: 1px solid #dfe5e2; border-radius: 10px; text-align: center; font-size: 24px; font-weight: 800; letter-spacing: 10px; }
     .otp-status { min-height: 16px; margin: 0; color: #a33a30; font-size: 11px; }
     .support-grid, .help-faq { display: grid; gap: 12px; margin-top: 20px; }
@@ -272,7 +272,7 @@
     .chat-panel .chat-log { flex: 1; min-height: 360px; max-height: none; padding: 16px; gap: 11px; }
     .chat-message { max-width: min(82%, 460px); padding: 10px 13px; }
     .chat-message p { font-size: 13px; }
-    .chat-demo-note { margin: 9px 0 0; color: var(--muted); font-size: 10px; line-height: 1.5; }
+    .chat-storage-note { margin: 9px 0 0; color: var(--muted); font-size: 10px; line-height: 1.5; }
     .chat-panel .chat-form { margin-top: 9px; }
     .chat-panel .chat-form input { font-size: 14px; }
     .chat-booking-card { min-width: 0; align-self: start; }
@@ -471,7 +471,7 @@
     .chat-message { font-size: 14px; }
     .chat-message strong { font-size: 12px; }
     .chat-message time { font-size: 11px; }
-    .chat-tool-status, .chat-demo-note, .demo-disclaimer, .auth-note { font-size: 12px; }
+    .chat-tool-status, .chat-storage-note, .feature-note, .auth-note { font-size: 12px; }
     .profile-card p, .install-modal-copy, .invoice-payment { font-size: 14px; }
     .rate-card-note, .rate-card-line { font-size: 13px; }
     .help-faq summary { font-size: 15px; }
@@ -516,7 +516,7 @@
         <div class="hero-content">
           <span class="eyebrow"><span class="eyebrow-dot"></span>आपके शहर की भरोसेमंद सेवा</span>
           <h1>घर की हर जरूरत,<br>अब बस एक क्लिक दूर।</h1>
-          <p>सत्यापित स्थानीय प्रोफेशनल्स। सही कीमत। भरोसेमंद सेवा।</p>
+          <p>स्थानीय सेवा प्रोफ़ाइलें। कीमत और जानकारी बुकिंग से पहले जाँचें।</p>
           <form class="hero-search" id="searchForm">
             <input class="search-input" id="searchInput" type="search" placeholder="कौन-सी सेवा चाहिए? जैसे AC रिपेयर" aria-label="सेवा खोजें">
             <select class="city-select" id="citySelect" aria-label="राजस्थान का शहर चुनें"></select>
@@ -532,7 +532,7 @@
         <div class="trust-item"><span class="trust-icon">⌂</span><div><strong>शहरों में सेवा</strong><span>स्थानीय सेवा कैटेगरी खोजें</span></div></div>
         <div class="trust-item"><span class="trust-icon">₹</span><div><strong>पारदर्शी कीमतें</strong><span>पहले से जानें कितना खर्च</span></div></div>
         <div class="trust-item"><span class="trust-icon">♡</span><div><strong>सुरक्षित बुकिंग</strong><span>हर कदम पर सहायता</span></div></div>
-        <div class="trust-item"><span class="trust-icon">★</span><div><strong>रेटिंग और रिव्यू</strong><span>डेमो डेटा · लाइव पर ग्राहक रिव्यू</span></div></div>
+        <div class="trust-item"><span class="trust-icon">★</span><div><strong>रेटिंग और रिव्यू</strong><span>बुकिंग पूरी होने पर अपनी रेटिंग दें</span></div></div>
       </section>
 
       <section>
@@ -542,7 +542,7 @@
 
       <section>
         <div class="section-head service-head">
-          <div><h2 id="providerHeading">फलोदी में लोकप्रिय प्रोफेशनल्स</h2><p id="providerSubheading">डेमो प्रोफाइलें · असली पार्टनर जुड़ने बाकी हैं।</p></div>
+          <div><h2 id="providerHeading">फलोदी में लोकप्रिय प्रोफेशनल्स</h2><p id="providerSubheading">प्रोफाइलें · असली पार्टनर जुड़ने बाकी हैं।</p></div>
           <div class="filters">
             <select class="filter-select" id="sortSelect" aria-label="सॉर्ट करें"><option value="recommended">अनुशंसित</option><option value="rating">सबसे अच्छी रेटिंग</option><option value="price">कम कीमत पहले</option></select>
             <select class="filter-select" id="ratingSelect" aria-label="न्यूनतम रेटिंग"><option value="0">सभी रेटिंग</option><option value="4.8">4.8+ रेटिंग</option><option value="4.9">4.9+ रेटिंग</option></select>
@@ -560,11 +560,11 @@
       <div class="panel"><div class="booking-list" id="bookingList"></div></div>
       <section class="panel support-grid" aria-label="ग्राहक सहायता">
         <div><h2 style="font-size:18px;margin:0">Customer Help & Complaint</h2><p class="page-subtitle">समस्या होने पर booking में Report / Complain दबाएँ। सामान्य सवालों के जवाब और support संपर्क यहाँ उपलब्ध हैं।</p>
-          <div class="support-links"><button type="button" class="small-action" onclick="openChat()">💬 Support chat</button><a class="small-action support-phone-link" hidden>📞 Customer care को कॉल</a><a class="small-action support-whatsapp-link" target="_blank" rel="noopener" hidden>WhatsApp support</a><span id="supportContactUnavailable" class="demo-disclaimer">Call / WhatsApp नंबर Admin settings में configure करें।</span></div>
+          <div class="support-links"><button type="button" class="small-action" onclick="openChat()">💬 Support chat</button><a class="small-action support-phone-link" hidden>📞 Customer care को कॉल</a><a class="small-action support-whatsapp-link" target="_blank" rel="noopener" hidden>WhatsApp support</a><span id="supportContactUnavailable" class="feature-note">Call / WhatsApp नंबर Admin settings में configure करें।</span></div>
         </div>
         <div class="help-faq">
           <details><summary>बुकिंग cancel या reschedule कैसे करें?</summary><p>Pending या Accepted booking को “Cancel booking” या “समय बदलें” बटन से manage करें। In Progress booking के लिए Job Chat से support से संपर्क करें। Cancellation से payment refund अपने-आप नहीं होता।</p></details>
-          <details><summary>Payment कट गया पर booking नहीं हुई तो क्या करें?</summary><p>यह demo किसी असली online payment को process नहीं करता। असली app में payment reference ID संभालकर support chat में booking ID सहित शिकायत भेजें—इस demo में सीधे Report / Complain इस्तेमाल करें।</p></details>
+          <details><summary>Payment कट गया पर booking नहीं हुई तो क्या करें?</summary><p>इस ऐप में UPI / कार्ड भुगतान अभी उपलब्ध नहीं है। COD booking में कोई समस्या हो, तो booking ID सहित Report / Complain भेजें।</p></details>
           <details><summary>सर्विसमैन देर से आए तो क्या करें?</summary><p>Booking के Job Chat से provider को संपर्क करें या Report / Complain में “Provider समय पर नहीं आया” चुनें। शिकायत Admin dashboard में alert होगी।</p></details>
           <details><summary>काम खराब हो या ज्यादा पैसे माँगे जाएँ?</summary><p>Job Chat और invoice सुरक्षित रखें, अतिरिक्त payment न करें जिस पर सहमति न हो, और booking पर Report / Complain भेजें। Admin work-stream की समीक्षा कर सकता है।</p></details>
         </div>
@@ -580,7 +580,7 @@
         <section class="panel chat-panel" aria-label="संदेश बातचीत">
           <div class="chat-thread-head"><img id="chatProviderImage" src="" alt=""><div><strong id="chatParticipantName"></strong><span id="chatParticipantRole"></span></div><span class="status" id="chatBookingStatus"></span></div>
           <div class="chat-log" id="chatLog" role="log" aria-live="polite" aria-relevant="additions text"></div>
-          <p class="chat-demo-note" id="chatDemoNote">Demo chat और फोटो इसी browser में सेव होती हैं; दूसरे डिवाइस पर live संदेश के लिए backend आवश्यक है।</p>
+          <p class="chat-storage-note" id="chatStorageNote">बुकिंग चैट और फोटो इसी browser में सेव होती हैं; दूसरे डिवाइस पर संदेश साझा करने के लिए server sync आवश्यक है।</p>
           <div class="chat-tools" id="chatTools">
             <button class="small-action" id="shareChatLocation" type="button">📍 अपनी live location शेयर करें</button>
             <label class="small-action photo-upload-action" for="beforePhotoInput">📷 काम से पहले की फोटो</label>
@@ -608,13 +608,13 @@
     <section id="providerView" class="content-view">
       <h1 class="page-title">Service Partner Panel</h1><p class="page-subtitle">जॉब रिक्वेस्ट संभालें, ग्राहक से संपर्क करें और अपनी कमाई देखें।</p>
       <div class="admin-stats">
-        <div class="stat-card"><span>आज के पूरे काम</span><strong id="providerTodayJobs">0</strong><em>डेमो बुकिंग हिसाब</em></div>
+        <div class="stat-card"><span>आज के पूरे काम</span><strong id="providerTodayJobs">0</strong><em>आज की बुकिंग के आधार पर</em></div>
         <div class="stat-card"><span>आज की कमाई</span><strong id="providerTodayEarnings">₹0</strong><em>कमीशन के बाद</em></div>
         <div class="stat-card"><span>इस हफ्ते पूरे काम</span><strong id="providerWeekJobs">0</strong><em>सोमवार से आज तक</em></div>
         <div class="stat-card"><span>इस हफ्ते की कमाई</span><strong id="providerWeekEarnings">₹0</strong><em>कमीशन के बाद</em></div>
       </div>
       <div class="complaint-alert" id="complaintAlert" role="status" aria-live="polite"></div>
-      <div class="section-head"><div><h2 style="font-size:19px">Customer complaints & disputes</h2><p>नई शिकायतों की समीक्षा करें, पूरी work-stream देखें और demo resolution दर्ज करें।</p></div></div>
+      <div class="section-head"><div><h2 style="font-size:19px">Customer complaints & disputes</h2><p>नई शिकायतों की समीक्षा करें, पूरी work-stream देखें और समाधान दर्ज करें।</p></div></div>
       <div class="table-wrap"><table><thead><tr><th>स्थिति</th><th>बुकिंग / कारण</th><th>ग्राहक</th><th>Provider</th><th>शिकायत</th><th>समाधान</th></tr></thead><tbody id="adminComplaintsTable"></tbody></table></div>
       <div class="section-head"><div><h2 style="font-size:19px">जॉब रिक्वेस्ट</h2><p>ग्राहक की बुकिंग स्वीकारें, पूरी करें या ग्राहक से संपर्क करें।</p></div></div>
       <div class="panel"><div class="booking-list" id="providerJobList"></div></div>
@@ -639,7 +639,7 @@
             <div class="field full"><label for="providerBio">अपने काम के बारे में</label><textarea id="providerBio" name="providerBio" rows="3" maxlength="300" placeholder="अपना अनुभव, काम और खासियत बताएं"></textarea></div>
             <div class="field full"><label for="providerPhotoInput">Service provider प्रोफ़ाइल फोटो · upload या बदलें</label><input id="providerPhotoInput" type="file" accept="image/*"><img id="providerPhotoPreview" class="provider-photo-preview" src="" alt="Provider फोटो preview" style="display:none"></div>
             <p class="field full" id="providerProfileSaveStatus" role="status" aria-live="polite" hidden></p>
-            <p class="field full" style="color:var(--muted);font-size:11px;margin:0">Demo profile अभी केवल इसी ब्राउज़र में सेव होगी। असली ग्राहक bookings लेने से पहले अपनी जानकारी सही भरें।</p>
+            <p class="field full" style="color:var(--muted);font-size:11px;margin:0">Provider profile साझा करने के लिए Firebase खाते में लॉगिन करें। अपनी संपर्क जानकारी और सेवा विवरण सही भरें।</p>
           </div>
           <input type="file" id="photoInput" accept="image/*" hidden>
           <div class="form-actions"><button class="primary-btn" type="submit">बदलाव सेव करें</button></div>
@@ -650,8 +650,8 @@
     <section id="adminView" class="content-view">
       <h1 class="page-title">Admin डैशबोर्ड</h1><p class="page-subtitle">बुकिंग, भुगतान और प्लेटफ़ॉर्म कमीशन का सारांश।</p>
       <div class="admin-stats">
-        <div class="stat-card"><span>कुल बुकिंग</span><strong id="adminBookings">0</strong><em>इस डेमो में</em></div>
-        <div class="stat-card"><span>कुल बुकिंग मूल्य</span><strong id="adminGross">₹0</strong><em>डेमो ऑर्डर मूल्य</em></div>
+        <div class="stat-card"><span>कुल बुकिंग</span><strong id="adminBookings">0</strong><em>दर्ज बुकिंग</em></div>
+        <div class="stat-card"><span>कुल बुकिंग मूल्य</span><strong id="adminGross">₹0</strong><em>बुकिंग का कुल मूल्य</em></div>
         <div class="stat-card"><span>अनुमानित कमीशन</span><strong id="adminCommission">₹0</strong><em>हर बुकिंग का 10%</em></div>
         <div class="stat-card"><span>सर्विस पार्टनर को</span><strong id="adminPayout">₹0</strong><em>कमीशन के बाद</em></div>
       </div>
@@ -672,9 +672,9 @@
           <div class="form-actions"><button class="primary-btn" type="submit">Category जोड़ें</button></div>
         </form>
       </div>
-      <div class="section-head"><div><h2 style="font-size:19px">Customer और Provider accounts</h2><p>इस demo browser में सेव profile और provider listings।</p></div></div>
+      <div class="section-head"><div><h2 style="font-size:19px">Customer और Provider accounts</h2><p>ग्राहक profile इस browser में और provider listings Firebase में सेव हैं।</p></div></div>
       <div class="table-wrap"><table><thead><tr><th>नाम</th><th>भूमिका</th><th>शहर</th><th>ईमेल / फोन</th><th>सेवा</th><th>मैनेज</th></tr></thead><tbody id="adminUsersTable"></tbody></table></div>
-      <div class="section-head"><div><h2 style="font-size:19px">Service provider मैनेज करें</h2><p>Demo listings या नया provider जोड़ें। बदलाव Firestore में सभी devices पर साझा होंगे। Provider केवल उसके Delete action से हटेगा।</p></div></div>
+      <div class="section-head"><div><h2 style="font-size:19px">Service provider मैनेज करें</h2><p>शुरुआती उदाहरण प्रोफ़ाइलें प्रबंधित करें या नया provider जोड़ें। बदलाव Firestore में सभी devices पर साझा होंगे। Provider केवल उसके Delete action से हटेगा।</p></div></div>
       <form class="panel profile-form" id="adminProviderForm">
         <input type="hidden" id="adminProviderId">
         <div class="field"><label for="adminProviderName">Provider का नाम</label><input id="adminProviderName" maxlength="100" required></div>
@@ -689,25 +689,25 @@
         <div class="form-actions"><button class="primary-btn" type="submit" id="adminProviderSave">Provider सेव करें</button><button class="small-action" type="button" id="adminProviderCancel" hidden>Edit रद्द करें</button></div>
       </form>
       <div class="table-wrap"><table><thead><tr><th>नाम</th><th>सेवा</th><th>शहर / इलाका</th><th>फोन / ईमेल</th><th>कीमत</th><th>मैनेज</th></tr></thead><tbody id="adminProvidersTable"></tbody></table></div>
-      <div class="section-head"><div><h2 style="font-size:19px">Service categories</h2><p>नई category जोड़ें या demo category हटाएँ।</p></div></div>
+      <div class="section-head"><div><h2 style="font-size:19px">Service categories</h2><p>नई category जोड़ें या कस्टम category हटाएँ।</p></div></div>
       <div class="table-wrap"><table><thead><tr><th>सेवा</th><th>शुरुआती कीमत</th><th>एक्शन</th></tr></thead><tbody id="adminCategoriesTable"></tbody></table></div>
       <div class="section-head"><div><h2 style="font-size:19px">Customer support संपर्क</h2><p>कॉल और WhatsApp के लिए अपना verified business number सेट करें।</p></div></div>
       <form class="panel profile-form" id="supportContactForm">
         <div class="field"><label for="supportPhoneInput">Customer care फोन (country code सहित)</label><input id="supportPhoneInput" type="tel" inputmode="tel" placeholder="+91 98765 43210"></div>
         <div class="field"><label for="supportWhatsappInput">WhatsApp फोन (country code सहित)</label><input id="supportWhatsappInput" type="tel" inputmode="tel" placeholder="+91 98765 43210"></div>
         <div class="form-actions"><button class="primary-btn" type="submit">Support नंबर सेव करें</button></div>
-        <p class="demo-disclaimer">ये संपर्क केवल इसी browser में सेव होंगे; production में admin access और verified business contacts सुरक्षित server पर रखें।</p>
+        <p class="feature-note">ये संपर्क इसी browser में सेव होंगे। सभी devices पर साझा करने के लिए सुरक्षित server storage आवश्यक है।</p>
       </form>
-      <p class="commission-note">नोट: यह फ्रंटएंड डेमो रिपोर्ट है; कमीशन राशि अनुमानित है। असली भुगतान, कमीशन सेटलमेंट और टैक्स के लिए सुरक्षित backend तथा payment gateway जोड़ना आवश्यक है।</p>
+      <p class="commission-note">नोट: कमीशन राशि अनुमानित है। असली भुगतान, कमीशन सेटलमेंट और टैक्स के लिए सुरक्षित backend तथा payment gateway जोड़ना आवश्यक है।</p>
     </section>
   </main>
 
-  <footer><div class="wrap footer-inner"><span>© 2026 GharSeva · भारत के घरों के लिए बनाया गया</span><span>41 राजस्थान जिला मुख्यालय　·　डेमो प्रोफाइलें　·　डेमो बुकिंग</span></div></footer>
+  <footer><div class="wrap footer-inner"><span>© 2026 GharSeva · भारत के घरों के लिए बनाया गया</span><span>41 राजस्थान जिला मुख्यालय　·　सेवा प्रोफ़ाइलें　·　ऑनलाइन बुकिंग</span></div></footer>
   <div class="modal-backdrop" id="providerProfileModal" role="dialog" aria-modal="true" aria-labelledby="providerProfileName">
     <div class="modal">
       <div class="modal-head"><div><h2>सेवा प्रोफेशनल प्रोफ़ाइल</h2><span style="font-size:12px;color:var(--muted)">काम बुक करने से पहले जानें अपने एक्सपर्ट को।</span></div><button class="close-btn" type="button" data-close aria-label="बंद करें">×</button></div>
       <div style="text-align:center"><img id="profileProviderImage" src="" alt="" style="width:112px;height:112px;border-radius:50%;object-fit:cover;border:4px solid #edf6f1"><h3 id="providerProfileName" style="margin:12px 0 4px"></h3><span id="providerProfileTrade" style="font-size:13px;color:var(--muted)"></span></div>
-      <div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:15px 0"><span class="status">डेमो प्रोफ़ाइल</span><span class="status" id="providerProfileRating"></span><span class="status" id="providerProfileLocation"></span></div>
+      <div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:15px 0"><span class="status">सेवा प्रोफ़ाइल</span><span class="status" id="providerProfileRating"></span><span class="status" id="providerProfileLocation"></span></div>
       <p id="providerProfileBio" style="color:#56615d;font-size:13px;line-height:1.7;text-align:center;margin:14px 0 18px"></p>
       <div class="service-details-grid"><div class="service-detail-chip"><strong>सेवा का समय</strong><br><span id="providerProfileDuration">जाँच के अनुसार</span></div><div class="service-detail-chip"><strong>सेवा क्षेत्र</strong><br><span id="providerProfileArea">स्थानीय शहर</span></div><div class="service-detail-chip"><strong>कीमत</strong><br><span id="providerProfilePriceDetail"></span></div><div class="service-detail-chip"><strong>श्रेणी</strong><br><span id="providerProfileCategory"></span></div></div>
       <div class="rate-card-box" id="providerRateCard"></div>
@@ -730,9 +730,9 @@
           <input type="hidden" id="bookingLatitude" name="latitude"><input type="hidden" id="bookingLongitude" name="longitude">
           <div class="field full"><label>भुगतान का तरीका</label>
             <div class="payment-options">
-              <label class="payment-option"><input type="radio" name="payment" value="UPI" checked> UPI · GPay / PhonePe / Paytm</label>
-              <label class="payment-option"><input type="radio" name="payment" value="Card"> कार्ड · demo</label>
-              <label class="payment-option"><input type="radio" name="payment" value="Cash"> काम के बाद नकद (COD)</label>
+              <label class="payment-option"><input type="radio" name="payment" value="UPI" disabled> UPI · अभी उपलब्ध नहीं</label>
+              <label class="payment-option"><input type="radio" name="payment" value="Card" disabled> कार्ड · अभी उपलब्ध नहीं</label>
+              <label class="payment-option"><input type="radio" name="payment" value="Cash" checked> काम के बाद नकद (COD)</label>
             </div>
           </div>
         </div>
@@ -745,7 +745,7 @@
           <div class="coupon-row"><input id="couponInput" placeholder="कूपन कोड (FESTIVE10 / GHARSEVA50)" aria-label="कूपन कोड"><button type="button" id="applyCoupon">कूपन लगाएँ</button></div><div class="coupon-message" id="couponMessage"></div>
         </div>
         <button class="primary-btn modal-submit" type="submit">बुकिंग की पुष्टि करें</button>
-        <p class="demo-disclaimer">पेमेंट विकल्प अभी demo हैं—UPI / कार्ड से कोई असली भुगतान नहीं होगा। COD का भुगतान सीधे काम के बाद provider को दें। लाइव पेमेंट के लिए सुरक्षित backend और payment gateway जरूरी है।</p>
+        <p class="feature-note">अभी केवल COD उपलब्ध है। भुगतान सीधे काम के बाद provider को दें। ऑनलाइन पेमेंट चालू करने के लिए सुरक्षित backend और payment gateway जरूरी है।</p>
       </form>
     </div>
   </div>
@@ -758,7 +758,7 @@
         <div class="field"><label for="invoicePartsAmount">Parts की कुल कीमत (₹)</label><input id="invoicePartsAmount" type="number" min="0" max="1000000" step="1" value="0" required></div>
         <div class="field"><label for="invoiceLabourAmount">Labour charge (₹)</label><input id="invoiceLabourAmount" type="number" min="0" max="1000000" step="1" required></div>
         <div class="invoice-calculation"><div class="summary-line"><span>Parts</span><strong id="invoicePartsPreview">₹0</strong></div><div class="summary-line"><span>Labour</span><strong id="invoiceLabourPreview">₹0</strong></div><div class="summary-line"><span>कूपन छूट</span><strong id="invoiceDiscountPreview">−₹0</strong></div><div class="summary-line total"><span>ग्राहक से कुल देय</span><strong id="invoiceTotalPreview">₹0</strong></div></div>
-        <p class="demo-disclaimer">इनवॉइस चैट में सेव होगा। UPI / कार्ड भुगतान अभी gateway से process नहीं होता; COD ग्राहक provider को सीधे देगा।</p>
+        <p class="feature-note">इनवॉइस चैट में सेव होगा। UPI / कार्ड भुगतान अभी उपलब्ध नहीं है; COD ग्राहक provider को सीधे देगा।</p>
         <button class="primary-btn modal-submit" type="submit">Final बिल बनाएँ और completion OTP लें</button>
       </form>
     </div>
@@ -770,9 +770,9 @@
         <p class="invoice-estimate" id="jobOtpInstructions"></p>
         <div class="field"><label for="jobOtpInput">ग्राहक द्वारा साझा किया गया 4-अंकों का OTP</label><input class="otp-input" id="jobOtpInput" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{4}" maxlength="4" required></div>
         <p class="otp-status" id="jobOtpStatus" role="status" aria-live="polite"></p>
-        <p class="demo-disclaimer">Demo mode: OTP ग्राहक के booking पेज पर दिखेगा; SMS नहीं भेजा जाता। असली फोन OTP, expiry और सुरक्षित verification के लिए server तथा SMS gateway अनिवार्य हैं।</p>
+        <p class="feature-note">OTP ग्राहक के booking पेज पर दिखेगा; SMS नहीं भेजा जाता। फोन पर OTP भेजने और सुरक्षित सत्यापन के लिए server तथा SMS gateway जोड़ना होगा।</p>
         <button class="primary-btn modal-submit" type="submit">OTP सत्यापित करें</button>
-        <button class="small-action" type="button" id="resendJobOtp">नया OTP बनाएँ (demo)</button>
+        <button class="small-action" type="button" id="resendJobOtp">नया OTP बनाएँ</button>
       </form>
     </div>
   </div>
@@ -782,7 +782,7 @@
         <form class="invoice-form" id="complaintForm">
           <div class="field"><label for="complaintReason">शिकायत का कारण</label><select id="complaintReason" required><option value="">कारण चुनें</option><option>Provider समय पर नहीं आया</option><option>खराब काम / service quality</option><option>ज्यादा पैसे माँगे</option><option>Payment / refund समस्या</option><option>अन्य</option></select></div>
           <div class="field"><label for="complaintDetails">क्या हुआ? (विवरण)</label><textarea id="complaintDetails" rows="4" maxlength="1000" placeholder="कृपया booking और समस्या के बारे में बताएं…" required></textarea></div>
-          <p class="demo-disclaimer">शिकायत इस browser के Admin dashboard में दिखेगी। Emergency में स्थानीय सहायता सेवाओं से संपर्क करें।</p>
+          <p class="feature-note">Emergency में स्थानीय सहायता सेवाओं से संपर्क करें।</p>
           <button class="primary-btn modal-submit" type="submit">शिकायत Admin को भेजें</button>
         </form>
       </div>
@@ -801,7 +801,7 @@
     <div class="modal">
       <div class="modal-head"><div><h2 id="installHelpTitle">GharSeva ऐप इंस्टॉल करें</h2><span style="font-size:12px;color:var(--muted)">अपने फोन की होम स्क्रीन से जल्दी खोलें।</span></div><button class="close-btn" type="button" data-close aria-label="बंद करें">×</button></div>
       <div class="install-modal-copy" id="installHelpContent"></div>
-      <p class="demo-disclaimer">Install prompt आपके browser और device पर निर्भर है। Install करने के बाद भी account/data इस demo में इसी browser पर रहता है।</p>
+      <p class="feature-note">Install prompt आपके browser और device पर निर्भर है। Booking और chat data इस browser में सेव होता है; सभी devices पर sync के लिए server integration आवश्यक है।</p>
     </div>
   </div>
   <section id="invoicePrintArea" aria-label="GharSeva invoice"></section>
@@ -931,7 +931,8 @@
       return providerTemplates.map((template, index) => ({
           ...template,
           id: `demo-${city}-${template.category.replace(/\s/g, "-")}`,
-          name: `डेमो पार्टनर ${String(index + 1).padStart(2, "0")}`,
+          name: `उदाहरण प्रोफ़ाइल ${String(index + 1).padStart(2, "0")}`,
+          isExampleProfile: true,
           city,
           area: `${cityLabel} शहर`,
           rating: 0,
@@ -941,6 +942,11 @@
     });
     let providers = loadStored("gharSevaAdminProviders", defaultProviders);
     if (!Array.isArray(providers)) providers = defaultProviders;
+    providers.forEach((provider) => {
+      if (provider.id.startsWith("demo-") && !provider.isAdminManaged && !provider.isUserProfile) {
+        provider.isExampleProfile = true;
+      }
+    });
     const defaultCustomer = { name: "Priya Sharma", phone: "+91 98765 43210", city: "Phalodi", area: "फलोदी", photo: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=240&q=85" };
     let customer = loadStored("gharSevaCustomer", defaultCustomer);
     if (
@@ -1484,10 +1490,10 @@
       if (sort === "price") results.sort((a, b) => a.price - b.price);
       const cityHindi = cities.find((item) => item.value === city).label;
       document.getElementById("providerHeading").textContent = `${cityHindi} में ${selectedCategory ? categories.find((item) => item.id === selectedCategory).label : "लोकप्रिय"} प्रोफेशनल्स`;
-      const demoCount = results.filter((provider) => !provider.isUserProfile).length;
+      const exampleCount = results.filter((provider) => provider.isExampleProfile).length;
       const ownProfileListed = results.some((provider) => provider.isUserProfile);
       document.getElementById("providerSubheading").textContent = results.length
-        ? `${demoCount} डेमो प्रोफाइलें${ownProfileListed ? " · आपकी provider profile भी सूचीबद्ध है" : " · असली पार्टनर जुड़ने बाकी हैं"}।`
+        ? `${exampleCount ? `${exampleCount} उदाहरण प्रोफ़ाइलें (बुकिंग उपलब्ध नहीं)` : `${results.length} सेवा प्रोफ़ाइलें`}${ownProfileListed ? " · आपकी provider profile भी सूचीबद्ध है" : exampleCount === results.length ? " · वास्तविक सेवा पार्टनर की पुष्टि अभी नहीं हुई है" : ""}।`
         : "दूसरी सेवा या शहर चुनकर फिर से खोजें।";
       const grid = document.getElementById("providerGrid");
       if (!results.length) {
@@ -1498,7 +1504,7 @@
         const rating = getProviderRating(provider);
         return `
         <article class="provider-card">
-          <div class="provider-photo-wrap"><img class="provider-photo" src="${provider.image}" alt="${escapeHTML(provider.name)} की प्रोफ़ाइल फोटो" loading="lazy"><span class="verified">${provider.isUserProfile ? "Service provider" : "डेमो प्रोफ़ाइल"}</span><button class="heart" type="button" aria-label="पसंदीदा सेव करें" onclick="toggleFavorite(this)">♡</button></div>
+          <div class="provider-photo-wrap"><img class="provider-photo" src="${provider.image}" alt="${escapeHTML(provider.name)} की प्रोफ़ाइल फोटो" loading="lazy"><span class="verified">${provider.isExampleProfile ? "उदाहरण प्रोफ़ाइल" : provider.isUserProfile ? "Service provider" : "Service listing"}</span><button class="heart" type="button" aria-label="पसंदीदा सेव करें" onclick="toggleFavorite(this)">♡</button></div>
           <div class="provider-info"><div class="provider-name-row"><div><h3>${escapeHTML(provider.name)}</h3><span class="provider-trade">${escapeHTML(provider.trade)}</span></div><span class="rating">${rating.rating ? `<span>★</span> ${rating.rating.toFixed(1)}` : "नया"}</span></div>
             <div class="provider-meta"><span>📍 ${escapeHTML(provider.area)}</span><span>${rating.reviews ? `💬 ${rating.reviews} रिव्यू` : "अभी रिव्यू नहीं"}</span><span>⏱ ${escapeHTML(provider.duration || "1–2 घंटे")}</span></div>
             <div class="price-row"><span class="price">${formatRupees(provider.price)} <small>से शुरू</small></span><button class="book-btn" type="button" onclick="openProviderProfile('${provider.id}')">प्रोफ़ाइल देखें</button></div>
@@ -1629,7 +1635,7 @@
       renderBookings();
       renderProviderPanel();
       openOtpModal(bookingId);
-      toast("Demo OTP बनाया गया। ग्राहक इसे अपनी booking स्क्रीन से देखकर provider को बताए।");
+      toast("OTP बनाया गया। ग्राहक इसे अपनी booking स्क्रीन से देखकर provider को बताए।");
     }
     function openOtpModal(bookingId) {
       const booking = bookings.find((item) => item.id === bookingId);
@@ -1638,7 +1644,7 @@
       const isStart = booking.verification.stage === "start";
       document.getElementById("jobOtpTitle").textContent = isStart ? "काम शुरू करने का OTP" : "काम पूरा करने का OTP";
       document.getElementById("jobOtpSubtitle").textContent = `बुकिंग ${booking.id} · ग्राहक ${booking.customer}`;
-      document.getElementById("jobOtpInstructions").textContent = `ग्राहक के फोन पर OTP भेजने के बजाय demo में code उसकी “मेरी बुकिंग” स्क्रीन पर उपलब्ध है। ग्राहक से code लेकर दर्ज करें। OTP 5 मिनट में expire होगा; अधिकतम 5 प्रयास हैं।`;
+      document.getElementById("jobOtpInstructions").textContent = `ग्राहक के फोन पर OTP नहीं भेजा जाता; code उसकी “मेरी बुकिंग” स्क्रीन पर उपलब्ध है। ग्राहक से code लेकर दर्ज करें। OTP 5 मिनट में expire होगा; अधिकतम 5 प्रयास हैं।`;
       document.getElementById("jobOtpInput").value = "";
       document.getElementById("jobOtpStatus").textContent = "";
       document.getElementById("jobOtpModal").classList.add("open");
@@ -1720,9 +1726,9 @@
       const invoice = booking.invoice;
       if (!invoice) return "";
       const paymentMethod = booking.payment === "UPI"
-        ? "UPI · GPay / PhonePe / Paytm (demo—भुगतान collect नहीं हुआ)"
-        : booking.payment === "Card" ? "Card (demo—भुगतान collect नहीं हुआ)" : "COD · काम के बाद provider को नकद";
-      return `<div class="invoice-message"><div class="invoice-head"><div><strong>GharSeva · डिजिटल इनवॉइस</strong><span>Invoice ${escapeHTML(invoice.id)} · ${escapeHTML(new Date(invoice.createdAt).toLocaleDateString("hi-IN"))}</span></div></div><div class="invoice-lines"><div class="invoice-line"><span>काम की Labour</span><strong>${formatRupees(invoice.labour)}</strong></div><div class="invoice-line"><span>Parts / सामग्री${invoice.partsDescription ? ` · ${escapeHTML(invoice.partsDescription)}` : ""}</span><strong>${formatRupees(invoice.parts)}</strong></div>${invoice.discount ? `<div class="invoice-line"><span>कूपन छूट</span><strong>−${formatRupees(invoice.discount)}</strong></div>` : ""}</div><div class="invoice-total"><span>कुल देय</span><strong>${formatRupees(invoice.total)}</strong></div><p class="invoice-payment">ग्राहक: ${escapeHTML(booking.customer)} · सेवा: ${escapeHTML(booking.rateItem || booking.category)}<br>भुगतान: ${paymentMethod}${booking.payment === "Cash" ? "" : "<br>इस डेमो में कोई online payment process नहीं हुआ।"}</p>${includePrintButton ? `<button class="small-action invoice-print" type="button" onclick="printInvoice('${escapeHTML(booking.id)}')">प्रिंट / PDF सेव करें</button>` : ""}</div>`;
+        ? "UPI · भुगतान उपलब्ध नहीं"
+        : booking.payment === "Card" ? "Card · भुगतान उपलब्ध नहीं" : "COD · काम के बाद provider को नकद";
+      return `<div class="invoice-message"><div class="invoice-head"><div><strong>GharSeva · डिजिटल इनवॉइस</strong><span>Invoice ${escapeHTML(invoice.id)} · ${escapeHTML(new Date(invoice.createdAt).toLocaleDateString("hi-IN"))}</span></div></div><div class="invoice-lines"><div class="invoice-line"><span>काम की Labour</span><strong>${formatRupees(invoice.labour)}</strong></div><div class="invoice-line"><span>Parts / सामग्री${invoice.partsDescription ? ` · ${escapeHTML(invoice.partsDescription)}` : ""}</span><strong>${formatRupees(invoice.parts)}</strong></div>${invoice.discount ? `<div class="invoice-line"><span>कूपन छूट</span><strong>−${formatRupees(invoice.discount)}</strong></div>` : ""}</div><div class="invoice-total"><span>कुल देय</span><strong>${formatRupees(invoice.total)}</strong></div><p class="invoice-payment">ग्राहक: ${escapeHTML(booking.customer)} · सेवा: ${escapeHTML(booking.rateItem || booking.category)}<br>भुगतान: ${paymentMethod}${booking.payment === "Cash" ? "" : "<br>ऑनलाइन भुगतान process नहीं हुआ।"}</p>${includePrintButton ? `<button class="small-action invoice-print" type="button" onclick="printInvoice('${escapeHTML(booking.id)}')">प्रिंट / PDF सेव करें</button>` : ""}</div>`;
     }
     function printInvoice(bookingId) {
       const booking = bookings.find((item) => item.id === bookingId);
@@ -1806,9 +1812,9 @@
         paymentStatus: booking.paymentStatus
       };
       if (action === "refund") {
-        booking.refundStatus = "Demo refund recorded - no money transferred";
-        booking.paymentStatus = "Demo refund recorded - gateway integration required";
-        complaint.resolution = "Demo refund दर्ज (असली पैसे वापस नहीं हुए)";
+        booking.refundStatus = "Refund note recorded - no money transferred";
+        booking.paymentStatus = "Refund not processed - payment gateway unavailable";
+        complaint.resolution = "Refund का नोट दर्ज; पैसे वापस नहीं हुए";
       } else if (action === "reassign") {
         if (booking.status === "Completed" || booking.status === "Rejected") {
           toast("Completed या rejected job को reassign नहीं किया जा सकता।");
@@ -1816,23 +1822,9 @@
         }
         const bookingProviderCategory = booking.providerCategory || categories.find((item) => item.label === booking.category)?.id;
         let replacement = (providerProfile ? [...providers, providerProfile] : providers).find((item) =>
+          !item.isExampleProfile &&
           item.city === booking.city && item.category === bookingProviderCategory && item.id !== booking.providerId
         );
-        if (!replacement) {
-          const template = providerTemplates.find((item) => item.category === bookingProviderCategory);
-          if (template) {
-            replacement = {
-              ...template,
-              id: `demo-replacement-${booking.id}`,
-              name: "डेमो वैकल्पिक पार्टनर",
-              city: booking.city,
-              area: booking.city,
-              rating: 0,
-              reviews: 0,
-              bio: "शिकायत समाधान के लिए उदाहरण वैकल्पिक पार्टनर; वास्तविक उपलब्धता की पुष्टि जरूरी है।"
-            };
-          }
-        }
         if (!replacement) {
           toast("इस सेवा के लिए कोई वैकल्पिक provider profile उपलब्ध नहीं है।");
           return;
@@ -1844,7 +1836,7 @@
         updateBookingStatus(booking, "Pending", "नए provider के लिए booking फिर से भेजी गई");
         delete booking.verification;
         delete booking.pendingInvoice;
-        complaint.resolution = `नया ${replacement.id.startsWith("demo-replacement-") ? "demo " : ""}provider भेजा गया: ${replacement.name}`;
+        complaint.resolution = `नया provider भेजा गया: ${replacement.name}`;
       } else {
         complaint.resolution = "Admin ने शिकायत की समीक्षा कर मामला सुलझाया";
       }
@@ -1903,8 +1895,8 @@
         : "सहायता टीम को संदेश भेजें।";
       document.getElementById("chatBookingCard").hidden = !booking;
       document.getElementById("chatTools").hidden = !booking;
-      document.getElementById("chatDemoNote").textContent = booking
-        ? "डेमो चर्चा और तस्वीरें इसी browser में सेव होती हैं। दूसरे डिवाइस पर live chat और notifications के लिए backend आवश्यक है।"
+      document.getElementById("chatStorageNote").textContent = booking
+        ? "चर्चा और तस्वीरें इसी browser में सेव होती हैं। दूसरे डिवाइस पर live chat और notifications के लिए backend आवश्यक है।"
         : "Support संदेश इसी browser में सेव होते हैं; असली सहायता के लिए backend integration आवश्यक है।";
       showChatToolStatus(booking ? "Before photo काम शुरू होने से पहले और after photo काम पूरा होने के बाद जोड़ें।" : "");
       document.getElementById("chatParticipantName").textContent = booking
@@ -1932,11 +1924,11 @@
         const callName = isProvider ? "ग्राहक को कॉल" : "Provider को कॉल";
         const callPhone = isProvider ? booking.customerPhone : booking.providerPhone;
         document.getElementById("chatBookingActions").innerHTML = `
-          ${callPhone ? `<a class="small-action" href="tel:${encodeURIComponent(callPhone)}">📞 ${callName}</a>` : `<span class="small-action disabled" title="इस demo प्रोफ़ाइल में फोन नंबर उपलब्ध नहीं है।">📞 फोन नंबर उपलब्ध नहीं</span>`}
+          ${callPhone ? `<a class="small-action" href="tel:${encodeURIComponent(callPhone)}">📞 ${callName}</a>` : `<span class="small-action disabled" title="इस प्रोफ़ाइल में फोन नंबर उपलब्ध नहीं है।">📞 फोन नंबर उपलब्ध नहीं</span>`}
           ${activeChatIsAdmin && booking.customerPhone ? `<a class="small-action" href="tel:${encodeURIComponent(booking.customerPhone)}">📞 ग्राहक</a>` : ""}
           ${mapQuery ? `<a class="small-action" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapQuery)}">📍 Maps में पता खोलें</a>` : ""}
           ${!activeChatIsAdmin && accountRole === "customer" ? `<button class="small-action complaint-trigger" type="button" onclick="openComplaint('${escapeHTML(booking.id)}')">⚠ Report / Complain</button>` : ""}
-          ${activeChatIsAdmin ? `<span class="small-action disabled">Admin review mode · demo</span>` : ""}`;
+          ${activeChatIsAdmin ? `<span class="small-action disabled">Admin review mode</span>` : ""}`;
       }
       const beforeInput = document.getElementById("beforePhotoInput");
       const afterInput = document.getElementById("afterPhotoInput");
@@ -2110,11 +2102,15 @@
     function openBooking(providerId) {
       activeProvider = findProvider(providerId);
       if (!activeProvider) return;
+      if (activeProvider.isExampleProfile) {
+        toast("यह उदाहरण प्रोफ़ाइल है; इस पर वास्तविक booking उपलब्ध नहीं है।");
+        return;
+      }
       const rateCard = getProviderRateCard(activeProvider);
       document.getElementById("bookingRateItem").innerHTML = rateCard.map((item) => `<option value="${escapeHTML(item.id)}">${escapeHTML(item.name)} · ${formatRupees(item.price)}</option>`).join("");
       document.getElementById("bookingRateNote").textContent = activeProvider.category === "Electrician"
-        ? "रेट कार्ड की शुरुआती demo दर; parts/labour की अंतिम कीमत काम पूरा होने पर invoice में होगी।"
-        : "यह शुरुआती demo estimate है। Provider काम पूरा होने पर parts और labour का final bill साझा करेगा।";
+        ? "रेट कार्ड की शुरुआती दर; parts/labour की अंतिम कीमत काम पूरा होने पर invoice में होगी।"
+        : "यह शुरुआती कीमत का अनुमान है। Provider काम पूरा होने पर parts और labour का final bill साझा करेगा।";
       document.getElementById("modalProviderImage").src = activeProvider.image;
       document.getElementById("modalProviderImage").alt = `${activeProvider.name} की फोटो`;
       document.getElementById("modalProviderName").textContent = activeProvider.name;
@@ -2147,7 +2143,7 @@
       document.getElementById("providerProfileName").textContent = activeProvider.name;
       document.getElementById("providerProfileTrade").textContent = activeProvider.trade;
       const providerRating = getProviderRating(activeProvider);
-      document.getElementById("providerProfileRating").textContent = providerRating.rating ? `★ ${providerRating.rating.toFixed(1)} · ${providerRating.reviews} रिव्यू` : "नई डेमो प्रोफ़ाइल";
+      document.getElementById("providerProfileRating").textContent = providerRating.rating ? `★ ${providerRating.rating.toFixed(1)} · ${providerRating.reviews} रिव्यू` : "नई प्रोफ़ाइल";
       document.getElementById("providerProfileLocation").textContent = `📍 ${activeProvider.area}, ${activeProvider.city}`;
       document.getElementById("providerProfileBio").textContent = activeProvider.bio;
       document.getElementById("providerProfilePrice").innerHTML = `${formatRupees(activeProvider.price)} <small>से शुरू</small>`;
@@ -2156,10 +2152,12 @@
       document.getElementById("providerProfileDuration").textContent = activeProvider.duration || "जाँच के अनुसार 1–2 घंटे";
       document.getElementById("providerProfileArea").textContent = `${activeProvider.area}, ${cities.find((city) => city.value === activeProvider.city)?.label || activeProvider.city}`;
       const rateCard = getProviderRateCard(activeProvider);
-      document.getElementById("providerRateCard").innerHTML = `<h3>पारदर्शी रेट कार्ड</h3><p class="rate-card-note">${activeProvider.category === "Electrician" ? "उदाहरण दरें; parts और अतिरिक्त labour का final bill काम के बाद chat में साझा होगा।" : "दिखाई गई शुरुआती कीमत demo/provider estimate है; final charges काम के बाद invoice में स्पष्ट होंगे।"}</p>${rateCard.map((item) => `<div class="rate-card-line"><span>${escapeHTML(item.name)}</span><strong>${formatRupees(item.price)}</strong></div>`).join("")}`;
+      document.getElementById("providerRateCard").innerHTML = `<h3>पारदर्शी रेट कार्ड</h3><p class="rate-card-note">${activeProvider.category === "Electrician" ? "उदाहरण दरें; parts और अतिरिक्त labour का final bill काम के बाद chat में साझा होगा।" : "दिखाई गई शुरुआती कीमत अनुमानित है; final charges काम के बाद invoice में स्पष्ट होंगे।"}</p>${rateCard.map((item) => `<div class="rate-card-line"><span>${escapeHTML(item.name)}</span><strong>${formatRupees(item.price)}</strong></div>`).join("")}`;
       const bookButton = document.getElementById("profileBookButton");
-      bookButton.disabled = Boolean(activeProvider.isUserProfile);
-      bookButton.textContent = activeProvider.isUserProfile ? "यह आपकी प्रोफ़ाइल है" : "बुकिंग करें";
+      bookButton.disabled = Boolean(activeProvider.isUserProfile || activeProvider.isExampleProfile);
+      bookButton.textContent = activeProvider.isUserProfile
+        ? "यह आपकी प्रोफ़ाइल है"
+        : activeProvider.isExampleProfile ? "उदाहरण प्रोफ़ाइल — बुकिंग उपलब्ध नहीं" : "बुकिंग करें";
       document.getElementById("providerProfileModal").classList.add("open");
     }
     function closeModal() { document.getElementById("bookingModal").classList.remove("open"); }
@@ -2287,11 +2285,11 @@
       }
       list.innerHTML = [...userBookings].sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt))).map((booking) => `
         <div class="booking-row"><div class="booking-person"><img src="${booking.image}" alt="${escapeHTML(booking.provider)} की फोटो"><div><strong>${escapeHTML(booking.category)} · ${escapeHTML(booking.provider)}</strong><span>${escapeHTML(booking.city)} · ${escapeHTML(booking.date)} · ${escapeHTML(booking.time)}</span><span class="status">${escapeHTML(booking.status || "Pending")}</span>
-          ${booking.verification && accountRole === "customer" ? `<span class="otp-demo-card"><strong>${booking.verification.stage === "start" ? "काम शुरू करने का OTP" : "काम पूरा करने का OTP"}</strong><span class="otp-demo-code">${escapeHTML(booking.verification.code)}</span><span class="otp-demo-warning">यह demo code provider को केवल ${booking.verification.stage === "start" ? "काम शुरू होने से पहले" : "काम पूरा होने के बाद"} दें। SMS नहीं भेजा गया है। ${Date.now() > booking.verification.expiresAt ? "यह OTP expire हो चुका है; provider से नया code बनाने को कहें।" : ""}</span></span>` : ""}
+          ${booking.verification && accountRole === "customer" ? `<span class="otp-code-card"><strong>${booking.verification.stage === "start" ? "काम शुरू करने का OTP" : "काम पूरा करने का OTP"}</strong><span class="otp-code-value">${escapeHTML(booking.verification.code)}</span><span class="otp-code-note">यह code provider को केवल ${booking.verification.stage === "start" ? "काम शुरू होने से पहले" : "काम पूरा होने के बाद"} दें। SMS नहीं भेजा गया है। ${Date.now() > booking.verification.expiresAt ? "यह OTP expire हो चुका है; provider से नया code बनाने को कहें।" : ""}</span></span>` : ""}
           ${booking.review ? `<span>आपकी रेटिंग: ${"★".repeat(booking.review.rating)} · ${escapeHTML(booking.review.text)}</span>` : booking.status === "Completed" ? `<span class="review-box"><select id="reviewRating-${booking.id}" aria-label="स्टार रेटिंग"><option value="5">★★★★★</option><option value="4">★★★★</option><option value="3">★★★</option><option value="2">★★</option><option value="1">★</option></select><input id="reviewText-${booking.id}" maxlength="240" placeholder="अपना रिव्यू लिखें"><button class="small-action accept" onclick="submitReview('${booking.id}')">रिव्यू भेजें</button></span>` : ""}
-          <div class="booking-actions"><button class="small-action" onclick="openChat('${booking.id}')">💬 Job Chat</button>${canCustomerManageBooking(booking) ? `<button class="small-action" onclick="openRescheduleModal('${booking.id}')">🕒 समय बदलें</button><button class="small-action" onclick="cancelCustomerBooking('${booking.id}')">बुकिंग cancel करें</button>` : ""}${booking.invoice ? `<button class="small-action" onclick="printInvoice('${booking.id}')">🧾 Invoice / PDF</button>` : ""}${accountRole === "customer" && !booking.complaints?.some((item) => item.status === "Open") ? `<button class="small-action" onclick="openComplaint('${booking.id}')">⚠ Report / Complain</button>` : booking.complaints?.some((item) => item.status === "Open") ? '<span class="small-action disabled">शिकायत review में</span>' : ""}${booking.providerPhone ? `<a class="small-action" href="tel:${encodeURIComponent(booking.providerPhone)}">📞 Provider को कॉल</a>` : '<span class="small-action disabled" title="इस demo प्रोफ़ाइल में फोन नंबर उपलब्ध नहीं है।">📞 फोन नंबर उपलब्ध नहीं</span>'}<a class="small-action" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(booking.latitude && booking.longitude ? `${booking.latitude},${booking.longitude}` : booking.address)}">📍 Map</a></div>
+          <div class="booking-actions"><button class="small-action" onclick="openChat('${booking.id}')">💬 Job Chat</button>${canCustomerManageBooking(booking) ? `<button class="small-action" onclick="openRescheduleModal('${booking.id}')">🕒 समय बदलें</button><button class="small-action" onclick="cancelCustomerBooking('${booking.id}')">बुकिंग cancel करें</button>` : ""}${booking.invoice ? `<button class="small-action" onclick="printInvoice('${booking.id}')">🧾 Invoice / PDF</button>` : ""}${accountRole === "customer" && !booking.complaints?.some((item) => item.status === "Open") ? `<button class="small-action" onclick="openComplaint('${booking.id}')">⚠ Report / Complain</button>` : booking.complaints?.some((item) => item.status === "Open") ? '<span class="small-action disabled">शिकायत review में</span>' : ""}${booking.providerPhone ? `<a class="small-action" href="tel:${encodeURIComponent(booking.providerPhone)}">📞 Provider को कॉल</a>` : '<span class="small-action disabled" title="इस प्रोफ़ाइल में फोन नंबर उपलब्ध नहीं है।">📞 फोन नंबर उपलब्ध नहीं</span>'}<a class="small-action" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(booking.latitude && booking.longitude ? `${booking.latitude},${booking.longitude}` : booking.address)}">📍 Map</a></div>
           <details class="booking-timeline"><summary>Booking timeline · ${bookingTimeline(booking).length} अपडेट</summary><ol>${bookingTimeline(booking).slice().reverse().map((entry) => `<li><strong>${escapeHTML(entry.label || entry.status || "Booking update")}</strong> · ${formatTimelineTime(entry.createdAt)}${entry.type === "schedule" ? `<br>नई तारीख और समय: ${escapeHTML(entry.date || booking.date)} · ${escapeHTML(entry.time || booking.time)}` : ""}</li>`).join("")}</ol></details>
-        </div></div><div class="booking-details">${formatRupees(booking.invoice ? booking.invoice.total : booking.total)}<small>${booking.invoice ? "अंतिम बिल" : "शुरुआती अनुमान"}</small><small>${escapeHTML(booking.payment)} · ${booking.payment === "Cash" ? "COD / नकद" : "online payment demo"}</small><small>स्थिति: ${escapeHTML(booking.status || "Pending")}</small></div></div>`).join("");
+        </div></div><div class="booking-details">${formatRupees(booking.invoice ? booking.invoice.total : booking.total)}<small>${booking.invoice ? "अंतिम बिल" : "शुरुआती अनुमान"}</small><small>${escapeHTML(booking.payment)} · ${booking.payment === "Cash" ? "COD / नकद" : "ऑनलाइन भुगतान उपलब्ध नहीं"}</small><small>स्थिति: ${escapeHTML(booking.status || "Pending")}</small></div></div>`).join("");
     }
     function submitReview(bookingId) {
       const booking = bookings.find((item) => item.id === bookingId);
@@ -2414,7 +2412,7 @@
         ? `नई शिकायत सूचना: ${openComplaints.length} शिकायत${openComplaints.length === 1 ? "" : "ें"} Admin की समीक्षा का इंतज़ार कर रही ${openComplaints.length === 1 ? "है" : "हैं"}।`
         : "कोई खुली ग्राहक शिकायत नहीं है।";
       document.getElementById("adminComplaintsTable").innerHTML = complaints.length
-        ? complaints.map(({ booking, complaint }) => `<tr><td>${complaint.status === "Open" ? '<span class="status" style="background:#fff0e8;color:#963e22">नई · Open</span>' : '<span class="status">Resolved</span>'}</td><td>${escapeHTML(booking.id)}<br><small>${escapeHTML(complaint.reason)}</small></td><td>${escapeHTML(booking.customer)}<br><small>${escapeHTML(booking.customerPhone || "")}</small></td><td>${escapeHTML(booking.provider)}<br><small>${escapeHTML(booking.city)}</small></td><td class="complaint-summary">${escapeHTML(complaint.details)}</td><td><div class="complaint-actions"><button class="admin-control" onclick="openAdminWorkstream('${escapeHTML(booking.id)}')">पूरी चैट / work-stream</button>${complaint.status === "Open" ? `<button class="admin-control" onclick="resolveComplaint('${escapeHTML(booking.id)}','${escapeHTML(complaint.id)}','resolve')">सुलझाएँ</button><button class="admin-control" onclick="resolveComplaint('${escapeHTML(booking.id)}','${escapeHTML(complaint.id)}','refund')">Demo refund दर्ज</button><button class="admin-control" onclick="resolveComplaint('${escapeHTML(booking.id)}','${escapeHTML(complaint.id)}','reassign')" ${booking.status === "Completed" || booking.status === "Rejected" ? "disabled" : ""}>नया provider भेजें</button>` : `<small>${escapeHTML(complaint.resolution || "समीक्षा पूरी")}</small>`}</div></td></tr>`).join("")
+        ? complaints.map(({ booking, complaint }) => `<tr><td>${complaint.status === "Open" ? '<span class="status" style="background:#fff0e8;color:#963e22">नई · Open</span>' : '<span class="status">Resolved</span>'}</td><td>${escapeHTML(booking.id)}<br><small>${escapeHTML(complaint.reason)}</small></td><td>${escapeHTML(booking.customer)}<br><small>${escapeHTML(booking.customerPhone || "")}</small></td><td>${escapeHTML(booking.provider)}<br><small>${escapeHTML(booking.city)}</small></td><td class="complaint-summary">${escapeHTML(complaint.details)}</td><td><div class="complaint-actions"><button class="admin-control" onclick="openAdminWorkstream('${escapeHTML(booking.id)}')">पूरी चैट / work-stream</button>${complaint.status === "Open" ? `<button class="admin-control" onclick="resolveComplaint('${escapeHTML(booking.id)}','${escapeHTML(complaint.id)}','resolve')">सुलझाएँ</button><button class="admin-control" onclick="resolveComplaint('${escapeHTML(booking.id)}','${escapeHTML(complaint.id)}','refund')">Refund नोट दर्ज करें</button><button class="admin-control" onclick="resolveComplaint('${escapeHTML(booking.id)}','${escapeHTML(complaint.id)}','reassign')" ${booking.status === "Completed" || booking.status === "Rejected" ? "disabled" : ""}>नया provider भेजें</button>` : `<small>${escapeHTML(complaint.resolution || "समीक्षा पूरी")}</small>`}</div></td></tr>`).join("")
         : '<tr><td colspan="6" style="text-align:center;color:#707b78;padding:22px">अभी कोई customer complaint दर्ज नहीं है।</td></tr>';
       document.getElementById("commissionRateInput").value = Math.round(commissionRate * 1000) / 10;
       document.getElementById("subscriptionFeeInput").value = subscriptionFee;
@@ -2433,7 +2431,7 @@
       ).join("");
       document.getElementById("adminUsersTable").innerHTML = userRows + providerRows;
       document.getElementById("adminProvidersTable").innerHTML = knownProviders.map((provider) => `
-        <tr><td>${escapeHTML(provider.name)}${provider.isUserProfile ? " · provider account" : provider.isAdminManaged ? " · admin-added" : " · demo"}</td>
+        <tr><td>${escapeHTML(provider.name)}${provider.isUserProfile ? " · provider account" : provider.isAdminManaged ? " · admin द्वारा जोड़ा गया" : " · उदाहरण प्रोफ़ाइल"}</td>
         <td>${escapeHTML(categories.find((category) => category.id === provider.category)?.label || provider.category || "")}</td>
         <td>${escapeHTML(cities.find((city) => city.value === provider.city)?.label || provider.city)} · ${escapeHTML(provider.area || "")}</td>
         <td>${escapeHTML(provider.phone || "—")}</td>
@@ -2544,7 +2542,7 @@
         document.getElementById("couponMessage").style.color = "#a33a30";
       } else {
         appliedCoupon = code;
-        document.getElementById("couponMessage").textContent = `${code} लागू हुआ — ${code === "FESTIVE10" ? "10% छूट" : "₹50 छूट"} (demo)।`;
+        document.getElementById("couponMessage").textContent = `${code} लागू हुआ — ${code === "FESTIVE10" ? "10% छूट" : "₹50 छूट"}।`;
         document.getElementById("couponMessage").style.color = "var(--green)";
       }
       updateCheckoutTotal();
@@ -2622,6 +2620,7 @@
         rating: existing?.rating || 0,
         reviews: existing?.reviews || 0
       };
+      provider.isExampleProfile = false;
       if (!provider.isUserProfile) provider.isAdminManaged = true;
       const saveButton = document.getElementById("adminProviderSave");
       saveButton.disabled = true;
@@ -2699,7 +2698,7 @@
       providerTemplates.push(template);
       rajasthanDistrictCities.forEach((city) => {
         const cityLabel = cities.find((item) => item.value === city).label;
-        providers.push({ ...template, id: `demo-${city}-${categoryId}`, name: "डेमो पार्टनर", city, area: `${cityLabel} शहर`, rating: 0, reviews: 0 });
+        providers.push({ ...template, id: `demo-${city}-${categoryId}`, name: "उदाहरण प्रोफ़ाइल", isExampleProfile: true, city, area: `${cityLabel} शहर`, rating: 0, reviews: 0 });
       });
       customCategories.push({ category, template });
       saveStored("gharSevaCustomCategories", customCategories);
@@ -2709,7 +2708,7 @@
       renderProviders();
       renderAdmin();
       event.currentTarget.reset();
-      toast("नई category और राजस्थान की demo listings जोड़ दी गईं।");
+      toast("नई category और राजस्थान की उदाहरण प्रोफ़ाइलें जोड़ दी गईं।");
     });
     document.getElementById("chatForm").addEventListener("submit", (event) => {
       event.preventDefault();
@@ -2880,7 +2879,7 @@
       if (!activeProvider) return;
       const user = getSignedInUser();
       if (!user || !user.email) {
-        toast("बुकिंग से पहले लॉगिन करें या डेमो मोड खोलें।");
+        toast("बुकिंग से पहले अपने खाते में लॉगिन करें।");
         return;
       }
       const form = new FormData(event.currentTarget);
@@ -2912,7 +2911,7 @@
         latitude: String(form.get("latitude") || ""),
         longitude: String(form.get("longitude") || ""),
         payment,
-        paymentStatus: payment === "Cash" ? "COD - काम के बाद" : "Demo - online payment",
+        paymentStatus: payment === "Cash" ? "COD - काम के बाद" : "Online payment unavailable",
         serviceAmount: selectedRate.price,
         commission,
         coupon: appliedCoupon || "",
