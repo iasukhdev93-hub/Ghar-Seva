@@ -9,8 +9,8 @@
   <meta name="apple-mobile-web-app-title" content="GharSeva">
   <title>GharSeva — भरोसेमंद घरेलू सेवाएँ</title>
   <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="icon" href="./icons/ghar-seva-192.png" type="image/png">
-  <link rel="apple-touch-icon" href="./icons/ghar-seva-192.png">
+  <link rel="icon" href="./ghar-seva-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="./ghar-seva-192.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -542,7 +542,7 @@
 
       <section>
         <div class="section-head service-head">
-          <div><h2 id="providerHeading">जयपुर में लोकप्रिय प्रोफेशनल्स</h2><p id="providerSubheading">डेमो प्रोफाइलें · असली पार्टनर जुड़ने बाकी हैं।</p></div>
+          <div><h2 id="providerHeading">फलोदी में लोकप्रिय प्रोफेशनल्स</h2><p id="providerSubheading">डेमो प्रोफाइलें · असली पार्टनर जुड़ने बाकी हैं।</p></div>
           <div class="filters">
             <select class="filter-select" id="sortSelect" aria-label="सॉर्ट करें"><option value="recommended">अनुशंसित</option><option value="rating">सबसे अच्छी रेटिंग</option><option value="price">कम कीमत पहले</option></select>
             <select class="filter-select" id="ratingSelect" aria-label="न्यूनतम रेटिंग"><option value="0">सभी रेटिंग</option><option value="4.8">4.8+ रेटिंग</option><option value="4.9">4.9+ रेटिंग</option></select>
@@ -629,7 +629,7 @@
           <div class="field"><label for="customerName">पूरा नाम</label><input id="customerName" name="name" value="Priya Sharma" required></div>
           <div class="field"><label for="customerPhone">मोबाइल नंबर</label><input id="customerPhone" name="phone" value="+91 98765 43210" inputmode="tel" required></div>
           <div class="field"><label for="customerCity">राजस्थान का शहर</label><select id="customerCity" name="city"></select></div>
-          <div class="field"><label for="customerArea">इलाका / पिनकोड</label><input id="customerArea" name="area" value="जयपुर"></div>
+          <div class="field"><label for="customerArea">इलाका / पिनकोड</label><input id="customerArea" name="area" value="फलोदी"></div>
           <div id="providerProfileFields" class="profile-form field full" style="display:none;padding:0;border:0;background:none">
             <div class="field"><label for="providerCategory">आप कौन-सी सेवा देते हैं?</label><select id="providerCategory" name="providerCategory"></select></div>
             <div class="field"><label for="providerPrice">शुरुआती सेवा कीमत (₹)</label><input id="providerPrice" name="providerPrice" type="number" min="1" max="100000" step="1" placeholder="जैसे 499"></div>
@@ -946,8 +946,7 @@
     if (
       customer.name === "Priya Sharma" &&
       customer.phone === "+91 98765 43210" &&
-      customer.city === "Jaipur" &&
-      customer.area === "जयपुर"
+      customer.city === "Jaipur"
     ) {
       customer = { ...customer, city: defaultCustomer.city, area: defaultCustomer.area };
       saveStored("gharSevaCustomer", customer);
