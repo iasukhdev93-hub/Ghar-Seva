@@ -1005,6 +1005,7 @@
     let activeInvoiceBookingId = null;
     let activeOtpBookingId = null;
     let deferredInstallPrompt = null;
+    let serviceWorkerInstallError = "";
     const savedSupportContacts = loadStored("gharSevaSupportContacts", {});
     let supportPhone = savedSupportContacts.phone || "";
     let supportWhatsapp = savedSupportContacts.whatsapp || "";
@@ -1102,7 +1103,7 @@
           : isIOS
             ? `<p>iPhone/iPad पर Safari में यह page खोलें:</p><ol><li>नीचे या ऊपर का <strong>Share</strong> आइकन दबाएँ।</li><li><strong>Add to Home Screen</strong> चुनें।</li><li><strong>Add</strong> दबाएँ; GharSeva icon आपकी Home Screen पर आ जाएगा।</li></ol>`
             : `<p>इस browser ने अभी direct install prompt उपलब्ध नहीं कराया। Browser के menu में <strong>Install app</strong> या <strong>Add to Home screen</strong> चुनें। Chrome/Edge desktop पर address bar के install आइकन या menu में <strong>Install GharSeva</strong> देखें।</p>`;
-      document.getElementById("installHelpContent").innerHTML = message;
+      document.getElementById("installHelpContent").innerHTML = `${message}${serviceWorkerInstallError ? `<p>${serviceWorkerInstallError}</p>` : ""}`;
       document.getElementById("installHelpModal").classList.add("open");
     }
     async function installGharSevaApp() {
@@ -1152,7 +1153,7 @@
           .then(() => console.info("GharSeva offline app shell is ready."))
           .catch((error) => {
             console.error("GharSeva service worker registration failed.", error);
-            document.getElementById("installHelpContent").innerHTML = "<p>Offline install तैयार नहीं हो सका। Hosting पर <strong>service-worker.js</strong> को उसी website folder में रखें, HTTPS चालू करें और page reload करें।</p>";
+            serviceWorkerInstallError = "Offline install तैयार नहीं हो सका। Hosting पर <strong>service-worker.js</strong> को उसी website folder में रखें, HTTPS चालू करें और page reload करें।";
           });
       }
     }
@@ -1491,7 +1492,7 @@
       const cityHindi = cities.find((item) => item.value === city).label;
       document.getElementById("providerHeading").textContent = `${cityHindi} में ${selectedCategory ? categories.find((item) => item.id === selectedCategory).label : "लोकप्रिय"} प्रोफेशनल्स`;
       const exampleCount = results.filter((provider) => provider.isExampleProfile).length;
-      const ownProfileListed = results.some((provider) => provider.isUserProfile);
+      const ownProfileListed = results.some(isOwnProviderProfile);
       document.getElementById("providerSubheading").textContent = results.length
         ? `${exampleCount ? `${exampleCount} उदाहरण प्रोफ़ाइलें (बुकिंग उपलब्ध नहीं)` : `${results.length} सेवा प्रोफ़ाइलें`}${ownProfileListed ? " · आपकी provider profile भी सूचीबद्ध है" : exampleCount === results.length ? " · वास्तविक सेवा पार्टनर की पुष्टि अभी नहीं हुई है" : ""}।`
         : "दूसरी सेवा या शहर चुनकर फिर से खोजें।";
@@ -1502,12 +1503,14 @@
       }
       grid.innerHTML = results.map((provider) => {
         const rating = getProviderRating(provider);
+        const canBook = !provider.isExampleProfile && !isOwnProviderProfile(provider);
+        const providerId = escapeHTML(JSON.stringify(provider.id));
         return `
         <article class="provider-card">
           <div class="provider-photo-wrap"><img class="provider-photo" src="${provider.image}" alt="${escapeHTML(provider.name)} की प्रोफ़ाइल फोटो" loading="lazy"><span class="verified">${provider.isExampleProfile ? "उदाहरण प्रोफ़ाइल" : provider.isUserProfile ? "Service provider" : "Service listing"}</span><button class="heart" type="button" aria-label="पसंदीदा सेव करें" onclick="toggleFavorite(this)">♡</button></div>
           <div class="provider-info"><div class="provider-name-row"><div><h3>${escapeHTML(provider.name)}</h3><span class="provider-trade">${escapeHTML(provider.trade)}</span></div><span class="rating">${rating.rating ? `<span>★</span> ${rating.rating.toFixed(1)}` : "नया"}</span></div>
             <div class="provider-meta"><span>📍 ${escapeHTML(provider.area)}</span><span>${rating.reviews ? `💬 ${rating.reviews} रिव्यू` : "अभी रिव्यू नहीं"}</span><span>⏱ ${escapeHTML(provider.duration || "1–2 घंटे")}</span></div>
-            <div class="price-row"><span class="price">${formatRupees(provider.price)} <small>से शुरू</small></span><button class="book-btn" type="button" onclick="openProviderProfile('${provider.id}')">प्रोफ़ाइल देखें</button></div>
+            <div class="price-row"><span class="price">${formatRupees(provider.price)} <small>से शुरू</small></span><button class="book-btn" type="button" onclick="${canBook ? `openBooking(${providerId})` : `openProviderProfile(${providerId})`}">${canBook ? "बुक करें" : "प्रोफ़ाइल देखें"}</button></div>
           </div>
         </article>`;
       }).join("");
@@ -1588,6 +1591,10 @@
       document.getElementById("commissionAmount").textContent = formatRupees(commission);
       document.getElementById("grandTotal").textContent = formatRupees(total);
     }
+    function isOwnProviderProfile(provider) {
+      const user = getSignedInUser();
+      return Boolean(provider?.isUserProfile && user && provider.ownerId === user.uid);
+    }
     function setBookingStatus(bookingId, status) {
       if (!hasAdminAccess) {
         toast("Job status बदलने के लिए Admin login जरूरी है।");
@@ -1601,7 +1608,23 @@
         return;
       }
       if (status === "In Progress") {
-        requestJobOtp(bookingId, "start");
+        if (booking.status !== "Accepted") return;
+        const previousTimeline = Array.isArray(booking.timeline) ? [...booking.timeline] : booking.timeline;
+        const previousVerification = booking.verification;
+        if (booking.verification?.stage === "start") delete booking.verification;
+        updateBookingStatus(booking, "In Progress", bookingStatusLabel("In Progress"));
+        if (!saveStored("gharSevaBookings", bookings)) {
+          booking.status = "Accepted";
+          if (previousTimeline) booking.timeline = previousTimeline;
+          else delete booking.timeline;
+          if (previousVerification) booking.verification = previousVerification;
+          else delete booking.verification;
+          return;
+        }
+        renderBookings();
+        renderProviderPanel();
+        renderAdmin();
+        toast("काम शुरू हो गया।");
         return;
       }
       updateBookingStatus(booking, status, bookingStatusLabel(status));
@@ -1618,8 +1641,8 @@
     }
     function requestJobOtp(bookingId, stage) {
       const booking = bookings.find((item) => item.id === bookingId);
-      if (!hasAdminAccess || !booking || (stage === "start" && booking.status !== "Accepted") ||
-          (stage === "complete" && (booking.status !== "In Progress" || !booking.pendingInvoice))) return;
+      if (!hasAdminAccess || stage !== "complete" || !booking ||
+          booking.status !== "In Progress" || !booking.pendingInvoice) return;
       const previousVerification = booking.verification;
       booking.verification = {
         stage,
@@ -1639,12 +1662,11 @@
     }
     function openOtpModal(bookingId) {
       const booking = bookings.find((item) => item.id === bookingId);
-      if (!hasAdminAccess || !booking?.verification) return;
+      if (!hasAdminAccess || booking?.verification?.stage !== "complete") return;
       activeOtpBookingId = bookingId;
-      const isStart = booking.verification.stage === "start";
-      document.getElementById("jobOtpTitle").textContent = isStart ? "काम शुरू करने का OTP" : "काम पूरा करने का OTP";
+      document.getElementById("jobOtpTitle").textContent = "काम पूरा करने का OTP";
       document.getElementById("jobOtpSubtitle").textContent = `बुकिंग ${booking.id} · ग्राहक ${booking.customer}`;
-      document.getElementById("jobOtpInstructions").textContent = `ग्राहक के फोन पर OTP नहीं भेजा जाता; code उसकी “मेरी बुकिंग” स्क्रीन पर उपलब्ध है। ग्राहक से code लेकर दर्ज करें। OTP 5 मिनट में expire होगा; अधिकतम 5 प्रयास हैं।`;
+      document.getElementById("jobOtpInstructions").textContent = `ग्राहक के फोन पर OTP नहीं भेजा जाता; code उसकी “मेरी बुकिंग” स्क्रीन पर उपलब्ध है। काम पूरा होने की पुष्टि के लिए ग्राहक से code लेकर दर्ज करें। OTP 5 मिनट में expire होगा; अधिकतम 5 प्रयास हैं।`;
       document.getElementById("jobOtpInput").value = "";
       document.getElementById("jobOtpStatus").textContent = "";
       document.getElementById("jobOtpModal").classList.add("open");
@@ -1667,7 +1689,7 @@
       if (!hasAdminAccess) return "केवल Admin OTP सत्यापित कर सकता है।";
       const verification = booking.verification;
       const previousTimeline = booking.timeline;
-      if (!verification) return "इस job के लिए OTP सक्रिय नहीं है।";
+      if (verification?.stage !== "complete") return "इस job के लिए completion OTP सक्रिय नहीं है।";
       if (Date.now() > verification.expiresAt) return "OTP expire हो गया। नया OTP बनाएँ।";
       if (verification.attempts >= 5) return "5 गलत प्रयास हो चुके हैं। नया OTP बनाएँ।";
       if (submittedOtp !== verification.code) {
@@ -1675,16 +1697,14 @@
         saveStored("gharSevaBookings", bookings);
         return `OTP सही नहीं है। ${5 - verification.attempts} प्रयास बाकी हैं।`;
       }
-      if (verification.stage === "start" && booking.status === "Accepted") {
-        updateBookingStatus(booking, "In Progress", bookingStatusLabel("In Progress"));
-      } else if (verification.stage === "complete" && booking.status === "In Progress" && booking.pendingInvoice) {
+      if (verification.stage === "complete" && booking.status === "In Progress" && booking.pendingInvoice) {
         finalizeJobCompletion(booking);
       } else {
         return "इस booking की स्थिति OTP verification के लिए मान्य नहीं है।";
       }
       delete booking.verification;
       if (!saveStored("gharSevaBookings", bookings)) {
-        booking.status = verification.stage === "start" ? "Accepted" : "In Progress";
+        booking.status = "In Progress";
         if (previousTimeline) booking.timeline = previousTimeline;
         else delete booking.timeline;
         booking.verification = verification;
@@ -2106,6 +2126,10 @@
         toast("यह उदाहरण प्रोफ़ाइल है; इस पर वास्तविक booking उपलब्ध नहीं है।");
         return;
       }
+      if (isOwnProviderProfile(activeProvider)) {
+        toast("अपनी सेवा प्रोफ़ाइल पर booking नहीं कर सकते।");
+        return;
+      }
       const rateCard = getProviderRateCard(activeProvider);
       document.getElementById("bookingRateItem").innerHTML = rateCard.map((item) => `<option value="${escapeHTML(item.id)}">${escapeHTML(item.name)} · ${formatRupees(item.price)}</option>`).join("");
       document.getElementById("bookingRateNote").textContent = activeProvider.category === "Electrician"
@@ -2154,8 +2178,9 @@
       const rateCard = getProviderRateCard(activeProvider);
       document.getElementById("providerRateCard").innerHTML = `<h3>पारदर्शी रेट कार्ड</h3><p class="rate-card-note">${activeProvider.category === "Electrician" ? "उदाहरण दरें; parts और अतिरिक्त labour का final bill काम के बाद chat में साझा होगा।" : "दिखाई गई शुरुआती कीमत अनुमानित है; final charges काम के बाद invoice में स्पष्ट होंगे।"}</p>${rateCard.map((item) => `<div class="rate-card-line"><span>${escapeHTML(item.name)}</span><strong>${formatRupees(item.price)}</strong></div>`).join("")}`;
       const bookButton = document.getElementById("profileBookButton");
-      bookButton.disabled = Boolean(activeProvider.isUserProfile || activeProvider.isExampleProfile);
-      bookButton.textContent = activeProvider.isUserProfile
+      const ownProfile = isOwnProviderProfile(activeProvider);
+      bookButton.disabled = Boolean(ownProfile || activeProvider.isExampleProfile);
+      bookButton.textContent = ownProfile
         ? "यह आपकी प्रोफ़ाइल है"
         : activeProvider.isExampleProfile ? "उदाहरण प्रोफ़ाइल — बुकिंग उपलब्ध नहीं" : "बुकिंग करें";
       document.getElementById("providerProfileModal").classList.add("open");
@@ -2285,7 +2310,7 @@
       }
       list.innerHTML = [...userBookings].sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt))).map((booking) => `
         <div class="booking-row"><div class="booking-person"><img src="${booking.image}" alt="${escapeHTML(booking.provider)} की फोटो"><div><strong>${escapeHTML(booking.category)} · ${escapeHTML(booking.provider)}</strong><span>${escapeHTML(booking.city)} · ${escapeHTML(booking.date)} · ${escapeHTML(booking.time)}</span><span class="status">${escapeHTML(booking.status || "Pending")}</span>
-          ${booking.verification && accountRole === "customer" ? `<span class="otp-code-card"><strong>${booking.verification.stage === "start" ? "काम शुरू करने का OTP" : "काम पूरा करने का OTP"}</strong><span class="otp-code-value">${escapeHTML(booking.verification.code)}</span><span class="otp-code-note">यह code provider को केवल ${booking.verification.stage === "start" ? "काम शुरू होने से पहले" : "काम पूरा होने के बाद"} दें। SMS नहीं भेजा गया है। ${Date.now() > booking.verification.expiresAt ? "यह OTP expire हो चुका है; provider से नया code बनाने को कहें।" : ""}</span></span>` : ""}
+          ${booking.verification?.stage === "complete" && accountRole === "customer" ? `<span class="otp-code-card"><strong>काम पूरा करने का OTP</strong><span class="otp-code-value">${escapeHTML(booking.verification.code)}</span><span class="otp-code-note">यह code provider को काम पूरा होने के बाद दें। SMS नहीं भेजा गया है। ${Date.now() > booking.verification.expiresAt ? "यह OTP expire हो चुका है; provider से नया code बनाने को कहें।" : ""}</span></span>` : ""}
           ${booking.review ? `<span>आपकी रेटिंग: ${"★".repeat(booking.review.rating)} · ${escapeHTML(booking.review.text)}</span>` : booking.status === "Completed" ? `<span class="review-box"><select id="reviewRating-${booking.id}" aria-label="स्टार रेटिंग"><option value="5">★★★★★</option><option value="4">★★★★</option><option value="3">★★★</option><option value="2">★★</option><option value="1">★</option></select><input id="reviewText-${booking.id}" maxlength="240" placeholder="अपना रिव्यू लिखें"><button class="small-action accept" onclick="submitReview('${booking.id}')">रिव्यू भेजें</button></span>` : ""}
           <div class="booking-actions"><button class="small-action" onclick="openChat('${booking.id}')">💬 Job Chat</button>${canCustomerManageBooking(booking) ? `<button class="small-action" onclick="openRescheduleModal('${booking.id}')">🕒 समय बदलें</button><button class="small-action" onclick="cancelCustomerBooking('${booking.id}')">बुकिंग cancel करें</button>` : ""}${booking.invoice ? `<button class="small-action" onclick="printInvoice('${booking.id}')">🧾 Invoice / PDF</button>` : ""}${accountRole === "customer" && !booking.complaints?.some((item) => item.status === "Open") ? `<button class="small-action" onclick="openComplaint('${booking.id}')">⚠ Report / Complain</button>` : booking.complaints?.some((item) => item.status === "Open") ? '<span class="small-action disabled">शिकायत review में</span>' : ""}${booking.providerPhone ? `<a class="small-action" href="tel:${encodeURIComponent(booking.providerPhone)}">📞 Provider को कॉल</a>` : '<span class="small-action disabled" title="इस प्रोफ़ाइल में फोन नंबर उपलब्ध नहीं है।">📞 फोन नंबर उपलब्ध नहीं</span>'}<a class="small-action" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(booking.latitude && booking.longitude ? `${booking.latitude},${booking.longitude}` : booking.address)}">📍 Map</a></div>
           <details class="booking-timeline"><summary>Booking timeline · ${bookingTimeline(booking).length} अपडेट</summary><ol>${bookingTimeline(booking).slice().reverse().map((entry) => `<li><strong>${escapeHTML(entry.label || entry.status || "Booking update")}</strong> · ${formatTimelineTime(entry.createdAt)}${entry.type === "schedule" ? `<br>नई तारीख और समय: ${escapeHTML(entry.date || booking.date)} · ${escapeHTML(entry.time || booking.time)}` : ""}</li>`).join("")}</ol></details>
@@ -2330,10 +2355,8 @@
         const mapLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(booking.latitude && booking.longitude ? `${booking.latitude},${booking.longitude}` : booking.address)}`;
         const actions = booking.status === "Pending"
           ? `<button class="small-action accept" onclick="setBookingStatus('${booking.id}','Accepted')">स्वीकारें</button><button class="small-action" onclick="setBookingStatus('${booking.id}','Rejected')">अस्वीकारें</button>`
-          : booking.status === "Accepted" && booking.verification?.stage === "start"
-            ? `<button class="small-action accept" onclick="openOtpModal('${booking.id}')">Start OTP दर्ज करें</button><button class="small-action" onclick="requestJobOtp('${booking.id}','start')">नया OTP बनाएँ</button>`
-            : booking.status === "Accepted"
-            ? `<button class="small-action accept" onclick="setBookingStatus('${booking.id}','In Progress')">काम शुरू करें · OTP</button>`
+          : booking.status === "Accepted"
+            ? `<button class="small-action accept" onclick="setBookingStatus('${booking.id}','In Progress')">काम शुरू करें</button>`
             : booking.status === "In Progress" && booking.verification?.stage === "complete"
                 ? `<button class="small-action accept" onclick="openOtpModal('${booking.id}')">Completion OTP दर्ज करें</button><button class="small-action" onclick="requestJobOtp('${booking.id}','complete')">नया OTP बनाएँ</button>`
                 : booking.status === "In Progress" && !booking.invoice
@@ -2825,7 +2848,7 @@
       renderProviderPanel();
       renderAdmin();
       if (document.getElementById("chatView").classList.contains("active") && activeChatBookingId === booking.id) renderChat();
-      toast(booking.status === "In Progress" ? "Start OTP सत्यापित — job अब In Progress है।" : "Completion OTP सत्यापित — invoice chat में भेजा और job Completed हुआ।");
+      toast("काम पूरा होने का OTP सत्यापित — invoice chat में भेजा और job Completed हुआ।");
     });
     document.getElementById("resendJobOtp").addEventListener("click", () => {
       const booking = bookings.find((item) => item.id === activeOtpBookingId);
@@ -2930,7 +2953,10 @@
         createdAt: new Date().toISOString()
       };
       bookings.push(booking);
-      saveStored("gharSevaBookings", bookings);
+      if (!saveStored("gharSevaBookings", bookings)) {
+        bookings.pop();
+        return;
+      }
       closeModal();
       event.currentTarget.reset();
       appliedCoupon = null;
@@ -2940,7 +2966,7 @@
     });
     document.getElementById("profileBookButton").addEventListener("click", () => {
       const providerId = activeProvider && activeProvider.id;
-      if (activeProvider && activeProvider.isUserProfile) return;
+      if (activeProvider && isOwnProviderProfile(activeProvider)) return;
       document.getElementById("providerProfileModal").classList.remove("open");
       if (providerId) openBooking(providerId);
     });
