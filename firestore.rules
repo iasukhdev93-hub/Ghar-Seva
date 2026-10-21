@@ -115,6 +115,7 @@ service cloud.firestore {
           signedIn()
           && request.resource.data.ownerId == request.auth.uid
           && request.resource.data.isUserProfile == true
+          && request.resource.data.get('isAdminVerified', false) == false
         );
       allow update: if isAdmin()
         || (
@@ -123,6 +124,8 @@ service cloud.firestore {
           && request.resource.data.ownerId == request.auth.uid
           && resource.data.isUserProfile == true
           && request.resource.data.isUserProfile == true
+          && request.resource.data.get('isAdminVerified', false)
+            == resource.data.get('isAdminVerified', false)
         );
       allow delete: if isAdmin();
     }
