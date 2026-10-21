@@ -84,6 +84,8 @@
     .category small { color: var(--muted); display: block; margin-top: 4px; font-size: 10px; }
     .service-head { align-items: center; margin-top: 37px; }
     .filters { display: flex; align-items: center; gap: 8px; }
+    .favorites-filter { border: 1px solid var(--line); border-radius: 10px; background: white; color: #56615d; padding: 9px 11px; min-height: 38px; font-size: 12px; font-weight: 700; }
+    .favorites-filter[aria-pressed="true"] { border-color: #e7a4ad; background: #fff4f5; color: #bd4053; }
     .filter-select { border: 1px solid var(--line); border-radius: 10px; background: white; color: #56615d; padding: 9px 11px; font-size: 12px; outline-color: #9ccab5; }
     .price-filter { width: 82px; min-width: 72px; }
     .provider-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
@@ -92,7 +94,8 @@
     .provider-photo-wrap { height: 92px; position: relative; display: grid; place-items: center; background: linear-gradient(145deg, #f0f7f3, #e5f1ea); }
     .provider-photo { width: 68px; height: 68px; border: 3px solid white; border-radius: 50%; object-fit: cover; box-shadow: 0 3px 12px rgba(30,48,42,.16); }
     .verified { position: absolute; left: 7px; top: 7px; max-width: calc(100% - 48px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; background: rgba(255,255,255,.94); border: 1px solid rgba(23,107,82,.08); border-radius: 20px; padding: 4px 7px; color: var(--green); font-size: 8px; font-weight: 800; }
-    .heart { position: absolute; right: 7px; top: 7px; border: 1px solid rgba(24,33,31,.05); background: rgba(255,255,255,.94); color: #47514d; border-radius: 50%; width: 28px; height: 28px; font-size: 15px; }
+    .heart { position: absolute; right: 7px; top: 7px; border: 1px solid rgba(24,33,31,.05); background: rgba(255,255,255,.94); color: #47514d; border-radius: 50%; width: 36px; height: 36px; font-size: 18px; }
+    .heart.is-favorite { color: #dc5265; }
     .provider-info { padding: 9px 10px 10px; }
     .provider-name-row { display: flex; justify-content: space-between; align-items: start; gap: 6px; }
     .provider-info h3 { font-size: 13px; margin: 0 0 3px; overflow-wrap: anywhere; }
@@ -143,6 +146,8 @@
     .field.full { grid-column: 1/-1; }
     .field label { font-size: 12px; color: #56615d; font-weight: 700; }
     .field input, .field select, .field textarea { border: 1px solid #dfe5e2; border-radius: 10px; padding: 11px; outline-color: #8dc4aa; width: 100%; color: var(--ink); background: white; }
+    .field .verification-toggle { display: flex; align-items: center; gap: 8px; }
+    .field .verification-toggle input { width: auto; min-height: 0; }
     .form-actions { grid-column: 1/-1; display: flex; justify-content: end; }
     .admin-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 13px; margin: 20px 0; }
     .stat-card { border: 1px solid var(--line); background: white; border-radius: 16px; padding: 17px; }
@@ -367,7 +372,7 @@
       .provider-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
       .service-head { align-items: start; flex-direction: column; }
       .filters { display: grid; width: 100%; min-width: 0; grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .filter-select, .price-filter { width: 100%; min-width: 0; min-height: 42px; padding: 8px 7px; font-size: 11px; }
+      .filter-select, .price-filter, .favorites-filter { width: 100%; min-width: 0; min-height: 44px; padding: 8px 7px; font-size: 12px; }
       .booking-form, .profile-form { grid-template-columns: minmax(0, 1fr); }
       .field.full, .form-actions { grid-column: auto; }
       .panel { min-width: 0; padding: 15px; border-radius: 15px; }
@@ -485,6 +490,7 @@
       .trust-item span:last-child { font-size: 12px; }
       .category strong { font-size: 13px; }
       .filter-select { font-size: 13px; }
+      .filter-select, .favorites-filter { font-size: 16px; }
       .payment-option { font-size: 14px; }
       .chat-thread-head strong { font-size: 14px; }
       .chat-thread-head .status { font-size: 11px; }
@@ -543,11 +549,12 @@
       <section>
         <div class="section-head service-head">
           <div><h2 id="providerHeading">राजस्थान में लोकप्रिय प्रोफेशनल्स</h2><p id="providerSubheading">प्रोफाइलें · असली पार्टनर जुड़ने बाकी हैं।</p></div>
-          <div class="filters">
+          <div class="filters" aria-label="सेवा प्रोफ़ाइल फ़िल्टर">
             <select class="filter-select" id="sortSelect" aria-label="सॉर्ट करें"><option value="recommended">अनुशंसित</option><option value="rating">सबसे अच्छी रेटिंग</option><option value="price">कम कीमत पहले</option></select>
             <select class="filter-select" id="ratingSelect" aria-label="न्यूनतम रेटिंग"><option value="0">सभी रेटिंग</option><option value="4.8">4.8+ रेटिंग</option><option value="4.9">4.9+ रेटिंग</option></select>
             <input class="filter-select price-filter" id="minPrice" type="number" min="0" placeholder="₹ से" aria-label="कम से कम कीमत">
             <input class="filter-select price-filter" id="maxPrice" type="number" min="0" placeholder="₹ तक" aria-label="अधिकतम कीमत">
+            <button class="favorites-filter" id="favoritesOnlyToggle" type="button" aria-pressed="false">♡ पसंदीदा दिखाएँ</button>
           </div>
         </div>
         <div class="provider-grid" id="providerGrid"></div>
@@ -633,6 +640,7 @@
           <div id="providerProfileFields" class="profile-form field full" style="display:none;padding:0;border:0;background:none">
             <div class="field"><label for="providerCategory">आप कौन-सी सेवा देते हैं?</label><select id="providerCategory" name="providerCategory"></select></div>
             <div class="field"><label for="providerPrice">शुरुआती सेवा कीमत (₹)</label><input id="providerPrice" name="providerPrice" type="number" min="1" max="100000" step="1" placeholder="जैसे 499"></div>
+            <div class="field"><label for="providerAvailability">सेवा की उपलब्धता</label><select id="providerAvailability" name="providerAvailability"><option value="available">नई बुकिंग ले रहे हैं</option><option value="unavailable">अभी उपलब्ध नहीं</option></select></div>
             <div class="field"><label for="providerExperience">अनुभव (साल)</label><input id="providerExperience" name="providerExperience" type="number" min="0" max="60" step="1" placeholder="जैसे 5"></div>
             <div class="field"><label for="providerArea">सेवा का इलाका</label><input id="providerArea" name="providerArea" placeholder="जैसे मानसरोवर, जयपुर"></div>
             <div class="field"><label for="providerDuration">आमतौर पर काम में लगने वाला समय</label><input id="providerDuration" name="providerDuration" maxlength="80" placeholder="जैसे 1–2 घंटे"></div>
@@ -682,6 +690,8 @@
         <div class="field"><label for="adminProviderCity">शहर</label><select id="adminProviderCity" required></select></div>
         <div class="field"><label for="adminProviderArea">इलाका</label><input id="adminProviderArea" maxlength="120" required></div>
         <div class="field"><label for="adminProviderPrice">शुरुआती कीमत (₹)</label><input id="adminProviderPrice" type="number" min="1" max="100000" required></div>
+        <div class="field"><label for="adminProviderAvailability">सेवा की उपलब्धता</label><select id="adminProviderAvailability"><option value="available">नई बुकिंग ले रहे हैं</option><option value="unavailable">अभी उपलब्ध नहीं</option></select></div>
+        <div class="field"><label for="adminProviderVerified">सत्यापन</label><label class="verification-toggle"><input id="adminProviderVerified" type="checkbox"> दस्तावेज़ जाँचकर verified करें</label></div>
         <div class="field"><label for="adminProviderDuration">काम का समय</label><input id="adminProviderDuration" maxlength="80" required></div>
         <div class="field"><label for="adminProviderPhone">फोन</label><input id="adminProviderPhone" type="tel" maxlength="30"></div>
         <div class="field full"><label for="adminProviderImage">फोटो URL</label><input id="adminProviderImage" type="url" maxlength="500" placeholder="https://..."></div>
@@ -707,7 +717,7 @@
     <div class="modal">
       <div class="modal-head"><div><h2>सेवा प्रोफेशनल प्रोफ़ाइल</h2><span style="font-size:12px;color:var(--muted)">काम बुक करने से पहले जानें अपने एक्सपर्ट को।</span></div><button class="close-btn" type="button" data-close aria-label="बंद करें">×</button></div>
       <div style="text-align:center"><img id="profileProviderImage" src="" alt="" style="width:112px;height:112px;border-radius:50%;object-fit:cover;border:4px solid #edf6f1"><h3 id="providerProfileName" style="margin:12px 0 4px"></h3><span id="providerProfileTrade" style="font-size:13px;color:var(--muted)"></span></div>
-      <div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:15px 0"><span class="status">सेवा प्रोफ़ाइल</span><span class="status" id="providerProfileRating"></span><span class="status" id="providerProfileLocation"></span></div>
+      <div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:15px 0"><span class="status" id="providerProfileVerification"></span><span class="status" id="providerProfileAvailability"></span><span class="status" id="providerProfileRating"></span><span class="status" id="providerProfileLocation"></span></div>
       <p id="providerProfileBio" style="color:#56615d;font-size:13px;line-height:1.7;text-align:center;margin:14px 0 18px"></p>
       <div class="service-details-grid"><div class="service-detail-chip"><strong>सेवा का समय</strong><br><span id="providerProfileDuration">जाँच के अनुसार</span></div><div class="service-detail-chip"><strong>सेवा क्षेत्र</strong><br><span id="providerProfileArea">स्थानीय शहर</span></div><div class="service-detail-chip"><strong>कीमत</strong><br><span id="providerProfilePriceDetail"></span></div><div class="service-detail-chip"><strong>श्रेणी</strong><br><span id="providerProfileCategory"></span></div></div>
       <div class="rate-card-box" id="providerRateCard"></div>
@@ -726,6 +736,7 @@
           <div class="field"><label for="bookingCustomerPhone">फोन नंबर</label><input id="bookingCustomerPhone" name="customerPhone" type="tel" inputmode="tel" required></div>
           <div class="field"><label for="serviceDate">सेवा की तारीख</label><input id="serviceDate" name="date" type="date" required></div>
           <div class="field"><label for="serviceTime">समय</label><select id="serviceTime" name="time"><option>सुबह 9–12</option><option>दोपहर 12–3</option><option>शाम 3–6</option><option>शाम 6–8</option></select></div>
+          <p class="field full" id="bookingAvailabilityMessage" role="status" aria-live="polite"></p>
           <div class="field full"><label for="serviceAddress">पूरा पता</label><textarea id="serviceAddress" name="address" rows="2" placeholder="मकान नंबर, सड़क, इलाका और पिनकोड" required></textarea></div>
           <input type="hidden" id="bookingLatitude" name="latitude"><input type="hidden" id="bookingLongitude" name="longitude">
           <div class="field full"><label>भुगतान का तरीका</label>
@@ -1001,6 +1012,12 @@
     let activeRescheduleBookingId = null;
     let chatReturnView = "bookingsView";
     let selectedCategory = "";
+    const savedFavoriteProviderIds = loadStored("gharSevaFavoriteProviderIds", []);
+    let favoriteProviderIds = new Set(
+      (Array.isArray(savedFavoriteProviderIds) ? savedFavoriteProviderIds : [])
+        .filter((providerId) => typeof providerId === "string")
+    );
+    let showFavoritesOnly = false;
     let activeProvider = null;
     let activeInvoiceBookingId = null;
     let activeOtpBookingId = null;
@@ -1077,6 +1094,53 @@
     function escapeHTML(value) {
       return String(value).replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
     }
+    function safeProviderImageSource(value) {
+      const source = String(value || "");
+      if (/^data:image\/(?:png|jpeg|webp|gif);base64,[a-z0-9+/=]+$/i.test(source)) return source;
+      try {
+        const url = new URL(source, window.location.href);
+        if (url.protocol === "https:" || (
+          url.protocol === "http:" &&
+          url.origin === window.location.origin &&
+          ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname)
+        )) return url.href;
+      } catch (error) {
+        console.error("Provider image URL is invalid.", error);
+      }
+      return "./ghar-seva-192.png";
+    }
+    async function showBookingBrowserNotification(title, body) {
+      if (!("Notification" in window) || Notification.permission !== "granted") return;
+      try {
+        if ("serviceWorker" in navigator) {
+          const registration = await navigator.serviceWorker.ready;
+          await registration.showNotification(title, {
+            body,
+            icon: "./ghar-seva-192.png",
+            data: { url: "./index.html" }
+          });
+        } else {
+          new Notification(title, { body, icon: "./ghar-seva-192.png" });
+        }
+      } catch (error) {
+        console.error("Booking browser notification could not be shown.", error);
+      }
+    }
+    async function enableBookingNotifications() {
+      if (!("Notification" in window)) {
+        toast("इस browser में notifications उपलब्ध नहीं हैं।");
+        return;
+      }
+      try {
+        const permission = await Notification.requestPermission();
+        if (permission === "granted") toast("Booking notifications चालू हो गईं।");
+        else toast("Notifications की अनुमति नहीं मिली। Browser settings में इसे चालू कर सकते हैं।");
+      } catch (error) {
+        console.error("Booking notification permission could not be requested.", error);
+        toast("Notification अनुमति नहीं माँगी जा सकी। Browser settings जाँचें।");
+      }
+      renderBookings();
+    }
     function toast(message) {
       const element = document.getElementById("toast");
       element.textContent = message;
@@ -1093,15 +1157,22 @@
       });
     }
     function showInstallHelp() {
-      const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+      const userAgent = navigator.userAgent;
+      const isIOS = /iphone|ipad|ipod/i.test(userAgent);
+      const isAndroid = /android/i.test(userAgent);
+      const isInAppBrowser = /Instagram|FBAN|FBAV|FB_IAB|WhatsApp|Line\/|Twitter|LinkedInApp|Telegram/i.test(userAgent);
       const isFile = window.location.protocol === "file:";
       const isSecure = window.isSecureContext;
       const message = isFile
         ? `<p>यह पेज अभी आपके कंप्यूटर से सीधे <strong>file://</strong> के रूप में खुला है। Browser इस तरह खोली गई file को installable app नहीं बना सकता। पहले इसे HTTPS वाली website पर publish करें (या विकास के लिए localhost से खोलें), फिर यही बटन इस्तेमाल करें।</p>`
         : !isSecure
           ? `<p>App install और offline support के लिए website को <strong>HTTPS</strong> पर खोलना जरूरी है। अपने hosting provider से SSL/HTTPS चालू करवाएँ और page reload करें।</p>`
-          : isIOS
+          : isInAppBrowser
+            ? `<p>यह website किसी दूसरे app के अंदर खुले browser में है। ऐसे browser में app install उपलब्ध नहीं होता। ऊपर के <strong>⋮</strong> या <strong>Share</strong> menu से <strong>Open in Chrome</strong> (Android) या <strong>Open in Safari</strong> (iPhone) चुनें, फिर वहाँ install करें।</p>`
+            : isIOS
             ? `<p>iPhone/iPad पर Safari में यह page खोलें:</p><ol><li>नीचे या ऊपर का <strong>Share</strong> आइकन दबाएँ।</li><li><strong>Add to Home Screen</strong> चुनें।</li><li><strong>Add</strong> दबाएँ; GharSeva icon आपकी Home Screen पर आ जाएगा।</li></ol>`
+            : isAndroid
+              ? `<p>Android पर <strong>Chrome</strong> में website खोलें और ऊपर <strong>⋮</strong> menu दबाकर <strong>Install app</strong> चुनें। अगर यह विकल्प न दिखे, <strong>Add to Home screen</strong> चुनें। फिर भी विकल्प न मिले तो website HTTPS पर खुली होनी चाहिए और browser में page reload करके दोबारा देखें।</p>`
             : `<p>इस browser ने अभी direct install prompt उपलब्ध नहीं कराया। Browser के menu में <strong>Install app</strong> या <strong>Add to Home screen</strong> चुनें। Chrome/Edge desktop पर address bar के install आइकन या menu में <strong>Install GharSeva</strong> देखें।</p>`;
       document.getElementById("installHelpContent").innerHTML = `${message}${serviceWorkerInstallError ? `<p>${serviceWorkerInstallError}</p>` : ""}`;
       document.getElementById("installHelpModal").classList.add("open");
@@ -1325,6 +1396,9 @@
         .where("userEmail", "==", user.email)
         .where("userId", "==", user.uid)
         .onSnapshot((snapshot) => {
+          const priorUserBookings = new Map(
+            bookings.filter((booking) => booking.userId === user.uid).map((booking) => [booking.id, booking])
+          );
           const currentUserRecords = snapshot.docs
             .map((document) => ({ ...document.data(), id: document.id }))
             .filter((booking) => booking.userId === user.uid);
@@ -1332,6 +1406,19 @@
             bookings.filter((booking) => booking.userId === user.uid).map((booking) => [booking.id, booking])
           );
           currentUserRecords.forEach((booking) => mergedUserRecords.set(booking.id, booking));
+          currentUserRecords.forEach((booking) => {
+            const previous = priorUserBookings.get(booking.id);
+            if (previous && (
+              previous.status !== booking.status ||
+              previous.date !== booking.date ||
+              previous.time !== booking.time
+            )) {
+              showBookingBrowserNotification(
+                "आपकी booking अपडेट हुई",
+                `${booking.provider}: ${booking.status || "Pending"} · ${booking.date} · ${booking.time}`
+              );
+            }
+          });
           bookings = [
             ...bookings.filter((booking) => booking.userId !== user.uid),
             ...mergedUserRecords.values()
@@ -1483,10 +1570,11 @@
       const sort = document.getElementById("sortSelect").value;
       const availableProviders = getAllProviders();
       let results = availableProviders.filter((provider) => (!city || provider.city === city) &&
+        (!showFavoritesOnly || favoriteProviderIds.has(provider.id)) &&
         (!selectedCategory || provider.category === selectedCategory) &&
         getProviderRating(provider).rating >= minRating &&
         provider.price >= minPrice && provider.price <= maxPrice &&
-        (!query || `${provider.name} ${provider.trade} ${provider.category} ${provider.area}`.toLocaleLowerCase("hi").includes(query)));
+        (!query || `${provider.name} ${provider.trade} ${categories.find((item) => item.id === provider.category)?.label || ""} ${provider.area} ${provider.city} ${cities.find((item) => item.value === provider.city)?.label || ""}`.toLocaleLowerCase("hi").includes(query)));
       if (sort === "rating") results.sort((a, b) => getProviderRating(b).rating - getProviderRating(a).rating || getProviderRating(b).reviews - getProviderRating(a).reviews);
       if (sort === "price") results.sort((a, b) => a.price - b.price);
       const cityHindi = city ? cities.find((item) => item.value === city).label : "राजस्थान";
@@ -1506,21 +1594,26 @@
       grid.innerHTML = results.map((provider) => {
         const rating = getProviderRating(provider);
         const canBook = !provider.isExampleProfile && !isOwnProviderProfile(provider);
+        const isAvailable = isProviderAvailable(provider);
         const providerId = escapeHTML(JSON.stringify(provider.id));
         return `
         <article class="provider-card">
-          <div class="provider-photo-wrap"><img class="provider-photo" src="${provider.image}" alt="${escapeHTML(provider.name)} की प्रोफ़ाइल फोटो" loading="lazy"><span class="verified">${provider.isExampleProfile ? "उदाहरण प्रोफ़ाइल" : provider.isUserProfile ? "Service provider" : "Service listing"}</span><button class="heart" type="button" aria-label="पसंदीदा सेव करें" onclick="toggleFavorite(this)">♡</button></div>
+          <div class="provider-photo-wrap"><img class="provider-photo" src="${escapeHTML(safeProviderImageSource(provider.image))}" alt="${escapeHTML(provider.name)} की प्रोफ़ाइल फोटो" loading="lazy"><span class="verified">${provider.isExampleProfile ? "उदाहरण प्रोफ़ाइल" : provider.isAdminVerified === true ? "✓ सत्यापित" : "सत्यापन बाकी"}</span><button class="heart ${favoriteProviderIds.has(provider.id) ? "is-favorite" : ""}" type="button" aria-label="${favoriteProviderIds.has(provider.id) ? "पसंदीदा से हटाएँ" : "पसंदीदा में सेव करें"}" aria-pressed="${favoriteProviderIds.has(provider.id)}" onclick="toggleFavorite(${escapeHTML(JSON.stringify(provider.id))})">${favoriteProviderIds.has(provider.id) ? "♥" : "♡"}</button></div>
           <div class="provider-info"><div class="provider-name-row"><div><h3>${escapeHTML(provider.name)}</h3><span class="provider-trade">${escapeHTML(provider.trade)}</span></div><span class="rating">${rating.rating ? `<span>★</span> ${rating.rating.toFixed(1)}` : "नया"}</span></div>
-            <div class="provider-meta"><span>📍 ${escapeHTML(provider.area)}</span><span>${rating.reviews ? `💬 ${rating.reviews} रिव्यू` : "अभी रिव्यू नहीं"}</span><span>⏱ ${escapeHTML(provider.duration || "1–2 घंटे")}</span></div>
-            <div class="price-row"><span class="price">${formatRupees(provider.price)} <small>से शुरू</small></span><button class="book-btn" type="button" onclick="${canBook ? `openBooking(${providerId})` : `openProviderProfile(${providerId})`}">${canBook ? "बुक करें" : "प्रोफ़ाइल देखें"}</button></div>
+            <div class="provider-meta"><span>📍 ${escapeHTML(provider.area)}, ${escapeHTML(cities.find((item) => item.value === provider.city)?.label || provider.city)}</span><span>${rating.reviews ? `💬 ${rating.reviews} रिव्यू` : "अभी रिव्यू नहीं"}</span><span>⏱ ${escapeHTML(provider.duration || "1–2 घंटे")}</span><span>${isAvailable ? "● नई booking उपलब्ध" : "● अभी उपलब्ध नहीं"}</span></div>
+            <div class="price-row"><span class="price">${formatRupees(provider.price)} <small>से शुरू · अनुमानित</small></span>${canBook && isAvailable ? `<button class="book-btn" type="button" onclick="openBooking(${providerId})">बुक करें</button>` : canBook ? '<button class="book-btn" type="button" disabled>अभी उपलब्ध नहीं</button>' : `<button class="book-btn" type="button" onclick="openProviderProfile(${providerId})">प्रोफ़ाइल देखें</button>`}</div>
           </div>
         </article>`;
       }).join("");
     }
-    function toggleFavorite(button) {
-      button.textContent = button.textContent === "♡" ? "♥" : "♡";
-      button.style.color = button.textContent === "♥" ? "#dc5265" : "#47514d";
-      toast(button.textContent === "♥" ? "पसंदीदा में सेव किया गया।" : "पसंदीदा से हटाया गया।");
+    function toggleFavorite(providerId) {
+      const nextFavorites = new Set(favoriteProviderIds);
+      if (nextFavorites.has(providerId)) nextFavorites.delete(providerId);
+      else nextFavorites.add(providerId);
+      if (!saveStored("gharSevaFavoriteProviderIds", [...nextFavorites])) return;
+      favoriteProviderIds = nextFavorites;
+      renderProviders();
+      toast(favoriteProviderIds.has(providerId) ? "पसंदीदा में सेव किया गया।" : "पसंदीदा से हटाया गया।");
     }
     function showView(id) {
       if (id === "providerView" && !hasAdminAccess) {
@@ -1571,6 +1664,31 @@
       if (listedRates) return listedRates;
       const category = categories.find((item) => item.id === provider.category);
       return [{ id: "starting-rate", name: `${category ? category.label : provider.trade} · शुरुआती अनुमान`, price: Number(provider.price) }];
+    }
+    function isProviderAvailable(provider) {
+      return provider.availability !== "unavailable";
+    }
+    function isBookingSlotAvailable(providerId, date, time) {
+      return !bookings.some((booking) =>
+        booking.providerId === providerId &&
+        booking.date === date &&
+        booking.time === time &&
+        ["Pending", "Accepted", "In Progress"].includes(booking.status)
+      );
+    }
+    function updateBookingAvailability() {
+      const message = document.getElementById("bookingAvailabilityMessage");
+      if (!activeProvider || !isProviderAvailable(activeProvider)) {
+        message.textContent = "यह provider अभी नई booking नहीं ले रहा है।";
+        return false;
+      }
+      const date = document.getElementById("serviceDate").value;
+      const time = document.getElementById("serviceTime").value;
+      const available = date && time && isBookingSlotAvailable(activeProvider.id, date, time);
+      message.textContent = available
+        ? "इस device की booking जानकारी में यह समय खाली है; अंतिम पुष्टि provider करेगा।"
+        : "इस device की booking जानकारी में यह समय पहले से दर्ज है। कोई दूसरा समय चुनें।";
+      return Boolean(available);
     }
     function getSelectedRate() {
       if (!activeProvider) return null;
@@ -2128,6 +2246,10 @@
         toast("यह उदाहरण प्रोफ़ाइल है; इस पर वास्तविक booking उपलब्ध नहीं है।");
         return;
       }
+      if (!isProviderAvailable(activeProvider)) {
+        toast("यह provider अभी नई booking नहीं ले रहा है।");
+        return;
+      }
       if (isOwnProviderProfile(activeProvider)) {
         toast("अपनी सेवा प्रोफ़ाइल पर booking नहीं कर सकते।");
         return;
@@ -2137,7 +2259,7 @@
       document.getElementById("bookingRateNote").textContent = activeProvider.category === "Electrician"
         ? "रेट कार्ड की शुरुआती दर; parts/labour की अंतिम कीमत काम पूरा होने पर invoice में होगी।"
         : "यह शुरुआती कीमत का अनुमान है। Provider काम पूरा होने पर parts और labour का final bill साझा करेगा।";
-      document.getElementById("modalProviderImage").src = activeProvider.image;
+      document.getElementById("modalProviderImage").src = safeProviderImageSource(activeProvider.image);
       document.getElementById("modalProviderImage").alt = `${activeProvider.name} की फोटो`;
       document.getElementById("modalProviderName").textContent = activeProvider.name;
       document.getElementById("modalProviderTrade").textContent = `${activeProvider.trade} · ${activeProvider.rating ? `${activeProvider.rating} ★` : "नई प्रोफ़ाइल"} · ${activeProvider.area}`;
@@ -2159,15 +2281,22 @@
       document.getElementById("serviceAddress").value = customer.area || "";
       document.getElementById("bookingLatitude").value = customer.latitude || "";
       document.getElementById("bookingLongitude").value = customer.longitude || "";
+      updateBookingAvailability();
       document.getElementById("bookingModal").classList.add("open");
     }
     function openProviderProfile(providerId) {
       activeProvider = findProvider(providerId);
       if (!activeProvider) return;
-      document.getElementById("profileProviderImage").src = activeProvider.image;
+      document.getElementById("profileProviderImage").src = safeProviderImageSource(activeProvider.image);
       document.getElementById("profileProviderImage").alt = `${activeProvider.name} की प्रोफ़ाइल फोटो`;
       document.getElementById("providerProfileName").textContent = activeProvider.name;
       document.getElementById("providerProfileTrade").textContent = activeProvider.trade;
+      document.getElementById("providerProfileVerification").textContent = activeProvider.isExampleProfile
+        ? "उदाहरण प्रोफ़ाइल"
+        : activeProvider.isAdminVerified === true ? "✓ Admin द्वारा सत्यापित" : "सत्यापन बाकी";
+      document.getElementById("providerProfileAvailability").textContent = isProviderAvailable(activeProvider)
+        ? "नई booking उपलब्ध"
+        : "अभी नई booking नहीं";
       const providerRating = getProviderRating(activeProvider);
       document.getElementById("providerProfileRating").textContent = providerRating.rating ? `★ ${providerRating.rating.toFixed(1)} · ${providerRating.reviews} रिव्यू` : "नई प्रोफ़ाइल";
       document.getElementById("providerProfileLocation").textContent = `📍 ${activeProvider.area}, ${activeProvider.city}`;
@@ -2181,10 +2310,11 @@
       document.getElementById("providerRateCard").innerHTML = `<h3>पारदर्शी रेट कार्ड</h3><p class="rate-card-note">${activeProvider.category === "Electrician" ? "उदाहरण दरें; parts और अतिरिक्त labour का final bill काम के बाद chat में साझा होगा।" : "दिखाई गई शुरुआती कीमत अनुमानित है; final charges काम के बाद invoice में स्पष्ट होंगे।"}</p>${rateCard.map((item) => `<div class="rate-card-line"><span>${escapeHTML(item.name)}</span><strong>${formatRupees(item.price)}</strong></div>`).join("")}`;
       const bookButton = document.getElementById("profileBookButton");
       const ownProfile = isOwnProviderProfile(activeProvider);
-      bookButton.disabled = Boolean(ownProfile || activeProvider.isExampleProfile);
+      bookButton.disabled = Boolean(ownProfile || activeProvider.isExampleProfile || !isProviderAvailable(activeProvider));
       bookButton.textContent = ownProfile
         ? "यह आपकी प्रोफ़ाइल है"
-        : activeProvider.isExampleProfile ? "उदाहरण प्रोफ़ाइल — बुकिंग उपलब्ध नहीं" : "बुकिंग करें";
+        : activeProvider.isExampleProfile ? "उदाहरण प्रोफ़ाइल — बुकिंग उपलब्ध नहीं"
+          : !isProviderAvailable(activeProvider) ? "अभी उपलब्ध नहीं" : "बुकिंग करें";
       document.getElementById("providerProfileModal").classList.add("open");
     }
     function closeModal() { document.getElementById("bookingModal").classList.remove("open"); }
@@ -2237,7 +2367,8 @@
         .sort((a, b) => b.timestamp - a.timestamp);
       const unreadCount = updates.filter((item) => item.timestamp > readAt).length;
       container.hidden = false;
-      container.innerHTML = `<div class="section-head"><div><h2>Booking alerts ${unreadCount ? `<span class="status">${unreadCount} नई</span>` : ""}</h2><p class="page-subtitle">${unreadCount ? "आपकी बुकिंग में नए बदलाव हुए हैं।" : "Status और समय के बदलाव यहाँ दिखेंगे।"}</p></div>${unreadCount ? '<button class="small-action" type="button" onclick="markBookingNotificationsRead()">सब पढ़ लिया</button>' : ""}</div><div class="booking-notification-list">${updates.length ? updates.slice(0, 5).map(({ booking, entry }) => `<div class="booking-notification"><strong>${escapeHTML(entry.label || entry.status || "Booking अपडेट")} · ${escapeHTML(booking.id)}</strong><span>${entry.type === "schedule" ? `नया समय: ${escapeHTML(entry.date || booking.date)} · ${escapeHTML(entry.time || booking.time)}` : `स्थिति: ${escapeHTML(entry.status || booking.status || "Pending")}`} · ${formatTimelineTime(entry.createdAt)}</span></div>`).join("") : '<div class="booking-notification">अभी कोई booking update नहीं है।</div>'}</div>`;
+      const canRequestNotifications = "Notification" in window && Notification.permission !== "granted";
+      container.innerHTML = `<div class="section-head"><div><h2>Booking alerts ${unreadCount ? `<span class="status">${unreadCount} नई</span>` : ""}</h2><p class="page-subtitle">${unreadCount ? "आपकी बुकिंग में नए बदलाव हुए हैं।" : "Status और समय के बदलाव यहाँ दिखेंगे।"}</p></div><div class="booking-actions">${canRequestNotifications ? '<button class="small-action" type="button" onclick="enableBookingNotifications()">🔔 Browser alerts चालू करें</button>' : ""}${unreadCount ? '<button class="small-action" type="button" onclick="markBookingNotificationsRead()">सब पढ़ लिया</button>' : ""}</div></div><div class="booking-notification-list">${updates.length ? updates.slice(0, 5).map(({ booking, entry }) => `<div class="booking-notification"><strong>${escapeHTML(entry.label || entry.status || "Booking अपडेट")} · ${escapeHTML(booking.id)}</strong><span>${entry.type === "schedule" ? `नया समय: ${escapeHTML(entry.date || booking.date)} · ${escapeHTML(entry.time || booking.time)}` : `स्थिति: ${escapeHTML(entry.status || booking.status || "Pending")}`} · ${formatTimelineTime(entry.createdAt)}</span></div>`).join("") : '<div class="booking-notification">अभी कोई booking update नहीं है। Browser alerts के लिए app खुला रखें; background push के लिए server integration चाहिए।</div>'}</div>`;
     }
     function markBookingNotificationsRead() {
       const user = getSignedInUser();
@@ -2311,10 +2442,11 @@
         return;
       }
       list.innerHTML = [...userBookings].sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt))).map((booking) => `
-        <div class="booking-row"><div class="booking-person"><img src="${booking.image}" alt="${escapeHTML(booking.provider)} की फोटो"><div><strong>${escapeHTML(booking.category)} · ${escapeHTML(booking.provider)}</strong><span>${escapeHTML(booking.city)} · ${escapeHTML(booking.date)} · ${escapeHTML(booking.time)}</span><span class="status">${escapeHTML(booking.status || "Pending")}</span>
+        <div class="booking-row"><div class="booking-person"><img src="${escapeHTML(safeProviderImageSource(booking.image))}" alt="${escapeHTML(booking.provider)} की फोटो"><div><strong>${escapeHTML(booking.category)} · ${escapeHTML(booking.provider)}</strong><span>${escapeHTML(booking.city)} · ${escapeHTML(booking.date)} · ${escapeHTML(booking.time)}</span><span class="status">${escapeHTML(booking.status || "Pending")}</span>
           ${booking.verification?.stage === "complete" && accountRole === "customer" ? `<span class="otp-code-card"><strong>काम पूरा करने का OTP</strong><span class="otp-code-value">${escapeHTML(booking.verification.code)}</span><span class="otp-code-note">यह code provider को काम पूरा होने के बाद दें। SMS नहीं भेजा गया है। ${Date.now() > booking.verification.expiresAt ? "यह OTP expire हो चुका है; provider से नया code बनाने को कहें।" : ""}</span></span>` : ""}
           ${booking.review ? `<span>आपकी रेटिंग: ${"★".repeat(booking.review.rating)} · ${escapeHTML(booking.review.text)}</span>` : booking.status === "Completed" ? `<span class="review-box"><select id="reviewRating-${booking.id}" aria-label="स्टार रेटिंग"><option value="5">★★★★★</option><option value="4">★★★★</option><option value="3">★★★</option><option value="2">★★</option><option value="1">★</option></select><input id="reviewText-${booking.id}" maxlength="240" placeholder="अपना रिव्यू लिखें"><button class="small-action accept" onclick="submitReview('${booking.id}')">रिव्यू भेजें</button></span>` : ""}
-          <div class="booking-actions"><button class="small-action" onclick="openChat('${booking.id}')">💬 Job Chat</button>${canCustomerManageBooking(booking) ? `<button class="small-action" onclick="openRescheduleModal('${booking.id}')">🕒 समय बदलें</button><button class="small-action" onclick="cancelCustomerBooking('${booking.id}')">बुकिंग cancel करें</button>` : ""}${booking.invoice ? `<button class="small-action" onclick="printInvoice('${booking.id}')">🧾 Invoice / PDF</button>` : ""}${accountRole === "customer" && !booking.complaints?.some((item) => item.status === "Open") ? `<button class="small-action" onclick="openComplaint('${booking.id}')">⚠ Report / Complain</button>` : booking.complaints?.some((item) => item.status === "Open") ? '<span class="small-action disabled">शिकायत review में</span>' : ""}${booking.providerPhone ? `<a class="small-action" href="tel:${encodeURIComponent(booking.providerPhone)}">📞 Provider को कॉल</a>` : '<span class="small-action disabled" title="इस प्रोफ़ाइल में फोन नंबर उपलब्ध नहीं है।">📞 फोन नंबर उपलब्ध नहीं</span>'}<a class="small-action" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(booking.latitude && booking.longitude ? `${booking.latitude},${booking.longitude}` : booking.address)}">📍 Map</a></div>
+          <div class="booking-actions"><button class="small-action" onclick="openChat('${booking.id}')">💬 Job Chat</button>${canCustomerManageBooking(booking) ? `<button class="small-action" onclick="openRescheduleModal('${booking.id}')">🕒 समय बदलें</button><button class="small-action" onclick="cancelCustomerBooking('${booking.id}')">बुकिंग cancel करें</button>` : ""}${booking.invoice ? `<button class="small-action" onclick="printInvoice('${booking.id}')">🧾 Invoice / PDF</button>` : ""}${accountRole === "customer" && !booking.complaints?.some((item) => item.status === "Open") ? `<button class="small-action" onclick="openComplaint('${booking.id}')">⚠ Report / Complain</button>` : ""}${booking.providerPhone ? `<a class="small-action" href="tel:${encodeURIComponent(booking.providerPhone)}">📞 Provider को कॉल</a>` : '<span class="small-action disabled" title="इस प्रोफ़ाइल में फोन नंबर उपलब्ध नहीं है।">📞 फोन नंबर उपलब्ध नहीं</span>'}<a class="small-action" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(booking.latitude && booking.longitude ? `${booking.latitude},${booking.longitude}` : booking.address)}">📍 Map</a></div>
+          ${(booking.complaints || []).map((complaint) => `<span class="status">शिकायत: ${complaint.status === "Open" ? "समीक्षा में" : `सुलझी · ${escapeHTML(complaint.resolution || "समीक्षा पूरी")}`}</span>`).join("")}
           <details class="booking-timeline"><summary>Booking timeline · ${bookingTimeline(booking).length} अपडेट</summary><ol>${bookingTimeline(booking).slice().reverse().map((entry) => `<li><strong>${escapeHTML(entry.label || entry.status || "Booking update")}</strong> · ${formatTimelineTime(entry.createdAt)}${entry.type === "schedule" ? `<br>नई तारीख और समय: ${escapeHTML(entry.date || booking.date)} · ${escapeHTML(entry.time || booking.time)}` : ""}</li>`).join("")}</ol></details>
         </div></div><div class="booking-details">${formatRupees(booking.invoice ? booking.invoice.total : booking.total)}<small>${booking.invoice ? "अंतिम बिल" : "शुरुआती अनुमान"}</small><small>${escapeHTML(booking.payment)} · ${booking.payment === "Cash" ? "COD / नकद" : "ऑनलाइन भुगतान उपलब्ध नहीं"}</small><small>स्थिति: ${escapeHTML(booking.status || "Pending")}</small></div></div>`).join("");
     }
@@ -2364,7 +2496,7 @@
                 : booking.status === "In Progress" && !booking.invoice
                   ? `<button class="small-action accept" onclick="setBookingStatus('${booking.id}','Completed')">काम पूरा करें · बिल बनाएँ</button>`
             : booking.invoice ? `<button class="small-action" onclick="printInvoice('${booking.id}')">🧾 Invoice / PDF</button>` : "";
-        return `<div class="booking-row"><div class="booking-person"><img src="${booking.image}" alt=""><div><strong>${escapeHTML(booking.category)} · ${escapeHTML(booking.customer)}</strong><span>${escapeHTML(booking.date)} · ${escapeHTML(booking.time)} · ${escapeHTML(booking.city)}</span><span>${escapeHTML(booking.address)} · ${escapeHTML(booking.customerPhone || "")}</span><span class="status">${escapeHTML(booking.status || "Pending")}</span><div class="booking-actions">${actions}<a class="small-action" href="tel:${encodeURIComponent(booking.customerPhone || "")}">📞 ग्राहक को कॉल</a><a class="small-action" href="${mapLink}" target="_blank" rel="noopener">📍 Google Maps</a><button class="small-action" onclick="openChat('${booking.id}')">💬 Job Chat</button></div></div></div><div class="booking-details">${formatRupees(booking.providerPayout)}<small>${booking.invoice ? "Final bill · आपकी कमाई" : "अनुमानित आपकी कमाई"}</small></div></div>`;
+        return `<div class="booking-row"><div class="booking-person"><img src="${escapeHTML(safeProviderImageSource(booking.image))}" alt=""><div><strong>${escapeHTML(booking.category)} · ${escapeHTML(booking.customer)}</strong><span>${escapeHTML(booking.date)} · ${escapeHTML(booking.time)} · ${escapeHTML(booking.city)}</span><span>${escapeHTML(booking.address)} · ${escapeHTML(booking.customerPhone || "")}</span><span class="status">${escapeHTML(booking.status || "Pending")}</span><div class="booking-actions">${actions}<a class="small-action" href="tel:${encodeURIComponent(booking.customerPhone || "")}">📞 ग्राहक को कॉल</a><a class="small-action" href="${mapLink}" target="_blank" rel="noopener">📍 Google Maps</a><button class="small-action" onclick="openChat('${booking.id}')">💬 Job Chat</button></div></div></div><div class="booking-details">${formatRupees(booking.providerPayout)}<small>${booking.invoice ? "Final bill · आपकी कमाई" : "अनुमानित आपकी कमाई"}</small></div></div>`;
       }).join("");
     }
     function renderProfile() {
@@ -2382,11 +2514,12 @@
       if (providerProfile) {
         document.getElementById("providerCategory").value = providerProfile.category;
         document.getElementById("providerPrice").value = providerProfile.price;
+        document.getElementById("providerAvailability").value = providerProfile.availability || "available";
         document.getElementById("providerExperience").value = providerProfile.experience;
         document.getElementById("providerArea").value = providerProfile.area;
         document.getElementById("providerBio").value = providerProfile.bio;
         document.getElementById("providerDuration").value = providerProfile.duration || "";
-        document.getElementById("providerPhotoPreview").src = providerProfile.image;
+        document.getElementById("providerPhotoPreview").src = safeProviderImageSource(providerProfile.image);
         document.getElementById("providerPhotoPreview").style.display = "block";
       }
       syncCustomerDisplay();
@@ -2416,6 +2549,8 @@
       document.getElementById("adminProviderCity").value = provider.city || "";
       document.getElementById("adminProviderArea").value = provider.area || "";
       document.getElementById("adminProviderPrice").value = provider.price || "";
+      document.getElementById("adminProviderAvailability").value = provider.availability || "available";
+      document.getElementById("adminProviderVerified").checked = provider.isAdminVerified === true;
       document.getElementById("adminProviderDuration").value = provider.duration || "";
       document.getElementById("adminProviderPhone").value = provider.phone || "";
       document.getElementById("adminProviderImage").value = provider.image || "";
@@ -2535,6 +2670,12 @@
 
     document.getElementById("searchForm").addEventListener("submit", (event) => { event.preventDefault(); selectedCategory = ""; renderCategories(); renderProviders(); document.querySelector(".service-head").scrollIntoView({ behavior: "smooth", block: "start" }); });
     document.getElementById("citySelect").addEventListener("change", renderProviders);
+    document.getElementById("favoritesOnlyToggle").addEventListener("click", (event) => {
+      showFavoritesOnly = !showFavoritesOnly;
+      event.currentTarget.setAttribute("aria-pressed", String(showFavoritesOnly));
+      event.currentTarget.textContent = showFavoritesOnly ? "♥ पसंदीदा दिख रहे हैं" : "♡ पसंदीदा दिखाएँ";
+      renderProviders();
+    });
     document.getElementById("sortSelect").addEventListener("change", renderProviders);
     document.getElementById("ratingSelect").addEventListener("change", renderProviders);
     document.getElementById("minPrice").addEventListener("input", renderProviders);
@@ -2636,6 +2777,8 @@
         city: city.value,
         area: document.getElementById("adminProviderArea").value.trim(),
         price,
+        availability: document.getElementById("adminProviderAvailability").value,
+        isAdminVerified: document.getElementById("adminProviderVerified").checked,
         duration: document.getElementById("adminProviderDuration").value.trim(),
         phone: document.getElementById("adminProviderPhone").value.trim(),
         image: imageValue || existing?.image || providerTemplates.find((item) => item.category === category.id)?.image || "",
@@ -2777,6 +2920,10 @@
         document.getElementById("rescheduleModal").classList.remove("open");
         return;
       }
+      if (!isBookingSlotAvailable(booking.providerId, date, time)) {
+        toast("इस device की booking जानकारी में यह समय पहले से दर्ज है। दूसरा समय चुनें।");
+        return;
+      }
       const previousDate = booking.date;
       const previousTime = booking.time;
       const previousTimeline = booking.timeline;
@@ -2819,6 +2966,8 @@
     document.getElementById("beforePhotoInput").addEventListener("change", (event) => uploadChatPhoto("before", event.currentTarget));
     document.getElementById("afterPhotoInput").addEventListener("change", (event) => uploadChatPhoto("after", event.currentTarget));
     document.getElementById("bookingRateItem").addEventListener("change", updateCheckoutTotal);
+    document.getElementById("serviceDate").addEventListener("change", updateBookingAvailability);
+    document.getElementById("serviceTime").addEventListener("change", updateBookingAvailability);
     document.getElementById("invoicePartsAmount").addEventListener("input", invoiceTotals);
     document.getElementById("invoiceLabourAmount").addEventListener("input", invoiceTotals);
     document.getElementById("jobOtpInput").addEventListener("input", (event) => {
@@ -2906,6 +3055,10 @@
         toast("बुकिंग से पहले अपने खाते में लॉगिन करें।");
         return;
       }
+      if (!updateBookingAvailability()) {
+        toast("Provider या चुना हुआ समय उपलब्ध नहीं है। कोई दूसरा समय चुनें।");
+        return;
+      }
       const form = new FormData(event.currentTarget);
       const payment = String(form.get("payment"));
       const selectedRate = getSelectedRate();
@@ -2953,6 +3106,11 @@
         }],
         createdAt: new Date().toISOString()
       };
+      if (!isProviderAvailable(activeProvider) || !isBookingSlotAvailable(activeProvider.id, booking.date, booking.time)) {
+        toast("यह provider या चुना हुआ समय अब उपलब्ध नहीं है। कोई दूसरा समय चुनें।");
+        updateBookingAvailability();
+        return;
+      }
       bookings.push(booking);
       if (!saveStored("gharSevaBookings", bookings)) {
         bookings.pop();
@@ -3018,6 +3176,8 @@
           category,
           city: nextCustomer.city,
           area: String(form.get("providerArea")).trim(),
+          availability: String(form.get("providerAvailability")),
+          isAdminVerified: providerProfile?.isAdminVerified === true,
           rating: 0,
           reviews: 0,
           price: Number(form.get("providerPrice")),
