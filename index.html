@@ -204,6 +204,7 @@
     .chat-message p { margin: 4px 0; line-height: 1.5; overflow-wrap: anywhere; white-space: pre-wrap; }
     .chat-message time { display: block; color: var(--muted); font-size: 9px; text-align: right; }
     .chat-location-link { display: inline-flex; align-items: center; gap: 6px; margin-top: 5px; color: var(--green); font-size: 12px; font-weight: 800; }
+    .distance-badge { color: var(--green); font-weight: 800; }
     .chat-photo { display: block; width: min(100%, 360px); max-height: 280px; object-fit: cover; border-radius: 9px; margin-top: 7px; }
     .invoice-message { width: min(100%, 440px); overflow: hidden; border: 1px solid #dce9e1; border-radius: 13px; background: white; box-shadow: 0 5px 18px rgba(22,64,45,.08); }
     .invoice-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 13px 15px; color: white; background: var(--green); }
@@ -528,7 +529,7 @@
             <select class="city-select" id="citySelect" aria-label="राजस्थान का शहर चुनें"></select>
             <button type="submit">सेवा खोजें　→</button>
           </form>
-          <button type="button" class="location-button" id="useLocationButton">◎ मेरी मौजूदा लोकेशन इस्तेमाल करें</button>
+          <button type="button" class="location-button" id="useLocationButton" aria-pressed="false">◎ दूरी देखने के लिए मेरी लोकेशन इस्तेमाल करें</button>
           <span class="location-status" id="locationStatus" role="status">शहर चुनें या पता मैन्युअल रूप से दर्ज करें।</span>
           <div><button type="button" class="install-app-btn" id="heroInstallAppButton">📲 GharSeva ऐप इंस्टॉल करें</button></div>
         </div>
@@ -603,6 +604,7 @@
           <div class="chat-booking-service"><span>सेवा</span><strong id="chatService"></strong></div>
           <div class="chat-detail"><span>बुकिंग ID</span><strong id="chatBookingId"></strong></div>
           <div class="chat-detail"><span>तारीख और समय</span><strong id="chatBookingTime"></strong></div>
+          <div class="chat-detail"><span>दोनों के बीच अनुमानित दूरी</span><strong id="chatDistance">दोनों पक्षों की लोकेशन उपलब्ध होने पर दिखेगी</strong></div>
           <div class="chat-detail"><span>पूरा पता</span><strong id="chatBookingAddress"></strong></div>
           <div class="chat-detail"><span>शहर</span><strong id="chatBookingCity"></strong></div>
           <div class="chat-detail"><span>ग्राहक</span><strong id="chatCustomerName"></strong></div>
@@ -641,6 +643,7 @@
             <div class="field"><label for="providerCategory">आप कौन-सी सेवा देते हैं?</label><select id="providerCategory" name="providerCategory"></select></div>
             <div class="field"><label for="providerPrice">शुरुआती सेवा कीमत (₹)</label><input id="providerPrice" name="providerPrice" type="number" min="1" max="100000" step="1" placeholder="जैसे 499"></div>
             <div class="field"><label for="providerAvailability">सेवा की उपलब्धता</label><select id="providerAvailability" name="providerAvailability"><option value="available">नई बुकिंग ले रहे हैं</option><option value="unavailable">अभी उपलब्ध नहीं</option></select></div>
+            <div class="field full"><label class="verification-toggle"><input id="providerLocationSharing" name="providerLocationSharing" type="checkbox"> मेरी अनुमानित live location सभी listing viewers को दिखाएँ</label><button class="small-action" id="providerLocationButton" type="button">📍 Public location sharing शुरू करें</button><small>सिर्फ लगभग 1 किमी तक की अनुमानित दूरी/इलाका दिखेगा; exact coordinates कभी listing में साझा नहीं होंगे। Page खुला रहने पर location अपडेट होगी।</small><span id="providerLocationStatus" role="status" aria-live="polite"></span></div>
             <div class="field"><label for="providerExperience">अनुभव (साल)</label><input id="providerExperience" name="providerExperience" type="number" min="0" max="60" step="1" placeholder="जैसे 5"></div>
             <div class="field"><label for="providerArea">सेवा का इलाका</label><input id="providerArea" name="providerArea" placeholder="जैसे मानसरोवर, जयपुर"></div>
             <div class="field"><label for="providerDuration">आमतौर पर काम में लगने वाला समय</label><input id="providerDuration" name="providerDuration" maxlength="80" placeholder="जैसे 1–2 घंटे"></div>
@@ -1019,6 +1022,9 @@
     );
     let showFavoritesOnly = false;
     let activeProvider = null;
+    let customerLocationWatchId = null;
+    let providerLocationWatchId = null;
+    let providerLocationExpiryTimer = null;
     let activeInvoiceBookingId = null;
     let activeOtpBookingId = null;
     let deferredInstallPrompt = null;
@@ -1108,6 +1114,61 @@
         console.error("Provider image URL is invalid.", error);
       }
       return "./ghar-seva-192.png";
+    }
+    function isValidLocation(location) {
+      return Number.isFinite(Number(location?.latitude)) &&
+        Number(location.latitude) >= -90 && Number(location.latitude) <= 90 &&
+        Number.isFinite(Number(location?.longitude)) &&
+        Number(location.longitude) >= -180 && Number(location.longitude) <= 180;
+    }
+    function getProviderSharedLocation(provider) {
+      const updatedAt = Date.parse(provider?.locationUpdatedAt || "");
+      return provider?.locationSharingEnabled === true &&
+        Number.isFinite(updatedAt) &&
+        Date.now() - updatedAt < 5 * 60 * 1000 &&
+        isValidLocation(provider.sharedLocation)
+          ? provider.sharedLocation
+          : null;
+    }
+    function getCustomerLiveLocation() {
+      return customerLocationWatchId !== null && isValidLocation(customer) ? customer : null;
+    }
+    function getRoundedLocation(position) {
+      return {
+        latitude: Math.round(position.coords.latitude * 100) / 100,
+        longitude: Math.round(position.coords.longitude * 100) / 100
+      };
+    }
+    function getApproximateDistance(locationA, locationB) {
+      if (!isValidLocation(locationA) || !isValidLocation(locationB)) return "";
+      const radians = (degrees) => degrees * Math.PI / 180;
+      const latitudeDelta = radians(Number(locationB.latitude) - Number(locationA.latitude));
+      const longitudeDelta = radians(Number(locationB.longitude) - Number(locationA.longitude));
+      const haversine = Math.min(1, Math.sin(latitudeDelta / 2) ** 2 +
+        Math.cos(radians(Number(locationA.latitude))) *
+        Math.cos(radians(Number(locationB.latitude))) *
+        Math.sin(longitudeDelta / 2) ** 2);
+      const distanceKm = 6371 * 2 * Math.atan2(Math.sqrt(haversine), Math.sqrt(1 - haversine));
+      return distanceKm < 1
+        ? `लगभग ${Math.max(50, Math.round(distanceKm * 100) * 10)} मीटर`
+        : `लगभग ${Math.round(distanceKm)} किमी`;
+    }
+    function getChatLocationDistance(booking) {
+      const provider = getAllProviders().find((item) => item.id === booking.providerId);
+      const providerLocation = getProviderSharedLocation(provider) ||
+        [...(booking.chat || [])].reverse().find((message) =>
+          message.type === "location" && message.sender === booking.provider && isValidLocation(message)
+        );
+      const customerLocation = !activeChatIsAdmin &&
+        accountRole === "customer" &&
+        booking.userId === getSignedInUser()?.uid
+          ? getCustomerLiveLocation()
+          : null;
+      const sharedCustomerLocation = customerLocation ||
+        [...(booking.chat || [])].reverse().find((message) =>
+          message.type === "location" && message.sender === booking.customer && isValidLocation(message)
+        );
+      return getApproximateDistance(sharedCustomerLocation, providerLocation);
     }
     async function showBookingBrowserNotification(title, body) {
       if (!("Notification" in window) || Notification.permission !== "granted") return;
@@ -1502,6 +1563,7 @@
               saveStored("gharSevaProvider", ownProfile);
             }
             renderProviders();
+            if (document.getElementById("chatView").classList.contains("active")) renderChat();
             if (ownProfile && document.getElementById("profileView").classList.contains("active")) renderProfile();
             if (hasAdminAccess) renderAdmin();
           }, (error) => {
@@ -1595,12 +1657,13 @@
         const rating = getProviderRating(provider);
         const canBook = !provider.isExampleProfile && !isOwnProviderProfile(provider);
         const isAvailable = isProviderAvailable(provider);
+        const distance = getApproximateDistance(getCustomerLiveLocation(), getProviderSharedLocation(provider));
         const providerId = escapeHTML(JSON.stringify(provider.id));
         return `
         <article class="provider-card">
           <div class="provider-photo-wrap"><img class="provider-photo" src="${escapeHTML(safeProviderImageSource(provider.image))}" alt="${escapeHTML(provider.name)} की प्रोफ़ाइल फोटो" loading="lazy"><span class="verified">${provider.isExampleProfile ? "उदाहरण प्रोफ़ाइल" : provider.isAdminVerified === true ? "✓ सत्यापित" : "सत्यापन बाकी"}</span><button class="heart ${favoriteProviderIds.has(provider.id) ? "is-favorite" : ""}" type="button" aria-label="${favoriteProviderIds.has(provider.id) ? "पसंदीदा से हटाएँ" : "पसंदीदा में सेव करें"}" aria-pressed="${favoriteProviderIds.has(provider.id)}" onclick="toggleFavorite(${escapeHTML(JSON.stringify(provider.id))})">${favoriteProviderIds.has(provider.id) ? "♥" : "♡"}</button></div>
           <div class="provider-info"><div class="provider-name-row"><div><h3>${escapeHTML(provider.name)}</h3><span class="provider-trade">${escapeHTML(provider.trade)}</span></div><span class="rating">${rating.rating ? `<span>★</span> ${rating.rating.toFixed(1)}` : "नया"}</span></div>
-            <div class="provider-meta"><span>📍 ${escapeHTML(provider.area)}, ${escapeHTML(cities.find((item) => item.value === provider.city)?.label || provider.city)}</span><span>${rating.reviews ? `💬 ${rating.reviews} रिव्यू` : "अभी रिव्यू नहीं"}</span><span>⏱ ${escapeHTML(provider.duration || "1–2 घंटे")}</span><span>${isAvailable ? "● नई booking उपलब्ध" : "● अभी उपलब्ध नहीं"}</span></div>
+            <div class="provider-meta"><span>📍 ${escapeHTML(provider.area)}, ${escapeHTML(cities.find((item) => item.value === provider.city)?.label || provider.city)}</span>${distance ? `<span class="distance-badge">↔ ${escapeHTML(distance)} दूर</span>` : ""}<span>${rating.reviews ? `💬 ${rating.reviews} रिव्यू` : "अभी रिव्यू नहीं"}</span><span>⏱ ${escapeHTML(provider.duration || "1–2 घंटे")}</span><span>${isAvailable ? "● नई booking उपलब्ध" : "● अभी उपलब्ध नहीं"}</span></div>
             <div class="price-row"><span class="price">${formatRupees(provider.price)} <small>से शुरू · अनुमानित</small></span>${canBook && isAvailable ? `<button class="book-btn" type="button" onclick="openBooking(${providerId})">बुक करें</button>` : canBook ? '<button class="book-btn" type="button" disabled>अभी उपलब्ध नहीं</button>' : `<button class="book-btn" type="button" onclick="openProviderProfile(${providerId})">प्रोफ़ाइल देखें</button>`}</div>
           </div>
         </article>`;
@@ -2046,7 +2109,7 @@
         ? (activeChatIsAdmin ? "Admin को पूरी booking conversation और work-stream दिख रही है" : isProvider ? "ग्राहक · बुकिंग से जुड़ी बातचीत" : "सर्विस प्रोफेशनल · बुकिंग से जुड़ी बातचीत")
         : "सहायता टीम";
       document.getElementById("chatProviderImage").src = booking
-        ? booking.image
+        ? safeProviderImageSource(booking.image)
         : customer.photo;
       document.getElementById("chatProviderImage").alt = booking
         ? `${isProvider ? booking.customer : booking.provider} की फोटो`
@@ -2056,6 +2119,7 @@
         document.getElementById("chatService").textContent = booking.category;
         document.getElementById("chatBookingId").textContent = booking.id;
         document.getElementById("chatBookingTime").textContent = `${booking.date} · ${booking.time}${booking.duration ? ` · ${booking.duration}` : ""}`;
+          document.getElementById("chatDistance").textContent = getChatLocationDistance(booking) || "दोनों पक्षों की location sharing चालू होने पर दूरी दिखेगी";
         document.getElementById("chatBookingAddress").textContent = booking.address || "पता उपलब्ध नहीं";
         document.getElementById("chatBookingCity").textContent = booking.city;
         document.getElementById("chatCustomerName").textContent = booking.customer;
@@ -2073,14 +2137,16 @@
       const beforeInput = document.getElementById("beforePhotoInput");
       const afterInput = document.getElementById("afterPhotoInput");
       const canUploadPhotos = booking && booking.status !== "Rejected" && !activeChatIsAdmin;
-      document.getElementById("shareChatLocation").hidden = !booking || isProvider || activeChatIsAdmin;
+      document.getElementById("shareChatLocation").hidden = !booking || activeChatIsAdmin;
+      document.getElementById("shareChatLocation").textContent = isProvider
+        ? "📍 अपनी location ग्राहक के साथ साझा करें"
+        : "📍 अपनी location provider के साथ साझा करें";
       document.querySelectorAll(".photo-upload-action").forEach((label) => { label.hidden = !canUploadPhotos; });
       beforeInput.disabled = !canUploadPhotos || booking.status === "Completed";
       afterInput.disabled = !canUploadPhotos || booking.status !== "Completed";
       document.getElementById("afterPhotoLabel").classList.toggle("disabled", afterInput.disabled);
       beforeInput.title = beforeInput.disabled ? "काम शुरू होने से पहले की फोटो अपलोड करें।" : "";
       afterInput.title = afterInput.disabled ? "काम पूरा होने के बाद की फोटो अपलोड करें।" : "";
-      document.getElementById("shareChatLocation").hidden = !booking || isProvider || activeChatIsAdmin;
       const media = booking ? (booking.photos || []).map((photo) => ({ ...photo, type: "photo" })) : [];
       const timeline = [...messages, ...media].sort((a, b) => new Date(a.createdAt || 0) - new Date(b.createdAt || 0));
       document.getElementById("chatLog").innerHTML = timeline.length
@@ -2090,7 +2156,7 @@
           const mine = message.sender === currentName ? " mine" : "";
           if (message.type === "location" && Number.isFinite(Number(message.latitude)) && Number.isFinite(Number(message.longitude))) {
             const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${message.latitude},${message.longitude}`)}`;
-            return `<div class="chat-message${mine}"><strong>${escapeHTML(message.sender)}</strong><p>📍 मेरी live location</p><a class="chat-location-link" href="${mapUrl}" target="_blank" rel="noopener">Google Maps में लोकेशन खोलें ↗</a><time>${escapeHTML(time)}</time></div>`;
+            return `<div class="chat-message${mine}"><strong>${escapeHTML(message.sender)}</strong><p>📍 मेरी साझा location</p><a class="chat-location-link" href="${mapUrl}" target="_blank" rel="noopener">Google Maps में लोकेशन खोलें ↗</a><time>${escapeHTML(time)}</time></div>`;
           }
           const safeImage = typeof message.image === "string" && /^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(message.image)
             ? message.image
@@ -2129,7 +2195,7 @@
     }
     function shareChatLocation() {
       const booking = bookings.find((item) => item.id === activeChatBookingId);
-      if (!booking || accountRole === "provider") return;
+      if (!booking || activeChatIsAdmin) return;
       if (!navigator.geolocation) {
         showChatToolStatus("इस browser में live location उपलब्ध नहीं है। पता chat में लिखें।", true);
         return;
@@ -2138,8 +2204,6 @@
       navigator.geolocation.getCurrentPosition((position) => {
         const latitude = position.coords.latitude;
         const longitude = position.coords.longitude;
-        booking.latitude = latitude;
-        booking.longitude = longitude;
         const saved = addChatMessage(booking, {
           type: "location",
           sender: getChatCurrentName(booking),
@@ -2151,11 +2215,13 @@
           showChatToolStatus("Location chat में सेव नहीं हो सकी। Storage खाली करके फिर कोशिश करें।", true);
           return;
         }
-        customer.latitude = latitude;
-        customer.longitude = longitude;
-        saveStored("gharSevaCustomer", customer);
+        if (accountRole === "customer") {
+          customer.latitude = latitude;
+          customer.longitude = longitude;
+          renderProviders();
+        }
         renderChat();
-        showChatToolStatus("आपकी live location चैट में Google Maps link के रूप में शेयर हो गई।");
+        showChatToolStatus("आपकी current location इस booking की chat में Google Maps link के रूप में साझा हुई।");
       }, (error) => {
         console.error("Could not share booking location.", error);
         const message = error.code === 1
@@ -2515,6 +2581,13 @@
         document.getElementById("providerCategory").value = providerProfile.category;
         document.getElementById("providerPrice").value = providerProfile.price;
         document.getElementById("providerAvailability").value = providerProfile.availability || "available";
+        document.getElementById("providerLocationSharing").checked = providerProfile.locationSharingEnabled === true;
+        document.getElementById("providerLocationStatus").textContent = providerProfile.locationSharingEnabled === true
+          ? "Approximate location sharing चालू है; इसे रोकने के लिए checkbox हटाएँ।"
+          : "Location sharing बंद है।";
+        document.getElementById("providerLocationButton").textContent = providerLocationWatchId !== null
+          ? "■ Public location sharing बंद करें"
+          : "📍 Public location sharing शुरू करें";
         document.getElementById("providerExperience").value = providerProfile.experience;
         document.getElementById("providerArea").value = providerProfile.area;
         document.getElementById("providerBio").value = providerProfile.bio;
@@ -2668,6 +2741,95 @@
       toast("Provider listing Firebase से हटा दी गई।");
     }
 
+    async function saveProviderLocationSharing(enabled, location = null) {
+      const user = getSignedInUser();
+      const status = document.getElementById("providerLocationStatus");
+      if (!user || !providerProfile?.isUserProfile || providerProfile.ownerId !== user.uid || !firestoreDb) {
+        status.textContent = "पहले Firebase में अपनी provider profile सेव करें और login रहें।";
+        return false;
+      }
+      const sharedLocation = enabled && isValidLocation(location) ? location : null;
+      try {
+        await firestoreDb.collection("serviceProviders").doc(providerProfile.id).update({
+          locationSharingEnabled: enabled,
+          sharedLocation: sharedLocation ? {
+            latitude: sharedLocation.latitude,
+            longitude: sharedLocation.longitude
+          } : null,
+          locationUpdatedAt: sharedLocation ? new Date().toISOString() : null
+        });
+      } catch (error) {
+        console.error("Provider location sharing could not be updated.", error);
+        status.textContent = "Location sharing सेव नहीं हुई। Internet और Firestore rules जाँचें।";
+        toast("Provider location Firebase में अपडेट नहीं हुई।");
+        return false;
+      }
+      providerProfile = {
+        ...providerProfile,
+        locationSharingEnabled: enabled,
+        sharedLocation,
+        locationUpdatedAt: sharedLocation ? new Date().toISOString() : null
+      };
+      saveStored("gharSevaProvider", providerProfile);
+      const cloudIndex = cloudProviders.findIndex((item) => item.id === providerProfile.id);
+      if (cloudIndex !== -1) cloudProviders[cloudIndex] = providerProfile;
+      clearTimeout(providerLocationExpiryTimer);
+      if (enabled) {
+        providerLocationExpiryTimer = window.setTimeout(() => {
+          renderProviders();
+          if (document.getElementById("chatView").classList.contains("active")) renderChat();
+        }, 5 * 60 * 1000 + 1000);
+      }
+      renderProviders();
+      if (document.getElementById("chatView").classList.contains("active")) renderChat();
+      return true;
+    }
+    async function stopProviderLocationSharing() {
+      if (providerLocationWatchId !== null) {
+        navigator.geolocation.clearWatch(providerLocationWatchId);
+        providerLocationWatchId = null;
+      }
+      const stopped = await saveProviderLocationSharing(false);
+      if (stopped) {
+        document.getElementById("providerLocationButton").textContent = "📍 Public location sharing शुरू करें";
+        document.getElementById("providerLocationStatus").textContent = "Public location sharing बंद है।";
+      }
+    }
+    function startProviderLocationSharing() {
+      const status = document.getElementById("providerLocationStatus");
+      const user = getSignedInUser();
+      if (!navigator.geolocation) {
+        status.textContent = "इस browser में live location उपलब्ध नहीं है।";
+        return;
+      }
+      if (!user || !providerProfile?.isUserProfile || providerProfile.ownerId !== user.uid || !firestoreDb) {
+        status.textContent = "पहले Firebase में अपनी provider profile सेव करें और login रहें।";
+        return;
+      }
+      document.getElementById("providerLocationSharing").checked = true;
+      status.textContent = "Location permission माँगी जा रही है…";
+      if (providerLocationWatchId !== null) navigator.geolocation.clearWatch(providerLocationWatchId);
+      providerLocationWatchId = navigator.geolocation.watchPosition(async (position) => {
+        const location = getRoundedLocation(position);
+        const previous = getProviderSharedLocation(providerProfile);
+        if (previous?.latitude === location.latitude && previous?.longitude === location.longitude) return;
+        const saved = await saveProviderLocationSharing(true, location);
+        if (!saved) {
+          navigator.geolocation.clearWatch(providerLocationWatchId);
+          providerLocationWatchId = null;
+          document.getElementById("providerLocationSharing").checked = false;
+          return;
+        }
+        document.getElementById("providerLocationButton").textContent = "■ Public location sharing बंद करें";
+        status.textContent = "Approximate location share हो रही है; page खुला रहने तक अपडेट होगी।";
+      }, (error) => {
+        console.error("Could not watch provider location.", error);
+        status.textContent = error.code === 1
+          ? "Location permission नहीं मिली; browser settings में अनुमति देकर फिर कोशिश करें।"
+          : "Live location नहीं मिल सकी। Internet/GPS जाँचकर फिर कोशिश करें।";
+      }, { enableHighAccuracy: true, timeout: 20000, maximumAge: 15000 });
+    }
+
     document.getElementById("searchForm").addEventListener("submit", (event) => { event.preventDefault(); selectedCategory = ""; renderCategories(); renderProviders(); document.querySelector(".service-head").scrollIntoView({ behavior: "smooth", block: "start" }); });
     document.getElementById("citySelect").addEventListener("change", renderProviders);
     document.getElementById("favoritesOnlyToggle").addEventListener("click", (event) => {
@@ -2686,18 +2848,49 @@
         status.textContent = "इस browser में live location उपलब्ध नहीं है; पता मैन्युअल भरें।";
         return;
       }
+      if (customerLocationWatchId !== null) {
+        navigator.geolocation.clearWatch(customerLocationWatchId);
+        customerLocationWatchId = null;
+        delete customer.latitude;
+        delete customer.longitude;
+        saveStored("gharSevaCustomer", customer);
+        document.getElementById("useLocationButton").setAttribute("aria-pressed", "false");
+        document.getElementById("useLocationButton").textContent = "◎ दूरी देखने के लिए मेरी लोकेशन इस्तेमाल करें";
+        document.getElementById("bookingLatitude").value = "";
+        document.getElementById("bookingLongitude").value = "";
+        status.textContent = "Location sharing बंद है; providers को आपकी location नहीं दिखेगी।";
+        renderProviders();
+        return;
+      }
       status.textContent = "आपकी location की अनुमति माँगी जा रही है…";
-      navigator.geolocation.getCurrentPosition((position) => {
+      customerLocationWatchId = navigator.geolocation.watchPosition((position) => {
         customer.latitude = position.coords.latitude;
         customer.longitude = position.coords.longitude;
         saveStored("gharSevaCustomer", customer);
         document.getElementById("bookingLatitude").value = customer.latitude;
         document.getElementById("bookingLongitude").value = customer.longitude;
-        status.textContent = `लोकेशन मिल गई (${customer.latitude.toFixed(4)}, ${customer.longitude.toFixed(4)}) — booking में पूरा पता भी लिखें।`;
+        document.getElementById("useLocationButton").setAttribute("aria-pressed", "true");
+        document.getElementById("useLocationButton").textContent = "■ मेरी live location sharing बंद करें";
+        status.textContent = "आपकी location इसी browser में रहती है; distance दिखाने के लिए केवल opted-in providers की approximate location से तुलना होगी।";
+        renderProviders();
+        if (document.getElementById("chatView").classList.contains("active")) renderChat();
       }, (error) => {
         console.error("Could not read customer location.", error);
+        if (customerLocationWatchId !== null) navigator.geolocation.clearWatch(customerLocationWatchId);
+        customerLocationWatchId = null;
+        document.getElementById("useLocationButton").setAttribute("aria-pressed", "false");
         status.textContent = error.code === 1 ? "Location permission नहीं मिली; पता मैन्युअल भरें।" : "Live location नहीं मिल सकी; पता मैन्युअल भरें।";
       }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 });
+    });
+    document.getElementById("providerLocationButton").addEventListener("click", () => {
+      if (providerLocationWatchId !== null) {
+        stopProviderLocationSharing();
+        return;
+      }
+      startProviderLocationSharing();
+    });
+    document.getElementById("providerLocationSharing").addEventListener("change", (event) => {
+      if (!event.currentTarget.checked && providerLocationWatchId !== null) stopProviderLocationSharing();
     });
     document.getElementById("applyCoupon").addEventListener("click", () => {
       const code = document.getElementById("couponInput").value.trim().toUpperCase();
@@ -3177,6 +3370,13 @@
           city: nextCustomer.city,
           area: String(form.get("providerArea")).trim(),
           availability: String(form.get("providerAvailability")),
+          locationSharingEnabled: document.getElementById("providerLocationSharing").checked,
+          sharedLocation: document.getElementById("providerLocationSharing").checked
+            ? providerProfile?.sharedLocation || null
+            : null,
+          locationUpdatedAt: document.getElementById("providerLocationSharing").checked
+            ? providerProfile?.locationUpdatedAt || null
+            : null,
           isAdminVerified: providerProfile?.isAdminVerified === true,
           rating: 0,
           reviews: 0,
@@ -3229,6 +3429,10 @@
         accountRole = nextRole;
         providerProfile = nextProviderProfile;
         providerPhotoData = nextProviderProfile.image;
+        if (!nextProviderProfile.locationSharingEnabled && providerLocationWatchId !== null) {
+          navigator.geolocation.clearWatch(providerLocationWatchId);
+          providerLocationWatchId = null;
+        }
         saveStored("gharSevaCustomer", customer);
         saveStored("gharSevaRole", accountRole);
         saveStored("gharSevaProvider", providerProfile);
