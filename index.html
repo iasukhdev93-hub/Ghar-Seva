@@ -542,7 +542,7 @@
 
       <section>
         <div class="section-head service-head">
-          <div><h2 id="providerHeading">फलोदी में लोकप्रिय प्रोफेशनल्स</h2><p id="providerSubheading">प्रोफाइलें · असली पार्टनर जुड़ने बाकी हैं।</p></div>
+          <div><h2 id="providerHeading">राजस्थान में लोकप्रिय प्रोफेशनल्स</h2><p id="providerSubheading">प्रोफाइलें · असली पार्टनर जुड़ने बाकी हैं।</p></div>
           <div class="filters">
             <select class="filter-select" id="sortSelect" aria-label="सॉर्ट करें"><option value="recommended">अनुशंसित</option><option value="rating">सबसे अच्छी रेटिंग</option><option value="price">कम कीमत पहले</option></select>
             <select class="filter-select" id="ratingSelect" aria-label="न्यूनतम रेटिंग"><option value="0">सभी रेटिंग</option><option value="4.8">4.8+ रेटिंग</option><option value="4.9">4.9+ रेटिंग</option></select>
@@ -1015,7 +1015,7 @@
         `<option value="${escapeHTML(city.value)}">${includePin ? "📍 " : ""}${escapeHTML(city.label)} · ${escapeHTML(city.value)}</option>`
       ).join("");
       document.getElementById("citySelect").innerHTML =
-        `<optgroup label="राजस्थान — सभी 41 जिला मुख्यालय">${renderOptions(true)}</optgroup>`;
+        `<option value="">राजस्थान के सभी शहर</option><optgroup label="राजस्थान — सभी 41 जिला मुख्यालय">${renderOptions(true)}</optgroup>`;
       document.getElementById("customerCity").innerHTML =
         `<optgroup label="राजस्थान — सभी 41 जिला मुख्यालय">${renderOptions(false)}</optgroup>`;
       document.getElementById("adminProviderCity").innerHTML = renderOptions(false);
@@ -1482,23 +1482,25 @@
       const maxPrice = Number(document.getElementById("maxPrice").value) || Infinity;
       const sort = document.getElementById("sortSelect").value;
       const availableProviders = getAllProviders();
-      let results = availableProviders.filter((provider) => provider.city === city &&
+      let results = availableProviders.filter((provider) => (!city || provider.city === city) &&
         (!selectedCategory || provider.category === selectedCategory) &&
         getProviderRating(provider).rating >= minRating &&
         provider.price >= minPrice && provider.price <= maxPrice &&
         (!query || `${provider.name} ${provider.trade} ${provider.category} ${provider.area}`.toLocaleLowerCase("hi").includes(query)));
       if (sort === "rating") results.sort((a, b) => getProviderRating(b).rating - getProviderRating(a).rating || getProviderRating(b).reviews - getProviderRating(a).reviews);
       if (sort === "price") results.sort((a, b) => a.price - b.price);
-      const cityHindi = cities.find((item) => item.value === city).label;
+      const cityHindi = city ? cities.find((item) => item.value === city).label : "राजस्थान";
       document.getElementById("providerHeading").textContent = `${cityHindi} में ${selectedCategory ? categories.find((item) => item.id === selectedCategory).label : "लोकप्रिय"} प्रोफेशनल्स`;
       const exampleCount = results.filter((provider) => provider.isExampleProfile).length;
       const ownProfileListed = results.some(isOwnProviderProfile);
       document.getElementById("providerSubheading").textContent = results.length
         ? `${exampleCount ? `${exampleCount} उदाहरण प्रोफ़ाइलें (बुकिंग उपलब्ध नहीं)` : `${results.length} सेवा प्रोफ़ाइलें`}${ownProfileListed ? " · आपकी provider profile भी सूचीबद्ध है" : exampleCount === results.length ? " · वास्तविक सेवा पार्टनर की पुष्टि अभी नहीं हुई है" : ""}।`
-        : "दूसरी सेवा या शहर चुनकर फिर से खोजें।";
+        : city ? "दूसरी सेवा या शहर चुनकर फिर से खोजें।" : "दूसरी सेवा चुनकर फिर से खोजें।";
       const grid = document.getElementById("providerGrid");
       if (!results.length) {
-        grid.innerHTML = '<div class="empty-state">इस शहर में अभी कोई मिलती-जुलती सेवा नहीं मिली। कोई दूसरी कैटेगरी या शहर चुनें।</div>';
+        grid.innerHTML = city
+          ? '<div class="empty-state">इस शहर में अभी कोई मिलती-जुलती सेवा नहीं मिली। कोई दूसरी कैटेगरी या शहर चुनें।</div>'
+          : '<div class="empty-state">अभी कोई मिलती-जुलती सेवा नहीं मिली। कोई दूसरी कैटेगरी चुनें।</div>';
         return;
       }
       grid.innerHTML = results.map((provider) => {
@@ -2392,7 +2394,6 @@
     function syncCustomerDisplay() {
       document.querySelectorAll(".customer-name-label").forEach((element) => element.textContent = customer.name);
       document.querySelectorAll(".customer-avatar").forEach((image) => image.src = customer.photo);
-      document.getElementById("citySelect").value = customer.city;
       renderProviders();
     }
     function resetAdminProviderForm() {
