@@ -111,6 +111,92 @@ service cloud.firestore {
         && request.resource.data.timeline[request.resource.data.timeline.size() - 1].time == request.resource.data.time;
     }
 
+    function canProviderUpdateBookingStatus() {
+      return ownsAssignedProvider(resource.data)
+        && request.resource.data.userId == resource.data.userId
+        && request.resource.data.providerId == resource.data.providerId
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['status', 'timeline', 'declineReason'])
+        && (
+          (resource.data.status == 'Pending'
+            && request.resource.data.status in ['Accepted', 'Rejected'])
+          || (resource.data.status == 'Accepted'
+            && request.resource.data.status == 'In Progress')
+        )
+        && appendsOwnTimelineEntry('status')
+        && request.resource.data.timeline[request.resource.data.timeline.size() - 1].status
+          == request.resource.data.status
+        && (
+          request.resource.data.status != 'Rejected'
+          || (
+            request.resource.data.declineReason is string
+            && request.resource.data.declineReason.size() >= 5
+            && request.resource.data.declineReason.size() <= 300
+          )
+        )
+        && (
+          request.resource.data.status == 'Rejected'
+          || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['declineReason'])
+        );
+    }
+
+    function canProviderProposePrice() {
+      let proposal = request.resource.data.priceProposal;
+      let previousProposal = resource.data.get('priceProposal', {});
+      return ownsAssignedProvider(resource.data)
+        && resource.data.status == 'In Progress'
+        && request.resource.data.userId == resource.data.userId
+        && request.resource.data.providerId == resource.data.providerId
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['priceProposal'])
+        && previousProposal.get('status', '') in ['', 'rejected']
+        && proposal is map
+        && proposal.keys().hasOnly([
+          'partsDescription', 'parts', 'labour', 'extraTotal', 'revisedTotal',
+          'baseTotal', 'status', 'createdAt', 'proposedBy'
+        ])
+        && proposal.get('partsDescription', '') is string
+        && proposal.partsDescription.size() <= 160
+        && proposal.parts is number
+        && proposal.parts >= 0
+        && proposal.parts <= 1000000
+        && proposal.labour is number
+        && proposal.labour >= 0
+        && proposal.labour <= 1000000
+        && proposal.extraTotal == proposal.parts + proposal.labour
+        && proposal.extraTotal > 0
+        && proposal.baseTotal == resource.data.total
+        && proposal.revisedTotal == proposal.baseTotal + proposal.extraTotal
+        && proposal.status == 'pending'
+        && proposal.createdAt is string
+        && proposal.proposedBy == request.auth.uid;
+    }
+
+    function canCustomerRespondToPriceProposal() {
+      let oldProposal = resource.data.get('priceProposal', {});
+      let newProposal = request.resource.data.get('priceProposal', {});
+      return ownsBooking(resource.data)
+        && request.resource.data.userId == resource.data.userId
+        && request.resource.data.userEmail == resource.data.userEmail
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['priceProposal'])
+        && oldProposal.get('status', '') == 'pending'
+        && newProposal is map
+        && newProposal.keys().hasOnly([
+          'partsDescription', 'parts', 'labour', 'extraTotal', 'revisedTotal',
+          'baseTotal', 'status', 'createdAt', 'proposedBy', 'respondedAt', 'respondedBy'
+        ])
+        && newProposal.partsDescription == oldProposal.partsDescription
+        && newProposal.parts == oldProposal.parts
+        && newProposal.labour == oldProposal.labour
+        && newProposal.extraTotal == oldProposal.extraTotal
+        && newProposal.revisedTotal == oldProposal.revisedTotal
+        && newProposal.baseTotal == oldProposal.baseTotal
+        && newProposal.createdAt == oldProposal.createdAt
+        && newProposal.proposedBy == oldProposal.proposedBy
+        && newProposal.status in ['approved', 'rejected']
+        && newProposal.respondedAt is string
+        && newProposal.respondedBy == request.auth.uid;
+    }
+
     match /bookings/{bookingId} {
       allow read: if isAdmin() || ownsBooking(resource.data) || ownsAssignedProvider(resource.data);
       allow create: if signedIn()
@@ -120,6 +206,9 @@ service cloud.firestore {
       allow update: if isAdmin()
         || canCancelBooking()
         || canRescheduleBooking()
+        || canProviderUpdateBookingStatus()
+        || canProviderProposePrice()
+        || canCustomerRespondToPriceProposal()
         || canAppendProviderChat()
         || (
           ownsBooking(resource.data)
