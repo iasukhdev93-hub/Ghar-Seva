@@ -563,13 +563,13 @@
       </section>
 
       <section>
-        <div class="section-head"><div><h2>आपको किस सेवा की जरूरत है?</h2><p>घर और परिवार के लिए, एक ही जगह पर।</p></div></div>
+        <div class="section-head"><div><h2>आपको किस सेवा की जरूरत है?</h2><p>घर और परिवार के लिए, एक ही जगह पर। कैटेगरी सिर्फ सुविधा के लिए है; नीचे सभी सेवाओं के प्रोफाइल दिखते हैं।</p></div></div>
         <div class="categories" id="categories"></div>
       </section>
 
       <section>
         <div class="section-head service-head">
-          <div><h2 id="providerHeading">राजस्थान में लोकप्रिय प्रोफेशनल्स</h2><p id="providerSubheading">प्रोफाइलें · असली पार्टनर जुड़ने बाकी हैं।</p></div>
+          <div><h2 id="providerHeading">राजस्थान में सभी सेवाओं के प्रोफेशनल्स</h2><p id="providerSubheading">प्रोफाइलें · असली पार्टनर जुड़ने बाकी हैं।</p><button class="small-action" id="showAllProviders" type="button">सभी कैटेगरी के प्रोफाइल दिखाएँ</button></div>
           <div class="filters" aria-label="सेवा प्रोफ़ाइल फ़िल्टर">
             <select class="filter-select" id="sortSelect" aria-label="सॉर्ट करें"><option value="recommended">नज़दीकी पहले · अनुशंसित</option><option value="rating">दूरी के बाद रेटिंग</option><option value="price">दूरी के बाद कीमत</option></select>
             <select class="filter-select" id="ratingSelect" aria-label="न्यूनतम रेटिंग"><option value="0">सभी रेटिंग</option><option value="4.8">4.8+ रेटिंग</option><option value="4.9">4.9+ रेटिंग</option></select>
@@ -2126,6 +2126,36 @@
         return sortByPreference(first, second);
       });
     }
+    function interleaveProvidersByCategory(providersToMix) {
+      const categoriesByProvider = new Map();
+      providersToMix.forEach((provider) => {
+        const mixCategory = categories.find((category) => category.id === provider.category)?.label ||
+          provider.trade || provider.category;
+        if (!categoriesByProvider.has(mixCategory)) categoriesByProvider.set(mixCategory, []);
+        categoriesByProvider.get(mixCategory).push(provider);
+      });
+      const categoryQueues = [...categoriesByProvider.entries()];
+      const mixed = [];
+      let previousCategory = "";
+      let nextCategoryIndex = 0;
+      while (mixed.length < providersToMix.length) {
+        let selectedIndex = -1;
+        for (let offset = 0; offset < categoryQueues.length; offset++) {
+          const index = (nextCategoryIndex + offset) % categoryQueues.length;
+          const [category, queue] = categoryQueues[index];
+          if (queue.length && category !== previousCategory) {
+            selectedIndex = index;
+            break;
+          }
+        }
+        if (selectedIndex < 0) selectedIndex = categoryQueues.findIndex(([, queue]) => queue.length);
+        const [category, queue] = categoryQueues[selectedIndex];
+        mixed.push(queue.shift());
+        previousCategory = category;
+        nextCategoryIndex = (selectedIndex + 1) % categoryQueues.length;
+      }
+      return mixed;
+    }
     function renderProviders() {
       const city = document.getElementById("citySelect").value;
       const query = document.getElementById("searchInput").value.trim().toLocaleLowerCase("hi");
@@ -2152,6 +2182,9 @@
         getProviderRating(provider).rating >= minRating &&
         provider.price >= minPrice && provider.price <= maxPrice &&
         (!query || `${provider.name} ${provider.trade} ${categories.find((item) => item.id === provider.category)?.label || ""} ${provider.area} ${provider.city} ${cities.find((item) => item.value === provider.city)?.label || ""}`.toLocaleLowerCase("hi").includes(query)));
+      if (!selectedCategory && sort === "recommended") {
+        results = interleaveProvidersByCategory(results);
+      }
       if (customerLocation) {
         sortProvidersByDistance(results, customerLocation, sort);
       } else {
@@ -2162,7 +2195,7 @@
         if (sort === "price") results.sort((first, second) => first.price - second.price);
       }
       const cityHindi = city ? cities.find((item) => item.value === city).label : "राजस्थान";
-      document.getElementById("providerHeading").textContent = `${cityHindi} में ${selectedCategory ? categories.find((item) => item.id === selectedCategory).label : "लोकप्रिय"} प्रोफेशनल्स`;
+      document.getElementById("providerHeading").textContent = `${cityHindi} में ${selectedCategory ? categories.find((item) => item.id === selectedCategory).label : "सभी सेवाओं के"} प्रोफेशनल्स`;
       const exampleCount = results.filter((provider) => provider.isExampleProfile).length;
       const ownProfileListed = results.some(isOwnProviderProfile);
       document.getElementById("providerSubheading").textContent = results.length
@@ -3786,6 +3819,11 @@
 
     document.getElementById("searchForm").addEventListener("submit", (event) => { event.preventDefault(); selectedCategory = ""; renderCategories(); renderProviders(); document.querySelector(".service-head").scrollIntoView({ behavior: "smooth", block: "start" }); });
     document.getElementById("citySelect").addEventListener("change", renderProviders);
+    document.getElementById("showAllProviders").addEventListener("click", () => {
+      selectedCategory = "";
+      renderCategories();
+      renderProviders();
+    });
     document.getElementById("favoritesOnlyToggle").addEventListener("click", (event) => {
       showFavoritesOnly = !showFavoritesOnly;
       event.currentTarget.setAttribute("aria-pressed", String(showFavoritesOnly));
