@@ -150,6 +150,17 @@
     .chat-unread { display: inline-flex; min-width: 18px; height: 18px; align-items: center; justify-content: center; border-radius: 9px; padding: 0 5px; background: #d9485f; color: white; font-size: 10px; font-weight: 800; }
     .review-highlights { display: flex; flex-wrap: wrap; gap: 6px; margin: 7px 0; }
     .review-highlights label { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; }
+    .provider-weekly-availability { display: grid; gap: 8px; }
+    .provider-week-row { display: grid; grid-template-columns: minmax(76px, 1fr) 3fr; gap: 8px; align-items: center; }
+    .provider-week-row > strong { font-size: 11px; }
+    .provider-week-slots { display: flex; flex-wrap: wrap; gap: 6px; }
+    .provider-week-slots label { display: inline-flex; align-items: center; gap: 3px; border: 1px solid #dfe5e2; border-radius: 8px; padding: 5px 7px; font-size: 10px; }
+    .price-proposal-card { display: grid; gap: 7px; margin: 8px 0; padding: 10px; border: 1px solid #e3e9e5; border-radius: 10px; background: #f8fbf9; font-size: 12px; }
+    .price-proposal-card button { margin-right: 6px; }
+    @media (max-width: 520px) {
+      .provider-week-row { grid-template-columns: 1fr; gap: 4px; }
+      .provider-week-slots label { padding: 5px; }
+    }
     .booking-timeline { width: 100%; margin-top: 10px; color: var(--muted); font-size: 11px; }
     .booking-timeline summary { color: var(--green); cursor: pointer; font-weight: 700; }
     .booking-timeline ol { display: grid; gap: 7px; margin: 8px 0 0; padding-left: 19px; }
@@ -677,6 +688,7 @@
             <div class="field"><label for="providerCategory">आप कौन-सी सेवा देते हैं?</label><select id="providerCategory" name="providerCategory"></select></div>
             <div class="field"><label for="providerPrice">शुरुआती सेवा कीमत (₹)</label><input id="providerPrice" name="providerPrice" type="number" min="1" max="100000" step="1" placeholder="जैसे 499"></div>
             <div class="field"><label for="providerAvailability">सेवा की उपलब्धता</label><select id="providerAvailability" name="providerAvailability"><option value="available">नई बुकिंग ले रहे हैं</option><option value="unavailable">अभी उपलब्ध नहीं</option></select></div>
+            <div class="field full"><label>साप्ताहिक उपलब्ध समय</label><div id="providerWeeklyAvailability" class="provider-weekly-availability"></div><small>ग्राहक केवल चुने हुए दिनों/समय पर अनुरोध भेज पाएँगे। Provider की पुष्टि के बाद booking पक्की होगी।</small></div>
             <div class="field full"><label class="verification-toggle"><input id="providerLocationSharing" name="providerLocationSharing" type="checkbox"> मेरी अनुमानित live location सभी listing viewers को दिखाएँ</label><button class="small-action" id="providerLocationButton" type="button">📍 Public location sharing शुरू करें</button><small>सिर्फ लगभग 1 किमी तक की अनुमानित दूरी/इलाका दिखेगा; exact coordinates कभी listing में साझा नहीं होंगे। Page खुला रहने पर location अपडेट होगी।</small><span id="providerLocationStatus" role="status" aria-live="polite"></span></div>
             <div class="field"><label for="providerExperience">अनुभव (साल)</label><input id="providerExperience" name="providerExperience" type="number" min="0" max="60" step="1" placeholder="जैसे 5"></div>
             <div class="field"><label for="providerArea">सेवा का इलाका</label><input id="providerArea" name="providerArea" placeholder="जैसे मानसरोवर, जयपुर"></div>
@@ -779,7 +791,7 @@
           <div class="field full" id="bookingAccountEmail"></div>
           <div class="field"><label for="bookingCustomerPhone">फोन नंबर</label><input id="bookingCustomerPhone" name="customerPhone" type="tel" inputmode="tel" required></div>
           <div class="field"><label for="serviceDate">सेवा की तारीख</label><input id="serviceDate" name="date" type="date" required></div>
-          <div class="field"><label for="serviceTime">समय</label><select id="serviceTime" name="time"><option>सुबह 9–12</option><option>दोपहर 12–3</option><option>शाम 3–6</option><option>शाम 6–8</option></select></div>
+          <div class="field"><label for="serviceTime">समय</label><select id="serviceTime" name="time"><option value="सुबह 9–12">सुबह 9–12</option><option value="दोपहर 12–3">दोपहर 12–3</option><option value="शाम 3–6">शाम 3–6</option><option value="शाम 6–8">शाम 6–8</option></select></div>
           <p class="field full" id="bookingAvailabilityMessage" role="status" aria-live="polite"></p>
           <div class="field full"><label for="savedAddressSelect">सेव किया हुआ पता</label><div class="saved-address-row"><select id="savedAddressSelect" aria-label="सेव किया हुआ पता"><option value="">नया पता लिखें</option></select><button class="small-action" type="button" id="saveBookingAddress">यह पता सेव करें</button></div></div>
           <div class="saved-address-actions" id="savedAddressActions" hidden><button class="small-action" type="button" id="editSavedAddress">चुना पता बदलें</button><button class="small-action" type="button" id="deleteSavedAddress">चुना पता हटाएँ</button></div>
@@ -817,9 +829,22 @@
         <div class="field"><label for="invoicePartsAmount">Parts की कुल कीमत (₹)</label><input id="invoicePartsAmount" type="number" min="0" max="1000000" step="1" value="0" required></div>
         <div class="field"><label for="invoiceLabourAmount">Labour charge (₹)</label><input id="invoiceLabourAmount" type="number" min="0" max="1000000" step="1" required></div>
         <div class="invoice-calculation"><div class="summary-line"><span>Parts</span><strong id="invoicePartsPreview">₹0</strong></div><div class="summary-line"><span>Labour</span><strong id="invoiceLabourPreview">₹0</strong></div><div class="summary-line"><span>कूपन छूट</span><strong id="invoiceDiscountPreview">−₹0</strong></div><div class="summary-line total"><span>ग्राहक से कुल देय</span><strong id="invoiceTotalPreview">₹0</strong></div></div>
-        <p class="feature-note">इनवॉइस चैट में सेव होगा। UPI / कार्ड भुगतान अभी उपलब्ध नहीं है; COD ग्राहक provider को सीधे देगा।</p>
+        <p class="feature-note">इनवॉइस चैट में सेव होगा। ग्राहक की मंज़ूरी वाले अनुमान से अधिक final bill नहीं बनाया जा सकता; अधिक राशि के लिए पहले नया price proposal भेजें। UPI / कार्ड भुगतान अभी उपलब्ध नहीं है; COD ग्राहक provider को सीधे देगा।</p>
         <button class="primary-btn modal-submit" type="submit">Final बिल बनाएँ और completion OTP लें</button>
       </form>
+    </div>
+    <div class="modal-backdrop" id="priceProposalModal" role="dialog" aria-modal="true" aria-labelledby="priceProposalTitle">
+      <div class="modal">
+        <div class="modal-head"><div><h2 id="priceProposalTitle">अतिरिक्त कीमत की मंज़ूरी</h2><span id="priceProposalBookingLabel" style="font-size:12px;color:var(--muted)"></span></div><button class="close-btn" type="button" data-close aria-label="बंद करें">×</button></div>
+        <form class="invoice-form" id="priceProposalForm">
+          <div class="field"><label for="priceProposalPartsDescription">सामग्री / पार्ट्स का विवरण</label><input id="priceProposalPartsDescription" maxlength="160" placeholder="जैसे: पाइप और फिटिंग"></div>
+          <div class="field"><label for="priceProposalParts">सामग्री / पार्ट्स (₹)</label><input id="priceProposalParts" type="number" min="0" max="1000000" step="1" value="0" required></div>
+          <div class="field"><label for="priceProposalLabour">अतिरिक्त मेहनताना (₹)</label><input id="priceProposalLabour" type="number" min="0" max="1000000" step="1" value="0" required></div>
+          <p class="invoice-estimate" id="priceProposalTotal" aria-live="polite"></p>
+          <p class="feature-note">यह ग्राहक से अतिरिक्त खर्च की मंज़ूरी का अनुरोध है। ग्राहक की मंज़ूरी से पहले यह अतिरिक्त राशि देय नहीं होगी।</p>
+          <button class="primary-btn modal-submit" type="submit">ग्राहक से मंज़ूरी माँगें</button>
+        </form>
+      </div>
     </div>
   </div>
   <div class="modal-backdrop" id="jobOtpModal" role="dialog" aria-modal="true" aria-labelledby="jobOtpTitle">
@@ -1088,9 +1113,17 @@
     let providerLocationExpiryTimer = null;
     let activeInvoiceBookingId = null;
     let activeOtpBookingId = null;
+    let activePriceProposalBookingId = null;
     let deferredInstallPrompt = null;
     let serviceWorkerInstallError = "";
     const savedSupportContacts = loadStored("gharSevaSupportContacts", {});
+    const providerWeekDays = ["रविवार", "सोमवार", "मंगलवार", "बुधवार", "गुरुवार", "शुक्रवार", "शनिवार"];
+    const bookingTimeSlots = [
+      { id: "morning", label: "सुबह 9–12" },
+      { id: "midday", label: "दोपहर 12–3" },
+      { id: "afternoon", label: "शाम 3–6" },
+      { id: "evening", label: "शाम 6–8" }
+    ];
     let supportPhone = savedSupportContacts.phone || "";
     let supportWhatsapp = savedSupportContacts.whatsapp || "";
 
@@ -1848,11 +1881,12 @@
             if (previous && (
               previous.status !== booking.status ||
               previous.date !== booking.date ||
-              previous.time !== booking.time
+              previous.time !== booking.time ||
+              previous.priceProposal?.status !== booking.priceProposal?.status
             )) {
               showBookingBrowserNotification(
                 "आपकी booking अपडेट हुई",
-                `${booking.provider}: ${booking.status || "Pending"} · ${booking.date} · ${booking.time}`
+                `${booking.provider}: ${booking.status || "Pending"} · ${booking.date} · ${booking.time}${previous.priceProposal?.status !== booking.priceProposal?.status ? " · कीमत के प्रस्ताव पर जवाब दें" : ""}`
               );
             }
           });
@@ -2378,6 +2412,53 @@
         typeof address.address === "string"
       ) : [];
     }
+    function getProviderWeeklyAvailability(provider) {
+      const schedule = provider?.availabilitySchedule;
+      if (!schedule || typeof schedule !== "object") {
+        return Object.fromEntries(providerWeekDays.map((_, day) =>
+          [String(day), bookingTimeSlots.map((slot) => slot.label)]));
+      }
+      return Object.fromEntries(providerWeekDays.map((_, day) => {
+        const slots = schedule[String(day)];
+        return [String(day), Array.isArray(slots)
+          ? slots.filter((slot) => bookingTimeSlots.some((item) => item.label === slot))
+          : []];
+      }));
+    }
+    function renderProviderWeeklyAvailability(schedule = getProviderWeeklyAvailability(providerProfile)) {
+      const container = document.getElementById("providerWeeklyAvailability");
+      if (!container) return;
+      container.innerHTML = providerWeekDays.map((day, index) => `
+        <div class="provider-week-row"><strong>${day}</strong><div class="provider-week-slots">
+          ${bookingTimeSlots.map((slot) => `<label><input type="checkbox" data-availability-day="${index}" value="${escapeHTML(slot.label)}" ${schedule[String(index)]?.includes(slot.label) ? "checked" : ""}>${escapeHTML(slot.label)}</label>`).join("")}
+        </div></div>`).join("");
+    }
+    function readProviderWeeklyAvailability() {
+      return Object.fromEntries(providerWeekDays.map((_, index) => [
+        String(index),
+        [...document.querySelectorAll(`[data-availability-day="${index}"]:checked`)].map((input) => input.value)
+      ]));
+    }
+    function getProviderAvailableSlots(provider, date) {
+      if (!provider || !date) return [];
+      const day = String(new Date(`${date}T12:00:00`).getDay());
+      return getProviderWeeklyAvailability(provider)[day] || [];
+    }
+    function refreshBookingTimeOptions() {
+      const select = document.getElementById("serviceTime");
+      if (!activeProvider || !select) return;
+      const selectedDate = document.getElementById("serviceDate").value;
+      const availableSlots = new Set(getProviderAvailableSlots(activeProvider, selectedDate));
+      const currentValue = select.value;
+      [...select.options].forEach((option) => {
+        option.disabled = !availableSlots.has(option.value) ||
+          !isBookingSlotAvailable(activeProvider.id, selectedDate, option.value);
+      });
+      if (!availableSlots.has(currentValue) || !isBookingSlotAvailable(activeProvider.id, selectedDate, currentValue)) {
+        const firstAvailable = [...select.options].find((option) => !option.disabled);
+        select.value = firstAvailable ? firstAvailable.value : "";
+      }
+    }
     function renderSavedAddressOptions() {
       const select = document.getElementById("savedAddressSelect");
       const addresses = getSavedAddresses();
@@ -2460,7 +2541,9 @@
       return provider.availability !== "unavailable";
     }
     function isBookingSlotAvailable(providerId, date, time) {
-      return !bookings.some((booking) =>
+      const provider = findProvider(providerId);
+      return Boolean(provider && getProviderAvailableSlots(provider, date).includes(time)) &&
+        !bookings.some((booking) =>
         booking.providerId === providerId &&
         booking.date === date &&
         booking.time === time &&
@@ -2474,11 +2557,14 @@
         return false;
       }
       const date = document.getElementById("serviceDate").value;
+      refreshBookingTimeOptions();
       const time = document.getElementById("serviceTime").value;
       const available = date && time && isBookingSlotAvailable(activeProvider.id, date, time);
       message.textContent = available
-        ? "इस device की booking जानकारी में यह समय खाली है; अंतिम पुष्टि provider करेगा।"
-        : "इस device की booking जानकारी में यह समय पहले से दर्ज है। कोई दूसरा समय चुनें।";
+        ? "Provider के तय साप्ताहिक समय में यह slot उपलब्ध दिख रहा है। Booking provider स्वीकार करने पर पक्की होगी।"
+        : date && !getProviderAvailableSlots(activeProvider, date).length
+          ? "Provider इस दिन उपलब्ध नहीं है। कृपया दूसरी तारीख चुनें।"
+          : "यह समय provider के तय schedule में नहीं है या इस device की booking में पहले से दर्ज है। दूसरा समय चुनें।";
       return Boolean(available);
     }
     function getSelectedRate() {
@@ -2557,12 +2643,176 @@
       const user = getSignedInUser();
       return Boolean(provider?.isUserProfile && user && provider.ownerId === user.uid);
     }
-    function setBookingStatus(bookingId, status) {
+    function canCurrentProviderManageBooking(booking) {
+      const user = getSignedInUser();
+      return Boolean(!hasAdminAccess && accountRole === "provider" && user && providerProfile?.isUserProfile &&
+        providerProfile.ownerId === user.uid && booking?.providerId === providerProfile.id);
+    }
+    async function updateProviderBookingStatus(booking, status, rejectionReason = "") {
+      const user = getSignedInUser();
+      const allowedTransition = booking.status === "Pending" && ["Accepted", "Rejected"].includes(status) ||
+        booking.status === "Accepted" && status === "In Progress";
+      if (!user || !canCurrentProviderManageBooking(booking) || !allowedTransition) {
+        toast("यह booking अब स्वीकार/अपडेट नहीं की जा सकती। सूची refresh करके देखें।");
+        return;
+      }
+      if (!window.firebase?.firestore) {
+        toast("Booking अपडेट करने के लिए Firebase connection उपलब्ध नहीं है।");
+        return;
+      }
+      const label = status === "Rejected"
+        ? `Provider ने booking अस्वीकार की: ${rejectionReason}`
+        : bookingStatusLabel(status);
+      const entry = {
+        type: "status",
+        status,
+        label,
+        actor: providerProfile.name,
+        actorId: user.uid,
+        createdAt: new Date().toISOString()
+      };
+      const timeline = [...(Array.isArray(booking.timeline) ? booking.timeline : []), entry];
+      const update = { status, timeline };
+      if (status === "Rejected") update.declineReason = rejectionReason;
+      try {
+        firestoreDb = firestoreDb || window.firebase.firestore();
+        await firestoreDb.collection("bookings").doc(booking.id).update(update);
+      } catch (error) {
+        console.error("Provider booking status could not be updated.", error);
+        toast("Booking status Firebase में अपडेट नहीं हुआ। Internet और firestore.rules जाँचें।");
+        return;
+      }
+      booking.status = status;
+      booking.timeline = timeline;
+      if (status === "Rejected") booking.declineReason = rejectionReason;
+      syncedBookingData.set(booking.id, JSON.stringify(booking));
+      saveStored("gharSevaBookings", bookings);
+      renderBookings();
+      renderProviderPanel();
+      toast(status === "Accepted" ? "Booking स्वीकार हुई और ग्राहक को सूचना भेजी गई।"
+        : status === "Rejected" ? "कारण सहित अस्वीकार की सूचना ग्राहक को भेजी गई।"
+          : "काम शुरू होने की सूचना ग्राहक को भेजी गई।");
+    }
+    function openPriceProposal(bookingId) {
+      const booking = bookings.find((item) => item.id === bookingId);
+      if (!canCurrentProviderManageBooking(booking) || booking.status !== "In Progress" ||
+          ["pending", "approved"].includes(booking.priceProposal?.status)) {
+        toast("अतिरिक्त कीमत केवल अपनी चल रही booking के लिए माँग सकते हैं।");
+        return;
+      }
+      activePriceProposalBookingId = bookingId;
+      document.getElementById("priceProposalBookingLabel").textContent =
+        `बुकिंग ${booking.id} · मौजूदा अनुमान ${formatRupees(booking.total)}`;
+      document.getElementById("priceProposalPartsDescription").value = "";
+      document.getElementById("priceProposalParts").value = "0";
+      document.getElementById("priceProposalLabour").value = "0";
+      updatePriceProposalTotal();
+      document.getElementById("priceProposalModal").classList.add("open");
+    }
+    function updatePriceProposalTotal() {
+      const booking = bookings.find((item) => item.id === activePriceProposalBookingId);
+      const parts = Number(document.getElementById("priceProposalParts").value) || 0;
+      const labour = Number(document.getElementById("priceProposalLabour").value) || 0;
+      const extra = parts + labour;
+      document.getElementById("priceProposalTotal").textContent = booking
+        ? `अतिरिक्त राशि: ${formatRupees(extra)} · मंज़ूरी के बाद कुल अनुमान: ${formatRupees(Number(booking.total) + extra)}`
+        : "";
+      return { parts, labour, extra };
+    }
+    async function submitPriceProposal(event) {
+      event.preventDefault();
+      const booking = bookings.find((item) => item.id === activePriceProposalBookingId);
+      const user = getSignedInUser();
+      const partsInput = document.getElementById("priceProposalParts");
+      const labourInput = document.getElementById("priceProposalLabour");
+      if (!user || !canCurrentProviderManageBooking(booking) || booking?.status !== "In Progress" ||
+          ["pending", "approved"].includes(booking.priceProposal?.status) ||
+          !partsInput.validity.valid || !labourInput.validity.valid) {
+        toast("Booking, राशि और provider access जाँचकर फिर कोशिश करें।");
+        return;
+      }
+      const { parts, labour, extra } = updatePriceProposalTotal();
+      if (extra <= 0) {
+        toast("मंज़ूरी माँगने के लिए अतिरिक्त राशि शून्य से अधिक भरें।");
+        return;
+      }
+      const proposal = {
+        partsDescription: document.getElementById("priceProposalPartsDescription").value.trim(),
+        parts,
+        labour,
+        extraTotal: extra,
+        revisedTotal: Number(booking.total) + extra,
+        baseTotal: Number(booking.total),
+        status: "pending",
+        createdAt: new Date().toISOString(),
+        proposedBy: user.uid
+      };
+      try {
+        firestoreDb = firestoreDb || window.firebase.firestore();
+        await firestoreDb.collection("bookings").doc(booking.id).update({ priceProposal: proposal });
+      } catch (error) {
+        console.error("Price proposal could not be sent for customer approval.", error);
+        toast("कीमत का प्रस्ताव Firebase में नहीं भेजा गया। Internet और firestore.rules जाँचें।");
+        return;
+      }
+      booking.priceProposal = proposal;
+      syncedBookingData.set(booking.id, JSON.stringify(booking));
+      saveStored("gharSevaBookings", bookings);
+      document.getElementById("priceProposalModal").classList.remove("open");
+      activePriceProposalBookingId = null;
+      renderBookings();
+      renderProviderPanel();
+      toast("कीमत का विवरण ग्राहक की मंज़ूरी के लिए भेजा गया।");
+    }
+    async function respondToPriceProposal(bookingId, decision) {
+      const user = getSignedInUser();
+      const booking = bookings.find((item) => item.id === bookingId);
+      if (!user || !booking || booking.userId !== user.uid || booking.priceProposal?.status !== "pending" ||
+          !["approved", "rejected"].includes(decision)) {
+        toast("यह कीमत का प्रस्ताव अब जवाब देने योग्य नहीं है।");
+        return;
+      }
+      const proposal = {
+        ...booking.priceProposal,
+        status: decision,
+        respondedAt: new Date().toISOString(),
+        respondedBy: user.uid
+      };
+      try {
+        firestoreDb = firestoreDb || window.firebase.firestore();
+        await firestoreDb.collection("bookings").doc(booking.id).update({ priceProposal: proposal });
+      } catch (error) {
+        console.error("Customer response to price proposal could not be saved.", error);
+        toast("आपका जवाब Firebase में सेव नहीं हुआ। Internet जाँचकर फिर कोशिश करें।");
+        return;
+      }
+      booking.priceProposal = proposal;
+      syncedBookingData.set(booking.id, JSON.stringify(booking));
+      saveStored("gharSevaBookings", bookings);
+      renderBookings();
+      toast(decision === "approved"
+        ? "अतिरिक्त कीमत मंज़ूर हुई। अंतिम बिल इस मंज़ूर कुल अनुमान से अधिक नहीं होना चाहिए।"
+        : "अतिरिक्त कीमत अस्वीकार हुई; पहले का अनुमान लागू रहेगा।");
+    }
+    async function setBookingStatus(bookingId, status) {
+      const booking = bookings.find((item) => item.id === bookingId);
+      if (canCurrentProviderManageBooking(booking)) {
+        let reason = "";
+        if (status === "Rejected") {
+          reason = window.prompt("ग्राहक को booking अस्वीकार करने का कारण बताएं (कम-से-कम 5 अक्षर):") || "";
+          reason = reason.trim();
+          if (reason.length < 5 || reason.length > 300) {
+            toast("अस्वीकार करने का कारण 5 से 300 अक्षरों में लिखें।");
+            return;
+          }
+        }
+        await updateProviderBookingStatus(booking, status, reason);
+        return;
+      }
       if (!hasAdminAccess) {
         toast("Job status बदलने के लिए Admin login जरूरी है।");
         return;
       }
-      const booking = bookings.find((item) => item.id === bookingId);
       if (!booking) return;
       if (status === "Completed") {
         if (booking.status === "In Progress" && booking.pendingInvoice) openOtpModal(bookingId);
@@ -3460,7 +3710,9 @@
         ? `<div class="empty-state">${escapeHTML(userBookingSyncError)} स्थानीय रूप से उपलब्ध bookings दिखाई जा रही हैं। <button class="small-action" type="button" onclick="retryBookingSync()">फिर कोशिश करें</button></div>`
         : "") + [...userBookings].sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt))).map((booking) => `
         <div class="booking-row"><div class="booking-person"><img src="${escapeHTML(safeProviderImageSource(booking.image))}" alt="${escapeHTML(booking.provider)} की फोटो"><div><strong>${escapeHTML(booking.category)} · ${escapeHTML(booking.provider)}</strong><span>${escapeHTML(booking.city)} · ${escapeHTML(booking.date)} · ${escapeHTML(booking.time)}</span><span class="status">${escapeHTML(booking.status || "Pending")}</span>
+          ${booking.declineReason ? `<span>Provider का कारण: ${escapeHTML(booking.declineReason)}</span>` : ""}
           ${booking.verification?.stage === "complete" && accountRole === "customer" ? `<span class="otp-code-card"><strong>काम पूरा करने का OTP</strong><span class="otp-code-value">${escapeHTML(booking.verification.code)}</span><span class="otp-code-note">यह code provider को काम पूरा होने के बाद दें। SMS नहीं भेजा गया है। ${Date.now() > booking.verification.expiresAt ? "यह OTP expire हो चुका है; provider से नया code बनाने को कहें।" : ""}</span></span>` : ""}
+          ${renderCustomerPriceProposal(booking)}
           ${booking.review ? `<span>आपकी रेटिंग: ${"★".repeat(booking.review.rating)} · ${escapeHTML(booking.review.text || "")}${(booking.review.highlights || []).length ? ` · ${booking.review.highlights.map((tag) => ({ punctuality: "समय पर", price_clarity: "कीमत स्पष्ट", quality: "काम की गुणवत्ता", communication: "बातचीत", professionalism: "व्यवहार" })[tag] || "").filter(Boolean).map(escapeHTML).join(", ")}` : ""}</span>` : booking.status === "Completed" ? `<span class="review-box" data-review-booking-id="${escapeHTML(booking.id)}"><select id="reviewRating-${escapeHTML(booking.id)}" aria-label="स्टार रेटिंग"><option value="5">★★★★★</option><option value="4">★★★★</option><option value="3">★★★</option><option value="2">★★</option><option value="1">★</option></select><input id="reviewText-${escapeHTML(booking.id)}" maxlength="240" placeholder="अपना रिव्यू लिखें"><span class="review-highlights" aria-label="सेवा के मुख्य बिंदु">${[["punctuality", "समय पर"], ["price_clarity", "कीमत स्पष्ट"], ["quality", "काम की गुणवत्ता"], ["communication", "बातचीत"], ["professionalism", "व्यवहार"]].map(([tag, label]) => `<label><input type="checkbox" value="${tag}">${label}</label>`).join("")}</span><button class="small-action accept" onclick="submitReview('${escapeHTML(booking.id)}')">रिव्यू भेजें</button></span>` : ""}
           <div class="booking-actions"><button class="small-action" onclick="openChat('${escapeHTML(booking.id)}')">💬 Job Chat${getUnreadChatCount(booking) ? ` <span class="chat-unread">${getUnreadChatCount(booking)}</span>` : ""}</button><button class="small-action" onclick="rebookService('${escapeHTML(booking.id)}')">🔁 दोबारा बुक करें</button>${["Pending", "Accepted"].includes(booking.status) ? `<button class="small-action" title="लगभग 1 घंटे पहले; browser खुला होना चाहिए" aria-pressed="${getReminderForBooking(booking.id)}" onclick="toggleBookingReminder('${escapeHTML(booking.id)}')">${getReminderForBooking(booking.id) ? "🔔 Reminder चालू" : "🔔 Reminder सेट करें"}</button>` : ""}${canCustomerManageBooking(booking) ? `<button class="small-action" onclick="openRescheduleModal('${escapeHTML(booking.id)}')">🕒 समय बदलें</button><button class="small-action" onclick="cancelCustomerBooking('${escapeHTML(booking.id)}')">बुकिंग cancel करें</button>` : ""}${booking.invoice ? `<button class="small-action" onclick="printInvoice('${escapeHTML(booking.id)}')">🧾 Invoice / PDF</button>` : ""}${accountRole === "customer" && !booking.complaints?.some((item) => item.status === "Open") ? `<button class="small-action" onclick="openComplaint('${escapeHTML(booking.id)}')">⚠ Report / Complain</button>` : ""}${booking.providerPhone ? `<a class="small-action" href="tel:${encodeURIComponent(booking.providerPhone)}">📞 Provider को कॉल</a>` : '<span class="small-action disabled" title="इस प्रोफ़ाइल में फोन नंबर उपलब्ध नहीं है।">📞 फोन नंबर उपलब्ध नहीं</span>'}<a class="small-action" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(booking.latitude && booking.longitude ? `${booking.latitude},${booking.longitude}` : booking.address)}">📍 Map</a></div>
           ${(booking.complaints || []).map((complaint) => `<span class="status">शिकायत: ${complaint.status === "Open" ? "समीक्षा में" : `सुलझी · ${escapeHTML(complaint.resolution || "समीक्षा पूरी")}`}</span>`).join("")}
@@ -3546,17 +3798,37 @@
         const etaControls = isPartner && ["Pending", "Accepted", "In Progress"].includes(booking.status)
           ? `<select id="providerEta-${escapeHTML(booking.id)}" aria-label="ग्राहक को भेजने के लिए ETA update"><option value="">ETA/status चुनें</option><option value="on_way">रास्ते में हूँ</option><option value="eta_15">अनुमानित 15 मिनट</option><option value="eta_30">अनुमानित 30 मिनट</option><option value="eta_60">अनुमानित 60 मिनट</option><option value="delayed">देरी हो रही है</option></select><button class="small-action" type="button" onclick="sendProviderEtaUpdate('${escapeHTML(booking.id)}')">ग्राहक को update भेजें</button>`
           : "";
-        const actions = isPartner ? "" : booking.status === "Pending"
-          ? `<button class="small-action accept" onclick="setBookingStatus('${booking.id}','Accepted')">स्वीकारें</button><button class="small-action" onclick="setBookingStatus('${booking.id}','Rejected')">अस्वीकारें</button>`
-          : booking.status === "Accepted"
-            ? `<button class="small-action accept" onclick="setBookingStatus('${booking.id}','In Progress')">काम शुरू करें</button>`
+        const actions = isPartner && booking.status === "Pending"
+          ? `<button class="small-action accept" type="button" onclick="setBookingStatus('${escapeHTML(booking.id)}','Accepted')">स्वीकारें</button><button class="small-action" type="button" onclick="setBookingStatus('${escapeHTML(booking.id)}','Rejected')">कारण सहित अस्वीकारें</button>`
+          : isPartner && booking.status === "Accepted"
+            ? `<button class="small-action accept" type="button" onclick="setBookingStatus('${escapeHTML(booking.id)}','In Progress')">काम शुरू करें</button>`
+            : !isPartner && booking.status === "Pending"
+              ? `<button class="small-action accept" onclick="setBookingStatus('${booking.id}','Accepted')">स्वीकारें</button><button class="small-action" onclick="setBookingStatus('${booking.id}','Rejected')">अस्वीकारें</button>`
+              : !isPartner && booking.status === "Accepted"
+                ? `<button class="small-action accept" onclick="setBookingStatus('${booking.id}','In Progress')">काम शुरू करें</button>`
             : booking.status === "In Progress" && booking.verification?.stage === "complete"
                 ? `<button class="small-action accept" onclick="openOtpModal('${booking.id}')">Completion OTP दर्ज करें</button><button class="small-action" onclick="requestJobOtp('${booking.id}','complete')">नया OTP बनाएँ</button>`
                 : booking.status === "In Progress" && !booking.invoice
                   ? `<button class="small-action accept" onclick="setBookingStatus('${booking.id}','Completed')">काम पूरा करें · बिल बनाएँ</button>`
             : booking.invoice ? `<button class="small-action" onclick="printInvoice('${booking.id}')">🧾 Invoice / PDF</button>` : "";
-        return `<div class="booking-row"><div class="booking-person"><img src="${escapeHTML(safeProviderImageSource(booking.image))}" alt=""><div><strong>${escapeHTML(booking.category)} · ${escapeHTML(booking.customer)}</strong><span>${escapeHTML(booking.date)} · ${escapeHTML(booking.time)} · ${escapeHTML(booking.city)}</span><span>${escapeHTML(booking.address)} · ${escapeHTML(booking.customerPhone || "")}</span><span class="status">${escapeHTML(booking.status || "Pending")}</span><div class="booking-actions">${actions}<a class="small-action" href="tel:${encodeURIComponent(booking.customerPhone || "")}">📞 ग्राहक को कॉल</a><a class="small-action" href="${mapLink}" target="_blank" rel="noopener">📍 Google Maps</a><button class="small-action" onclick="openChat('${escapeHTML(booking.id)}')">💬 Job Chat${getUnreadChatCount(booking) ? ` <span class="chat-unread">${getUnreadChatCount(booking)}</span>` : ""}</button>${etaControls}</div></div></div><div class="booking-details">${formatRupees(booking.providerPayout)}<small>${booking.invoice ? "Final bill · आपकी कमाई" : "अनुमानित आपकी कमाई"}</small></div></div>`;
+        const priceProposalControl = isPartner && booking.status === "In Progress" &&
+          (!booking.priceProposal || booking.priceProposal.status === "rejected")
+          ? `<button class="small-action" type="button" onclick="openPriceProposal('${escapeHTML(booking.id)}')">अतिरिक्त कीमत की मंज़ूरी माँगें</button>`
+          : "";
+        const priceProposalStatus = booking.priceProposal
+          ? `<span class="status">अतिरिक्त कीमत: ${booking.priceProposal.status === "approved" ? "ग्राहक ने मंज़ूर की" : booking.priceProposal.status === "rejected" ? "ग्राहक ने मना किया" : "ग्राहक की मंज़ूरी बाकी"}</span>`
+          : "";
+        return `<div class="booking-row"><div class="booking-person"><img src="${escapeHTML(safeProviderImageSource(booking.image))}" alt=""><div><strong>${escapeHTML(booking.category)} · ${escapeHTML(booking.customer)}</strong><span>${escapeHTML(booking.date)} · ${escapeHTML(booking.time)} · ${escapeHTML(booking.city)}</span><span>${escapeHTML(booking.address)} · ${escapeHTML(booking.customerPhone || "")}</span><span class="status">${escapeHTML(booking.status || "Pending")}</span>${booking.declineReason ? `<span>अस्वीकार करने का कारण: ${escapeHTML(booking.declineReason)}</span>` : ""}${priceProposalStatus}<div class="booking-actions">${actions}${priceProposalControl}<a class="small-action" href="tel:${encodeURIComponent(booking.customerPhone || "")}">📞 ग्राहक को कॉल</a><a class="small-action" href="${mapLink}" target="_blank" rel="noopener">📍 Google Maps</a><button class="small-action" onclick="openChat('${escapeHTML(booking.id)}')">💬 Job Chat${getUnreadChatCount(booking) ? ` <span class="chat-unread">${getUnreadChatCount(booking)}</span>` : ""}</button>${etaControls}</div></div></div><div class="booking-details">${formatRupees(booking.providerPayout)}<small>${booking.invoice ? "Final bill · आपकी कमाई" : "अनुमानित आपकी कमाई"}</small></div></div>`;
       }).join("");
+    }
+    function renderCustomerPriceProposal(booking) {
+      const proposal = booking.priceProposal;
+      if (!proposal) return "";
+      const isCustomer = booking.userId === getSignedInUser()?.uid && accountRole === "customer";
+      const status = proposal.status === "pending" ? "आपकी मंज़ूरी का इंतज़ार"
+        : proposal.status === "approved" ? "आपने मंज़ूर किया"
+          : "आपने अस्वीकार किया";
+      return `<div class="price-proposal-card"><strong>अतिरिक्त कीमत का प्रस्ताव · ${status}</strong><span>सामग्री${proposal.partsDescription ? ` (${escapeHTML(proposal.partsDescription)})` : ""}: ${formatRupees(proposal.parts)}</span><span>अतिरिक्त मेहनताना: ${formatRupees(proposal.labour)}</span><span>अतिरिक्त राशि: ${formatRupees(proposal.extraTotal)}</span><strong>मंज़ूरी के बाद कुल अनुमान: ${formatRupees(proposal.revisedTotal)}</strong>${isCustomer && proposal.status === "pending" ? `<div><button class="small-action accept" type="button" onclick="respondToPriceProposal('${escapeHTML(booking.id)}','approved')">अतिरिक्त कीमत मंज़ूर करें</button><button class="small-action" type="button" onclick="respondToPriceProposal('${escapeHTML(booking.id)}','rejected')">अस्वीकार करें</button></div>` : ""}</div>`;
     }
     function renderProfile() {
       document.getElementById("customerName").value = customer.name;
@@ -3566,6 +3838,7 @@
       document.getElementById("accountRole").value = accountRole;
       document.getElementById("providerProfileFields").style.display = accountRole === "provider" ? "grid" : "none";
       document.getElementById("profileRoleLabel").textContent = accountRole === "provider" ? "Service provider · ग्राहक भी बन सकते हैं" : "GharSeva ग्राहक";
+      renderProviderWeeklyAvailability(getProviderWeeklyAvailability(providerProfile));
       ["providerCategory", "providerPrice", "providerExperience", "providerArea", "providerDuration", "providerBio"].forEach((id) => {
         document.getElementById(id).required = accountRole === "provider";
       });
@@ -4184,6 +4457,9 @@
     document.getElementById("bookingRateItem").addEventListener("change", updateCheckoutTotal);
     document.getElementById("serviceDate").addEventListener("change", updateBookingAvailability);
     document.getElementById("serviceTime").addEventListener("change", updateBookingAvailability);
+    document.getElementById("priceProposalParts").addEventListener("input", updatePriceProposalTotal);
+    document.getElementById("priceProposalLabour").addEventListener("input", updatePriceProposalTotal);
+    document.getElementById("priceProposalForm").addEventListener("submit", submitPriceProposal);
     document.getElementById("invoicePartsAmount").addEventListener("input", invoiceTotals);
     document.getElementById("invoiceLabourAmount").addEventListener("input", invoiceTotals);
     document.getElementById("jobOtpInput").addEventListener("input", (event) => {
@@ -4238,6 +4514,15 @@
       const totals = invoiceTotals();
       if (totals.total <= 0) {
         toast("इनवॉइस का कुल बिल शून्य से अधिक होना चाहिए।");
+        return;
+      }
+      const approvedMaximum = booking.priceProposal?.status === "approved"
+        ? Number(booking.priceProposal.revisedTotal)
+        : Number(booking.total);
+      if (totals.total > approvedMaximum) {
+        toast(booking.priceProposal?.status === "pending"
+          ? `ग्राहक की मंज़ूरी अभी बाकी है। वर्तमान अधिकतम स्वीकृत अनुमान ${formatRupees(booking.total)} है।`
+          : `अंतिम बिल ${formatRupees(approvedMaximum)} से अधिक है। पहले ग्राहक से अतिरिक्त कीमत की मंज़ूरी लें।`);
         return;
       }
       const invoice = {
@@ -4336,7 +4621,7 @@
       closeModal();
       event.currentTarget.reset();
       appliedCoupon = null;
-      toast(`बुकिंग कन्फर्म! ${booking.id} · ${formatRupees(booking.total)}`);
+      toast(`बुकिंग अनुरोध भेजा गया: ${booking.id} · ${formatRupees(booking.total)} · Provider की स्वीकृति का इंतज़ार करें।`);
       showView("bookingsView");
       renderProviderPanel();
     });
@@ -4378,8 +4663,16 @@
         const category = String(form.get("providerCategory"));
         const template = providerTemplates.find((item) => item.category === category);
         const experience = Number(form.get("providerExperience"));
+        const availabilitySchedule = readProviderWeeklyAvailability();
         if (!template) {
           saveStatus.textContent = "चुनी गई service category उपलब्ध नहीं है। Category दोबारा चुनें।";
+          saveStatus.hidden = false;
+          toast(saveStatus.textContent);
+          return;
+        }
+        if (String(form.get("providerAvailability")) === "available" &&
+            !Object.values(availabilitySchedule).some((slots) => slots.length)) {
+          saveStatus.textContent = "नई booking लेने के लिए कम-से-कम एक दिन और समय चुनें।";
           saveStatus.hidden = false;
           toast(saveStatus.textContent);
           return;
@@ -4394,6 +4687,7 @@
           city: nextCustomer.city,
           area: String(form.get("providerArea")).trim(),
           availability: String(form.get("providerAvailability")),
+          availabilitySchedule,
           locationSharingEnabled: document.getElementById("providerLocationSharing").checked,
           sharedLocation: document.getElementById("providerLocationSharing").checked
             ? providerProfile?.sharedLocation || null
