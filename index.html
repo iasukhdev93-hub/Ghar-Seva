@@ -53,6 +53,12 @@
     .install-modal-copy ol { padding-left: 20px; }
     .install-modal-copy li { margin: 6px 0; }
     #installHelpModal { z-index: 120; }
+    .home-actions { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 16px; }
+    .home-actions button { min-height: 38px; }
+    .home-profile-setup[hidden] { display: none; }
+    .share-app-btn { border: 1px solid #cbded3; border-radius: 10px; color: var(--green); background: white; padding: 8px 11px; font-size: 12px; font-weight: 800; }
+    .share-app-btn:hover { background: #f1f8f4; }
+    .share-app-btn:focus-visible, .home-profile-setup:focus-visible { outline: 3px solid #9ed9bc; outline-offset: 2px; }
     .avatar { width: 34px; height: 34px; object-fit: cover; border-radius: 50%; background: #dce9e3; }
     .wrap { width: min(1180px, calc(100% - 48px)); margin: auto; }
     .hero { margin-top: 28px; border-radius: 28px; min-height: 315px; overflow: hidden; position: relative; color: white; background: linear-gradient(100deg, rgba(15,62,47,.97) 2%, rgba(19,81,60,.93) 54%, rgba(19,81,60,.35)), url("https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1800&q=85") center 56%/cover; display: flex; align-items: center; }
@@ -550,6 +556,10 @@
 
   <main class="wrap">
     <section id="homeView" class="content-view active">
+      <div class="home-actions">
+        <button type="button" class="small-action home-profile-setup" id="homeProfileSetupButton" hidden>अपनी प्रोफ़ाइल सेटअप करें</button>
+        <button type="button" class="share-app-btn" id="shareAppButton" aria-label="GharSeva ऐप का लिंक साझा करें">↗ ऐप शेयर करें</button>
+      </div>
       <section class="hero">
         <div class="hero-content">
           <span class="eyebrow"><span class="eyebrow-dot"></span>आपके शहर की भरोसेमंद सेवा</span>
@@ -1709,6 +1719,24 @@
       }
       return firebaseAuth && firebaseAuth.currentUser;
     }
+    function hasCompletedProfileSetup(user) {
+      if (!user || !user.uid) return false;
+      const hasProviderProfile = providerProfile?.isUserProfile && providerProfile.ownerId === user.uid;
+      return Boolean(hasProviderProfile || loadStored(`gharSevaProfileSetup-${user.uid}`, false));
+    }
+    function hasLegacyCustomerProfile(user) {
+      const sameAccount = user.email && customer.email &&
+        customer.email.trim().toLowerCase() === user.email.trim().toLowerCase();
+      const hasCustomDetails = customer.name?.trim() && customer.phone?.trim() &&
+        (customer.name !== defaultCustomer.name ||
+          customer.phone !== defaultCustomer.phone ||
+          customer.city !== defaultCustomer.city ||
+          customer.area !== defaultCustomer.area);
+      return Boolean(sameAccount && hasCustomDetails);
+    }
+    function updateHomeProfileSetupButton(user = getSignedInUser()) {
+      document.getElementById("homeProfileSetupButton").hidden = !user || hasCompletedProfileSetup(user);
+    }
     function canUseProviderPanel() {
       const user = getSignedInUser();
       return Boolean(hasAdminAccess || (
@@ -1724,6 +1752,7 @@
       accountRole = role === "provider" ? "provider" : "customer";
       document.getElementById("providerPanelNavButton").hidden = !canUseProviderPanel();
       saveStored("gharSevaRole", accountRole);
+      if (hasLegacyCustomerProfile(user)) saveStored(`gharSevaProfileSetup-${user.uid}`, true);
       customer = {
         ...customer,
         name: user.displayName || (user.email ? user.email.split("@")[0] : customer.name),
@@ -1734,7 +1763,8 @@
       saveStored("gharSevaCustomer", customer);
       syncCustomerDisplay();
       closeAuthGate();
-      if (accountRole === "provider") showView("profileView");
+      updateHomeProfileSetupButton(user);
+      showView("homeView");
     }
     function updateAuthMode(mode) {
       authMode = mode;
@@ -1802,6 +1832,7 @@
           hasAdminAccess = false;
           document.getElementById("adminNavButton").hidden = true;
           document.getElementById("providerPanelNavButton").hidden = true;
+          updateHomeProfileSetupButton(null);
           if (document.getElementById("providerView").classList.contains("active")) showView("homeView");
         }
       }, (error) => {
@@ -2052,6 +2083,7 @@
                 saveStored("gharSevaProvider", null);
               }
             }
+            updateHomeProfileSetupButton(user);
             document.getElementById("providerPanelNavButton").hidden = !canUseProviderPanel();
             renderProviders();
             if (document.getElementById("chatView").classList.contains("active")) renderChat();
@@ -2294,14 +2326,12 @@
       renderProviders();
     }
     async function shareInviteLink() {
-      if (!getSignedInUser()) {
-        toast("Invite link साझा करने के लिए पहले login करें।");
-        return;
-      }
-      const inviteUrl = new URL(window.location.pathname, window.location.origin);
+      const inviteUrl = new URL(window.location.href);
+      inviteUrl.search = "";
+      inviteUrl.hash = "";
       const invite = {
         title: "GharSeva",
-        text: `${customer.name} ने आपको GharSeva पर स्थानीय सेवाएँ देखने के लिए invite किया है।`,
+        text: "GharSeva पर स्थानीय सेवाएँ देखें। लिंक खोलें और ऐप इंस्टॉल करें; iPhone पर Share → Add to Home Screen चुनें।",
         url: inviteUrl.href
       };
       try {
@@ -2311,14 +2341,23 @@
         }
         if (navigator.clipboard?.writeText) {
           await navigator.clipboard.writeText(`${invite.text} ${invite.url}`);
-          toast("Invite link clipboard में copy हो गया।");
+          toast("ऐप का लिंक copy हो गया; अब इसे किसी को भी भेजें।");
           return;
         }
         window.prompt("यह invite link copy करके साझा करें:", inviteUrl.href);
       } catch (error) {
         if (error.name === "AbortError") return;
         console.error("GharSeva invite link could not be shared.", error);
-        toast("Invite link साझा नहीं हुआ। Browser की sharing अनुमति जाँचें।");
+        if (navigator.clipboard?.writeText) {
+          try {
+            await navigator.clipboard.writeText(`${invite.text} ${invite.url}`);
+            toast("ऐप का लिंक copy हो गया; अब इसे किसी को भी भेजें।");
+            return;
+          } catch (clipboardError) {
+            console.error("GharSeva app link could not be copied.", clipboardError);
+          }
+        }
+        window.prompt("लिंक साझा नहीं हो सका। इस ऐप लिंक को copy करें:", inviteUrl.href);
       }
     }
     function renderProviderComparison() {
@@ -4138,6 +4177,8 @@
       document.getElementById(id).addEventListener("change", scheduleBookingDraftSave);
     });
     document.getElementById("shareInviteButton").addEventListener("click", shareInviteLink);
+    document.getElementById("shareAppButton").addEventListener("click", shareInviteLink);
+    document.getElementById("homeProfileSetupButton").addEventListener("click", () => showView("profileView"));
     document.getElementById("useLocationButton").addEventListener("click", () => {
       const status = document.getElementById("locationStatus");
       if (!navigator.geolocation) {
@@ -4769,6 +4810,10 @@
       document.getElementById("providerPanelNavButton").hidden = !canUseProviderPanel();
       if (isProviderAccount) listenForProviderBookings(providerProfile);
       else listenForProviderBookings(null);
+      if (getSignedInUser()?.uid) {
+        saveStored(`gharSevaProfileSetup-${getSignedInUser().uid}`, true);
+        updateHomeProfileSetupButton();
+      }
       syncCustomerDisplay();
       renderProfile();
       if (accountRole === "provider") document.getElementById("citySelect").value = customer.city;
