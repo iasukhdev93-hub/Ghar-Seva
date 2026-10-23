@@ -18,11 +18,59 @@ service cloud.firestore {
         && data.userEmail == request.auth.token.email;
     }
 
+    function ownsAssignedProvider(data) {
+      return signedIn()
+        && data.get('providerId', null) is string
+        && exists(/databases/$(database)/documents/serviceProviders/$(data.providerId))
+        && get(/databases/$(database)/documents/serviceProviders/$(data.providerId)).data.get('ownerId', '') == request.auth.uid
+        && get(/databases/$(database)/documents/serviceProviders/$(data.providerId)).data.get('isUserProfile', false) == true;
+    }
+
     function onlyAppends(oldItems, newItems) {
       return oldItems is list
         && newItems is list
         && newItems.size() == oldItems.size() + 1
         && newItems.hasAll(oldItems);
+    }
+
+    function validChatMessage(message, senderName) {
+      return message is map
+        && message.get('senderId', '') == request.auth.uid
+        && message.get('sender', '') == senderName
+        && message.get('createdAt', '') is string
+        && (
+          (
+            message.get('type', 'text') == 'text'
+            && message.get('text', '') is string
+            && message.get('text', '').size() <= 2000
+          )
+          || (
+            message.get('type', '') == 'location'
+            && message.get('latitude', null) is number
+            && message.latitude >= -90
+            && message.latitude <= 90
+            && message.get('longitude', null) is number
+            && message.longitude >= -180
+            && message.longitude <= 180
+          )
+        );
+    }
+
+    function appendsOwnChat(senderName) {
+      let oldChat = resource.data.get('chat', []);
+      let newChat = request.resource.data.get('chat', []);
+      return onlyAppends(oldChat, newChat)
+        && validChatMessage(newChat[newChat.size() - 1], senderName);
+    }
+
+    function canAppendProviderChat() {
+      return ownsAssignedProvider(resource.data)
+        && request.resource.data.userId == resource.data.userId
+        && request.resource.data.providerId == resource.data.providerId
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['chat'])
+        && appendsOwnChat(
+          get(/databases/$(database)/documents/serviceProviders/$(resource.data.providerId)).data.get('name', '')
+        );
     }
 
     function appendsOwnTimelineEntry(entryType) {
@@ -64,7 +112,7 @@ service cloud.firestore {
     }
 
     match /bookings/{bookingId} {
-      allow read: if isAdmin() || ownsBooking(resource.data);
+      allow read: if isAdmin() || ownsBooking(resource.data) || ownsAssignedProvider(resource.data);
       allow create: if signedIn()
         && request.resource.data.userId == request.auth.uid
         && request.resource.data.userEmail == request.auth.token.email
@@ -72,6 +120,7 @@ service cloud.firestore {
       allow update: if isAdmin()
         || canCancelBooking()
         || canRescheduleBooking()
+        || canAppendProviderChat()
         || (
           ownsBooking(resource.data)
           && request.resource.data.userId == resource.data.userId
@@ -81,7 +130,7 @@ service cloud.firestore {
           && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['chat'])
             || (
               request.resource.data.keys().hasAny(['chat'])
-              && onlyAppends(resource.data.get('chat', []), request.resource.data.chat)
+              && appendsOwnChat(resource.data.customer)
             ))
           && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['complaints'])
             || (
@@ -102,6 +151,12 @@ service cloud.firestore {
               && request.resource.data.review.rating <= 5
               && request.resource.data.review.text is string
               && request.resource.data.review.text.size() <= 240
+              && request.resource.data.review.keys().hasOnly(['rating', 'text', 'highlights'])
+              && (!request.resource.data.review.keys().hasAny(['highlights'])
+                || (
+                  request.resource.data.review.highlights is list
+                  && request.resource.data.review.highlights.size() <= 5
+                ))
               && resource.data.status == 'Completed'
             ))
         );
