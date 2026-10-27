@@ -18,6 +18,101 @@ service cloud.firestore {
         && data.userEmail == request.auth.token.email;
     }
 
+    function validBookingCreate(bookingId) {
+      let data = request.resource.data;
+      return data.keys().hasAll([
+          'id', 'userId', 'userEmail', 'customer', 'customerPhone',
+          'provider', 'providerPhone', 'providerId', 'providerCategory',
+          'category', 'city', 'image', 'duration', 'rateItem', 'ratePrice',
+          'date', 'time', 'address', 'latitude', 'longitude', 'payment',
+          'paymentStatus', 'serviceAmount', 'commission', 'coupon', 'discount',
+          'total', 'providerPayout', 'repeatServiceMonths', 'status', 'timeline',
+          'createdAt', 'policyAccepted', 'policyAcceptedAt', 'policyVersion'
+        ])
+        && data.keys().hasOnly([
+          'id', 'userId', 'userEmail', 'customer', 'customerPhone',
+          'provider', 'providerPhone', 'providerId', 'providerCategory',
+          'category', 'city', 'image', 'duration', 'rateItem', 'ratePrice',
+          'date', 'time', 'address', 'applianceId', 'applianceName',
+          'latitude', 'longitude', 'payment', 'paymentStatus', 'serviceAmount',
+          'commission', 'coupon', 'discount', 'total', 'providerPayout',
+          'repeatServiceMonths', 'photos', 'status', 'timeline', 'createdAt',
+          'policyAccepted', 'policyAcceptedAt', 'policyVersion'
+        ])
+        && data.id == bookingId
+        && data.userId == request.auth.uid
+        && data.userEmail == request.auth.token.email
+        && data.customer is string
+        && data.customer.size() > 0
+        && data.customer.size() <= 100
+        && data.customerPhone is string
+        && data.customerPhone.size() <= 30
+        && data.provider is string
+        && data.providerId is string
+        && data.providerCategory is string
+        && data.category is string
+        && data.city is string
+        && data.rateItem is string
+        && data.date is string
+        && data.date.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && data.time is string
+        && data.time.size() <= 40
+        && data.address is string
+        && data.address.size() >= 5
+        && data.address.size() <= 500
+        && data.payment == 'Cash'
+        && data.paymentStatus == 'COD - काम के बाद'
+        && data.ratePrice is number
+        && data.ratePrice > 0
+        && data.serviceAmount == data.ratePrice
+        && data.commission is number
+        && data.commission >= 0
+        && data.commission <= data.ratePrice
+        && data.discount is number
+        && data.discount >= 0
+        && data.discount <= data.ratePrice
+        && data.total == data.ratePrice - data.discount
+        && data.providerPayout == data.total - data.commission
+        && data.coupon is string
+        && data.repeatServiceMonths in [0, 1, 3, 6, 12]
+        && (!data.keys().hasAny(['applianceId'])
+          || (data.applianceId is string && data.applianceName is string))
+        && data.status == 'Pending'
+        && data.timeline is list
+        && data.timeline.size() == 1
+        && data.timeline[0].status == 'Pending'
+        && data.timeline[0].actorId == request.auth.uid
+        && data.createdAt is string
+        && data.policyAccepted == true
+        && data.policyAcceptedAt is string
+        && data.policyVersion == '2026-10-27'
+        && data.get('photos', []) is list
+        && data.get('photos', []).size() <= 1;
+    }
+
+    function validCustomerComplaint(complaint) {
+      return complaint is map
+        && complaint.keys().hasAll([
+          'id', 'reason', 'details', 'status', 'createdAt', 'updatedAt', 'submittedBy'
+        ])
+        && complaint.keys().hasOnly([
+          'id', 'reason', 'details', 'status', 'createdAt', 'updatedAt', 'submittedBy'
+        ])
+        && complaint.id is string
+        && complaint.id.size() >= 8
+        && complaint.id.size() <= 40
+        && complaint.reason is string
+        && complaint.reason.size() > 0
+        && complaint.reason.size() <= 100
+        && complaint.details is string
+        && complaint.details.size() > 0
+        && complaint.details.size() <= 1000
+        && complaint.status == 'Open'
+        && complaint.createdAt is string
+        && complaint.updatedAt == complaint.createdAt
+        && complaint.submittedBy == request.auth.uid;
+    }
+
     function ownsAssignedProvider(data) {
       return signedIn()
         && data.get('providerId', null) is string
@@ -83,7 +178,7 @@ service cloud.firestore {
 
     function canCancelBooking() {
       return ownsBooking(resource.data)
-        && resource.data.status in ['Pending', 'Accepted']
+        && resource.data.status == 'Pending'
         && request.resource.data.status == 'Cancelled'
         && request.resource.data.userId == resource.data.userId
         && request.resource.data.userEmail == resource.data.userEmail
@@ -96,7 +191,7 @@ service cloud.firestore {
 
     function canRescheduleBooking() {
       return ownsBooking(resource.data)
-        && resource.data.status in ['Pending', 'Accepted']
+        && resource.data.status == 'Pending'
         && request.resource.data.status == resource.data.status
         && request.resource.data.userId == resource.data.userId
         && request.resource.data.userEmail == resource.data.userEmail
@@ -119,7 +214,7 @@ service cloud.firestore {
           .hasOnly(['status', 'timeline', 'declineReason'])
         && (
           (resource.data.status == 'Pending'
-            && request.resource.data.status in ['Accepted', 'Rejected'])
+            && request.resource.data.status == 'Rejected')
           || (resource.data.status == 'Accepted'
             && request.resource.data.status == 'In Progress')
         )
@@ -199,10 +294,7 @@ service cloud.firestore {
 
     match /bookings/{bookingId} {
       allow read: if isAdmin() || ownsBooking(resource.data) || ownsAssignedProvider(resource.data);
-      allow create: if signedIn()
-        && request.resource.data.userId == request.auth.uid
-        && request.resource.data.userEmail == request.auth.token.email
-        && request.resource.data.status == 'Pending';
+      allow create: if signedIn() && validBookingCreate(bookingId);
       allow update: if isAdmin()
         || canCancelBooking()
         || canRescheduleBooking()
@@ -224,7 +316,11 @@ service cloud.firestore {
           && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['complaints'])
             || (
               request.resource.data.keys().hasAny(['complaints'])
+              && request.resource.data.complaints.size() <= 10
               && onlyAppends(resource.data.get('complaints', []), request.resource.data.complaints)
+              && validCustomerComplaint(
+                request.resource.data.complaints[request.resource.data.complaints.size() - 1]
+              )
             ))
           && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['photos'])
             || (
@@ -253,13 +349,14 @@ service cloud.firestore {
     }
 
     match /serviceProviders/{providerId} {
-      allow read: if true;
+      allow read: if signedIn();
       allow create: if isAdmin()
         || (
           signedIn()
           && request.resource.data.ownerId == request.auth.uid
           && request.resource.data.isUserProfile == true
           && request.resource.data.get('isAdminVerified', false) == false
+          && request.resource.data.get('verificationReviewedAt', null) == null
         );
       allow update: if isAdmin()
         || (
@@ -268,10 +365,27 @@ service cloud.firestore {
           && request.resource.data.ownerId == request.auth.uid
           && resource.data.isUserProfile == true
           && request.resource.data.isUserProfile == true
+          && request.resource.data.get('rating', 0) == resource.data.get('rating', 0)
+          && request.resource.data.get('reviews', 0) == resource.data.get('reviews', 0)
           && request.resource.data.get('isAdminVerified', false)
             == resource.data.get('isAdminVerified', false)
+          && request.resource.data.get('verificationReviewedAt', null)
+            == resource.data.get('verificationReviewedAt', null)
         );
       allow delete: if isAdmin();
+    }
+
+    match /users/{userId}/pushTokens/{tokenId} {
+      allow read: if signedIn() && request.auth.uid == userId;
+      allow create, update: if signedIn()
+        && request.auth.uid == userId
+        && tokenId.matches('^[0-9a-f]{64}$')
+        && request.resource.data.keys().hasOnly(['token', 'updatedAt'])
+        && request.resource.data.token is string
+        && request.resource.data.token.size() > 0
+        && request.resource.data.token.size() <= 4096
+        && request.resource.data.updatedAt is string;
+      allow delete: if signedIn() && request.auth.uid == userId;
     }
   }
 }
