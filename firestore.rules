@@ -1,0 +1,391 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return signedIn()
+        && request.auth.token.email_verified == true
+        && request.auth.token.email == 'ia.sukhdev.93@gmail.com';
+    }
+
+    function ownsBooking(data) {
+      return signedIn()
+        && data.userId == request.auth.uid
+        && data.userEmail == request.auth.token.email;
+    }
+
+    function validBookingCreate(bookingId) {
+      let data = request.resource.data;
+      return data.keys().hasAll([
+          'id', 'userId', 'userEmail', 'customer', 'customerPhone',
+          'provider', 'providerPhone', 'providerId', 'providerCategory',
+          'category', 'city', 'image', 'duration', 'rateItem', 'ratePrice',
+          'date', 'time', 'address', 'latitude', 'longitude', 'payment',
+          'paymentStatus', 'serviceAmount', 'commission', 'coupon', 'discount',
+          'total', 'providerPayout', 'repeatServiceMonths', 'status', 'timeline',
+          'createdAt', 'policyAccepted', 'policyAcceptedAt', 'policyVersion'
+        ])
+        && data.keys().hasOnly([
+          'id', 'userId', 'userEmail', 'customer', 'customerPhone',
+          'provider', 'providerPhone', 'providerId', 'providerCategory',
+          'category', 'city', 'image', 'duration', 'rateItem', 'ratePrice',
+          'date', 'time', 'address', 'applianceId', 'applianceName',
+          'latitude', 'longitude', 'payment', 'paymentStatus', 'serviceAmount',
+          'commission', 'coupon', 'discount', 'total', 'providerPayout',
+          'repeatServiceMonths', 'photos', 'status', 'timeline', 'createdAt',
+          'policyAccepted', 'policyAcceptedAt', 'policyVersion'
+        ])
+        && data.id == bookingId
+        && data.userId == request.auth.uid
+        && data.userEmail == request.auth.token.email
+        && data.customer is string
+        && data.customer.size() > 0
+        && data.customer.size() <= 100
+        && data.customerPhone is string
+        && data.customerPhone.size() <= 30
+        && data.provider is string
+        && data.providerId is string
+        && data.providerCategory is string
+        && data.category is string
+        && data.city is string
+        && data.rateItem is string
+        && data.date is string
+        && data.date.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && data.time is string
+        && data.time.size() <= 40
+        && data.address is string
+        && data.address.size() >= 5
+        && data.address.size() <= 500
+        && data.payment == 'Cash'
+        && data.paymentStatus == 'COD - काम के बाद'
+        && data.ratePrice is number
+        && data.ratePrice > 0
+        && data.serviceAmount == data.ratePrice
+        && data.commission is number
+        && data.commission >= 0
+        && data.commission <= data.ratePrice
+        && data.discount is number
+        && data.discount >= 0
+        && data.discount <= data.ratePrice
+        && data.total == data.ratePrice - data.discount
+        && data.providerPayout == data.total - data.commission
+        && data.coupon is string
+        && data.repeatServiceMonths in [0, 1, 3, 6, 12]
+        && (!data.keys().hasAny(['applianceId'])
+          || (data.applianceId is string && data.applianceName is string))
+        && data.status == 'Pending'
+        && data.timeline is list
+        && data.timeline.size() == 1
+        && data.timeline[0].status == 'Pending'
+        && data.timeline[0].actorId == request.auth.uid
+        && data.createdAt is string
+        && data.policyAccepted == true
+        && data.policyAcceptedAt is string
+        && data.policyVersion == '2026-10-27'
+        && data.get('photos', []) is list
+        && data.get('photos', []).size() <= 1;
+    }
+
+    function validCustomerComplaint(complaint) {
+      return complaint is map
+        && complaint.keys().hasAll([
+          'id', 'reason', 'details', 'status', 'createdAt', 'updatedAt', 'submittedBy'
+        ])
+        && complaint.keys().hasOnly([
+          'id', 'reason', 'details', 'status', 'createdAt', 'updatedAt', 'submittedBy'
+        ])
+        && complaint.id is string
+        && complaint.id.size() >= 8
+        && complaint.id.size() <= 40
+        && complaint.reason is string
+        && complaint.reason.size() > 0
+        && complaint.reason.size() <= 100
+        && complaint.details is string
+        && complaint.details.size() > 0
+        && complaint.details.size() <= 1000
+        && complaint.status == 'Open'
+        && complaint.createdAt is string
+        && complaint.updatedAt == complaint.createdAt
+        && complaint.submittedBy == request.auth.uid;
+    }
+
+    function ownsAssignedProvider(data) {
+      return signedIn()
+        && data.get('providerId', null) is string
+        && exists(/databases/$(database)/documents/serviceProviders/$(data.providerId))
+        && get(/databases/$(database)/documents/serviceProviders/$(data.providerId)).data.get('ownerId', '') == request.auth.uid
+        && get(/databases/$(database)/documents/serviceProviders/$(data.providerId)).data.get('isUserProfile', false) == true;
+    }
+
+    function onlyAppends(oldItems, newItems) {
+      return oldItems is list
+        && newItems is list
+        && newItems.size() == oldItems.size() + 1
+        && newItems.hasAll(oldItems);
+    }
+
+    function validChatMessage(message, senderName) {
+      return message is map
+        && message.get('senderId', '') == request.auth.uid
+        && message.get('sender', '') == senderName
+        && message.get('createdAt', '') is string
+        && (
+          (
+            message.get('type', 'text') == 'text'
+            && message.get('text', '') is string
+            && message.get('text', '').size() <= 2000
+          )
+          || (
+            message.get('type', '') == 'location'
+            && message.get('latitude', null) is number
+            && message.latitude >= -90
+            && message.latitude <= 90
+            && message.get('longitude', null) is number
+            && message.longitude >= -180
+            && message.longitude <= 180
+          )
+        );
+    }
+
+    function appendsOwnChat(senderName) {
+      let oldChat = resource.data.get('chat', []);
+      let newChat = request.resource.data.get('chat', []);
+      return onlyAppends(oldChat, newChat)
+        && validChatMessage(newChat[newChat.size() - 1], senderName);
+    }
+
+    function canAppendProviderChat() {
+      return ownsAssignedProvider(resource.data)
+        && request.resource.data.userId == resource.data.userId
+        && request.resource.data.providerId == resource.data.providerId
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['chat'])
+        && appendsOwnChat(
+          get(/databases/$(database)/documents/serviceProviders/$(resource.data.providerId)).data.get('name', '')
+        );
+    }
+
+    function appendsOwnTimelineEntry(entryType) {
+      let oldTimeline = resource.data.get('timeline', []);
+      let newTimeline = request.resource.data.timeline;
+      return onlyAppends(oldTimeline, newTimeline)
+        && newTimeline[newTimeline.size() - 1].type == entryType
+        && newTimeline[newTimeline.size() - 1].actorId == request.auth.uid;
+    }
+
+    function canCancelBooking() {
+      return ownsBooking(resource.data)
+        && resource.data.status == 'Pending'
+        && request.resource.data.status == 'Cancelled'
+        && request.resource.data.userId == resource.data.userId
+        && request.resource.data.userEmail == resource.data.userEmail
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['status', 'cancelledAt', 'timeline'])
+        && request.resource.data.cancelledAt is string
+        && appendsOwnTimelineEntry('status')
+        && request.resource.data.timeline[request.resource.data.timeline.size() - 1].status == 'Cancelled';
+    }
+
+    function canRescheduleBooking() {
+      return ownsBooking(resource.data)
+        && resource.data.status == 'Pending'
+        && request.resource.data.status == resource.data.status
+        && request.resource.data.userId == resource.data.userId
+        && request.resource.data.userEmail == resource.data.userEmail
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['date', 'time', 'timeline'])
+        && request.resource.data.date is string
+        && request.resource.data.time is string
+        && (request.resource.data.date != resource.data.date
+          || request.resource.data.time != resource.data.time)
+        && appendsOwnTimelineEntry('schedule')
+        && request.resource.data.timeline[request.resource.data.timeline.size() - 1].date == request.resource.data.date
+        && request.resource.data.timeline[request.resource.data.timeline.size() - 1].time == request.resource.data.time;
+    }
+
+    function canProviderUpdateBookingStatus() {
+      return ownsAssignedProvider(resource.data)
+        && request.resource.data.userId == resource.data.userId
+        && request.resource.data.providerId == resource.data.providerId
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['status', 'timeline', 'declineReason'])
+        && (
+          (resource.data.status == 'Pending'
+            && request.resource.data.status == 'Rejected')
+          || (resource.data.status == 'Accepted'
+            && request.resource.data.status == 'In Progress')
+        )
+        && appendsOwnTimelineEntry('status')
+        && request.resource.data.timeline[request.resource.data.timeline.size() - 1].status
+          == request.resource.data.status
+        && (
+          request.resource.data.status != 'Rejected'
+          || (
+            request.resource.data.declineReason is string
+            && request.resource.data.declineReason.size() >= 5
+            && request.resource.data.declineReason.size() <= 300
+          )
+        )
+        && (
+          request.resource.data.status == 'Rejected'
+          || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['declineReason'])
+        );
+    }
+
+    function canProviderProposePrice() {
+      let proposal = request.resource.data.priceProposal;
+      let previousProposal = resource.data.get('priceProposal', {});
+      return ownsAssignedProvider(resource.data)
+        && resource.data.status == 'In Progress'
+        && request.resource.data.userId == resource.data.userId
+        && request.resource.data.providerId == resource.data.providerId
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['priceProposal'])
+        && previousProposal.get('status', '') in ['', 'rejected']
+        && proposal is map
+        && proposal.keys().hasOnly([
+          'partsDescription', 'parts', 'labour', 'extraTotal', 'revisedTotal',
+          'baseTotal', 'status', 'createdAt', 'proposedBy'
+        ])
+        && proposal.get('partsDescription', '') is string
+        && proposal.partsDescription.size() <= 160
+        && proposal.parts is number
+        && proposal.parts >= 0
+        && proposal.parts <= 1000000
+        && proposal.labour is number
+        && proposal.labour >= 0
+        && proposal.labour <= 1000000
+        && proposal.extraTotal == proposal.parts + proposal.labour
+        && proposal.extraTotal > 0
+        && proposal.baseTotal == resource.data.total
+        && proposal.revisedTotal == proposal.baseTotal + proposal.extraTotal
+        && proposal.status == 'pending'
+        && proposal.createdAt is string
+        && proposal.proposedBy == request.auth.uid;
+    }
+
+    function canCustomerRespondToPriceProposal() {
+      let oldProposal = resource.data.get('priceProposal', {});
+      let newProposal = request.resource.data.get('priceProposal', {});
+      return ownsBooking(resource.data)
+        && request.resource.data.userId == resource.data.userId
+        && request.resource.data.userEmail == resource.data.userEmail
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['priceProposal'])
+        && oldProposal.get('status', '') == 'pending'
+        && newProposal is map
+        && newProposal.keys().hasOnly([
+          'partsDescription', 'parts', 'labour', 'extraTotal', 'revisedTotal',
+          'baseTotal', 'status', 'createdAt', 'proposedBy', 'respondedAt', 'respondedBy'
+        ])
+        && newProposal.partsDescription == oldProposal.partsDescription
+        && newProposal.parts == oldProposal.parts
+        && newProposal.labour == oldProposal.labour
+        && newProposal.extraTotal == oldProposal.extraTotal
+        && newProposal.revisedTotal == oldProposal.revisedTotal
+        && newProposal.baseTotal == oldProposal.baseTotal
+        && newProposal.createdAt == oldProposal.createdAt
+        && newProposal.proposedBy == oldProposal.proposedBy
+        && newProposal.status in ['approved', 'rejected']
+        && newProposal.respondedAt is string
+        && newProposal.respondedBy == request.auth.uid;
+    }
+
+    match /bookings/{bookingId} {
+      allow read: if isAdmin() || ownsBooking(resource.data) || ownsAssignedProvider(resource.data);
+      allow create: if signedIn() && validBookingCreate(bookingId);
+      allow update: if isAdmin()
+        || canCancelBooking()
+        || canRescheduleBooking()
+        || canProviderUpdateBookingStatus()
+        || canProviderProposePrice()
+        || canCustomerRespondToPriceProposal()
+        || canAppendProviderChat()
+        || (
+          ownsBooking(resource.data)
+          && request.resource.data.userId == resource.data.userId
+          && request.resource.data.userEmail == resource.data.userEmail
+          && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['chat', 'complaints', 'review', 'latitude', 'longitude', 'photos'])
+          && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['chat'])
+            || (
+              request.resource.data.keys().hasAny(['chat'])
+              && appendsOwnChat(resource.data.customer)
+            ))
+          && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['complaints'])
+            || (
+              request.resource.data.keys().hasAny(['complaints'])
+              && request.resource.data.complaints.size() <= 10
+              && onlyAppends(resource.data.get('complaints', []), request.resource.data.complaints)
+              && validCustomerComplaint(
+                request.resource.data.complaints[request.resource.data.complaints.size() - 1]
+              )
+            ))
+          && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['photos'])
+            || (
+              request.resource.data.keys().hasAny(['photos'])
+              && onlyAppends(resource.data.get('photos', []), request.resource.data.photos)
+            ))
+          && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['review'])
+            || (
+              !resource.data.keys().hasAny(['review'])
+              && request.resource.data.review is map
+              && request.resource.data.review.rating is int
+              && request.resource.data.review.rating >= 1
+              && request.resource.data.review.rating <= 5
+              && request.resource.data.review.text is string
+              && request.resource.data.review.text.size() <= 240
+              && request.resource.data.review.keys().hasOnly(['rating', 'text', 'highlights'])
+              && (!request.resource.data.review.keys().hasAny(['highlights'])
+                || (
+                  request.resource.data.review.highlights is list
+                  && request.resource.data.review.highlights.size() <= 5
+                ))
+              && resource.data.status == 'Completed'
+            ))
+        );
+      allow delete: if isAdmin();
+    }
+
+    match /serviceProviders/{providerId} {
+      allow read: if signedIn();
+      allow create: if isAdmin()
+        || (
+          signedIn()
+          && request.resource.data.ownerId == request.auth.uid
+          && request.resource.data.isUserProfile == true
+          && request.resource.data.get('isAdminVerified', false) == false
+          && request.resource.data.get('verificationReviewedAt', null) == null
+        );
+      allow update: if isAdmin()
+        || (
+          signedIn()
+          && resource.data.ownerId == request.auth.uid
+          && request.resource.data.ownerId == request.auth.uid
+          && resource.data.isUserProfile == true
+          && request.resource.data.isUserProfile == true
+          && request.resource.data.get('rating', 0) == resource.data.get('rating', 0)
+          && request.resource.data.get('reviews', 0) == resource.data.get('reviews', 0)
+          && request.resource.data.get('isAdminVerified', false)
+            == resource.data.get('isAdminVerified', false)
+          && request.resource.data.get('verificationReviewedAt', null)
+            == resource.data.get('verificationReviewedAt', null)
+        );
+      allow delete: if isAdmin();
+    }
+
+    match /users/{userId}/pushTokens/{tokenId} {
+      allow read: if signedIn() && request.auth.uid == userId;
+      allow create, update: if signedIn()
+        && request.auth.uid == userId
+        && tokenId.matches('^[0-9a-f]{64}$')
+        && request.resource.data.keys().hasOnly(['token', 'updatedAt'])
+        && request.resource.data.token is string
+        && request.resource.data.token.size() > 0
+        && request.resource.data.token.size() <= 4096
+        && request.resource.data.updatedAt is string;
+      allow delete: if signedIn() && request.auth.uid == userId;
+    }
+  }
+}
