@@ -3380,6 +3380,9 @@
       if (["unavailable", "deadline-exceeded", "network-request-failed"].includes(code)) {
         return "Firebase Function तक connection नहीं हुआ। Internet जाँचकर फिर कोशिश करें।";
       }
+      if (code === "messaging/failed-service-worker-registration") {
+        return "Firebase notification service worker register नहीं हुआ। यह Firestore rules का error नहीं है; booking का status refresh करके देखें और Hosting पर service-worker.js उपलब्ध होने की जाँच करें।";
+      }
       if (code === "internal") {
         return "Booking server में error आया। Firebase Console के Functions logs में acceptBooking जाँचें।";
       }
@@ -3399,6 +3402,23 @@
         toast("Booking स्वीकार हुई और service time दूसरे स्वीकार किए गए jobs के लिए सुरक्षित है।");
       } catch (error) {
         console.error("Booking could not be accepted with a slot reservation.", error);
+        try {
+          firestoreDb = firestoreDb || window.firebase.firestore();
+          const snapshot = await firestoreDb.collection("bookings").doc(booking.id).get();
+          if (snapshot.exists && snapshot.data().status === "Accepted") {
+            const current = bookings.find((item) => item.id === booking.id) || booking;
+            Object.assign(current, snapshot.data(), { id: snapshot.id });
+            syncedBookingData.set(current.id, JSON.stringify(current));
+            saveStored("gharSevaBookings", bookings);
+            renderBookings();
+            renderProviderPanel();
+            renderAdmin();
+            toast("Booking server पर स्वीकार हो चुकी है; सूची refresh कर दी गई।");
+            return;
+          }
+        } catch (refreshError) {
+          console.error("Booking status could not be confirmed after acceptance failed.", refreshError);
+        }
         toast(bookingAcceptanceErrorMessage(error), 8000);
       }
     }
