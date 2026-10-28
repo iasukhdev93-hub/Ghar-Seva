@@ -1782,12 +1782,12 @@
         renderBookings();
       }
     }
-    function toast(message) {
+    function toast(message, duration = 3000) {
       const element = document.getElementById("toast");
       element.textContent = message;
       element.classList.add("show");
       clearTimeout(toast.timeout);
-      toast.timeout = setTimeout(() => element.classList.remove("show"), 3000);
+      toast.timeout = setTimeout(() => element.classList.remove("show"), duration);
     }
     function isAppInstalled() {
       return window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
@@ -3345,6 +3345,46 @@
       const functions = window.firebase.app().functions("asia-south1");
       return functions.httpsCallable(name)(payload);
     }
+    function bookingAcceptanceErrorMessage(error) {
+      const code = String(error?.code || "").replace(/^functions\//, "");
+      const details = String(error?.message || "").toLowerCase();
+      if (code === "already-exists") {
+        return "यह समय किसी दूसरी booking ने ले लिया है। कोई दूसरा समय चुनें।";
+      }
+      if (code === "not-found") {
+        return details.includes("booking not found")
+          ? "यह booking Firebase में नहीं मिली। सूची refresh करके फिर कोशिश करें।"
+          : "acceptBooking Function deploy नहीं है। Project folder से firebase deploy --only functions:acceptBooking चलाएँ।";
+      }
+      if (code === "unauthenticated") {
+        return "आपका login expire हो गया है। दोबारा login करके booking स्वीकार करें।";
+      }
+      if (code === "permission-denied") {
+        return "इस booking को स्वीकार करने की अनुमति नहीं है। उसी provider account से login करें जो इस profile का मालिक है।";
+      }
+      if (code === "failed-precondition") {
+        if (details.includes("no longer pending")) {
+          return "यह booking अब Pending नहीं है। सूची refresh करें।";
+        }
+        if (details.includes("not accepting bookings")) {
+          return "आपकी provider profile अभी booking नहीं ले रही है। Profile में उपलब्धता चालू करें।";
+        }
+        if (details.includes("not available at that time")) {
+          return "आपकी profile में इस दिन/समय की availability नहीं है। Schedule ठीक करके फिर कोशिश करें।";
+        }
+        if (details.includes("today or a future")) {
+          return "Booking की तारीख बीत चुकी है। ग्राहक से नई तारीख चुनने को कहें।";
+        }
+        return "Booking की स्थिति या provider schedule बदल गया है। सूची और availability refresh करके देखें।";
+      }
+      if (["unavailable", "deadline-exceeded", "network-request-failed"].includes(code)) {
+        return "Firebase Function तक connection नहीं हुआ। Internet जाँचकर फिर कोशिश करें।";
+      }
+      if (code === "internal") {
+        return "Booking server में error आया। Firebase Console के Functions logs में acceptBooking जाँचें।";
+      }
+      return `Booking स्वीकार नहीं हुई${code ? ` (${code})` : ""}। Firebase Console के acceptBooking logs जाँचें।`;
+    }
     async function acceptBookingWithReservation(booking) {
       if (!booking) return;
       try {
@@ -3359,12 +3399,7 @@
         toast("Booking स्वीकार हुई और service time दूसरे स्वीकार किए गए jobs के लिए सुरक्षित है।");
       } catch (error) {
         console.error("Booking could not be accepted with a slot reservation.", error);
-        const message = error.code === "functions/already-exists"
-          ? "यह समय अभी किसी दूसरी booking ने ले लिया है। कोई दूसरा समय चुनें।"
-          : error.code === "functions/failed-precondition"
-            ? "Booking या provider availability बदल गई है। सूची refresh करके जाँचें।"
-            : "Booking स्वीकार नहीं हुई। Firebase Functions deploy, internet और provider access जाँचें।";
-        toast(message);
+        toast(bookingAcceptanceErrorMessage(error), 8000);
       }
     }
     async function updateProviderBookingStatus(booking, status, rejectionReason = "") {
